@@ -99,10 +99,12 @@ func LoggerMiddleware(logger *logging.Logger) echo.MiddlewareFunc {
 
 			url := req.URL.String()
 
+			bodyStr := helper.StructToString(reqBody)
+
 			logger.WithFields(logrus.Fields{
 				"method":   req.Method,
 				"url":      url,
-				"body":     helper.StructToString(reqBody),
+				"body":     bodyStr[:min(len(bodyStr), 4096)],
 				"trace_id": traceId,
 			}).Info("Start handling")
 

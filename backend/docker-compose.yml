@@ -1,0 +1,55 @@
+version: "3.8"
+
+networks:
+  suitesme:
+
+services:
+  suitesme:
+    build: ./
+    ports:
+      - 8080:8080
+    volumes:
+      - logs_data:/suitesme/cmd/app/logs
+    depends_on:
+      - postgres
+      - minio
+    networks:
+      - suitesme
+    env_file:
+      - .env
+    restart: always
+
+
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_HOST=${DB_HOST}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - suitesme
+    restart: always
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    networks:
+      - suitesme
+    volumes:
+      - minio_data:/data
+    restart: always
+
+volumes:
+  db_data:
+  minio_data:
+  logs_data:

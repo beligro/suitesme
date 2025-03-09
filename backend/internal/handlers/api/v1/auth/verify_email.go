@@ -5,6 +5,7 @@ import (
 	"suitesme/pkg/myerrors"
 
 	"suitesme/internal/models"
+	"suitesme/internal/utils/external"
 	utils_request "suitesme/internal/utils/request"
 
 	"github.com/google/uuid"
@@ -47,8 +48,29 @@ func (ctr AuthController) VerifyEmail(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(http.StatusNotFound)
 	}
 
+	if user.IsVerified {
+		return myerrors.GetHttpErrorByCode(http.StatusConflict)
+	}
+
 	if user.VerificationCode != request.VerificationCode {
 		return myerrors.GetHttpErrorByCode(http.StatusConflict)
 	}
+
+	leadId, err := external.CreateLead(ctr.config, ctr.logger, user)
+	if err != nil {
+		ctr.logger.Error(err)
+		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+	}
+	if leadId == nil {
+		ctr.logger.Error("Empty lead id")
+		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+	}
+
+	err = ctr.storage.User.SetUserIsVerified(request.UserId, *leadId)
+	if err != nil {
+		ctr.logger.Error(err)
+		return myerrors.ParseGormErrorToHttp(err)
+	}
+
 	return ctx.JSON(http.StatusOK, models.EmptyResponse{})
 }

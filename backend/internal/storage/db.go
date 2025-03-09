@@ -26,7 +26,8 @@ func MakeMigrations() error {
 	if migrationErr := DB.AutoMigrate(
 		&models.DbUser{},
 		&models.DbStyle{},
-		&models.DbUserStyle{}); migrationErr != nil {
+		&models.DbUserStyle{},
+		&models.DbTokens{}); migrationErr != nil {
 		logger.Errorf("DB Migration Error: %v", migrationErr)
 		return migrationErr
 	}

@@ -17,6 +17,8 @@ func ParseRequest[T any](ctx *echo.Context, logger *logging.Logger) (*T, error) 
 		return nil, myerrors.GetHttpErrorByCode(http.StatusBadRequest)
 	}
 
+	logger.Info(request)
+
 	err = (*ctx).Validate(&request)
 	if err != nil {
 		logger.Warn(err)

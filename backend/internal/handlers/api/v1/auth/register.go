@@ -14,7 +14,7 @@ import (
 )
 
 type RegisterRequest struct {
-	Email           string `json:"email" validate:"required,email"`
+	Email           string `json:"email" validate:"required"`
 	Password        string `json:"password" validate:"required"`
 	PasswordConfirm string `json:"password_confirm" validate:"required"`
 	FirstName       string `json:"first_name" validate:"required"`
@@ -46,6 +46,7 @@ func (ctr AuthController) Register(ctx echo.Context) error {
 	}
 
 	if request.Password != request.PasswordConfirm {
+		ctr.logger.Warn("Passwords are different")
 		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
 	}
 
@@ -58,6 +59,7 @@ func (ctr AuthController) Register(ctx echo.Context) error {
 	verificationCode := security.GetVerificationCode()
 	passwordHash, err := security.HashPassword(request.Password)
 	if err != nil {
+		ctr.logger.Error(err.Error())
 		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
 	}
 
@@ -74,10 +76,12 @@ func (ctr AuthController) Register(ctx echo.Context) error {
 	userId, err := ctr.storage.User.Create(newUser)
 
 	if err != nil {
+		ctr.logger.Error(err.Error())
 		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
 	}
 
-	err = sender.SendEmail(request.Email, verificationCode, ctr.config)
+	msg := []byte("Verification code is: " + verificationCode)
+	err = sender.SendEmail(request.Email, msg, ctr.config)
 
 	if err != nil {
 		ctr.logger.Error(err.Error())

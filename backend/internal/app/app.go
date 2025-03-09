@@ -2,16 +2,22 @@ package app
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"suitesme/internal/config"
 	"suitesme/internal/handlers/api/v1/auth"
 	"suitesme/internal/handlers/api/v1/profile"
+	"suitesme/internal/handlers/api/v1/style"
 	"suitesme/internal/storage"
 	"suitesme/pkg/logging"
 	"suitesme/pkg/myerrors"
 	"suitesme/pkg/validator"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -35,7 +41,7 @@ func Run() {
 	logger := logging.GetLogger()
 	logger.Info("logger initialized")
 
-	cfg := config.New()
+	cfg := config.New(&logger)
 	logger.Info("config initialized")
 
 	dbParams := fmt.Sprintf("host=%s dbname=%s user=%s password=%s sslmode=disable", cfg.DbHost, cfg.DbName, cfg.DbUser, cfg.DbPassword)
@@ -44,8 +50,20 @@ func Run() {
 		logger.Panic(err)
 	}
 
+	sess, err := session.NewSession(&aws.Config{
+		Region:           aws.String(cfg.MinioRegion),
+		Credentials:      credentials.NewStaticCredentials(cfg.MinioRootUser, cfg.MinioRootPassword, ""),
+		Endpoint:         aws.String(cfg.MinioEndpoint),
+		S3ForcePathStyle: aws.Bool(true),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	s3Client := s3.New(sess)
+
 	authController := auth.NewAuthController(&logger, storage, cfg)
 	profileController := profile.NewProfileController(&logger, storage)
+	styleController := style.NewStyleController(&logger, storage, cfg, s3Client)
 
 	e := echo.New()
 	e.Validator = validator.NewValidator()
@@ -54,6 +72,11 @@ func Run() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(TraceIdMiddleware)
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000", "http://51.250.84.195:3000"},
+		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+	}))
 
 	e.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong")
@@ -72,11 +95,17 @@ func Run() {
 	apiV1Auth.POST("/refresh", authController.Refresh)
 	apiV1Auth.POST("/logout", authController.Logout)
 	apiV1Auth.POST("/verify_email", authController.VerifyEmail)
+	apiV1Auth.POST("/forgot_password", authController.ForgotPassword)
+	apiV1Auth.POST("/password/reset", authController.PasswordReset)
 
 	apiV1Profile := apiV1.Group("/profile")
 
 	apiV1Profile.POST("/edit", profileController.Edit, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
-	apiV1Profile.POST("/info", profileController.Info, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
+	apiV1Profile.GET("/info", profileController.Info, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
+
+	apiV1Style := apiV1.Group("/style")
+
+	apiV1Style.POST("/info", styleController.Info, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
 
 	s := &http.Server{
 		Addr:         cfg.HTTPAddr,

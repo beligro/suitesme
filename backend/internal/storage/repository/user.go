@@ -35,6 +35,16 @@ func (repo *UserRepository) Get(id uuid.UUID) (*models.DbUser, error) {
 	return user, result.Error
 }
 
+func (repo *UserRepository) GetForPasswordReset(id uuid.UUID, passwordResetToken string) (*models.DbUser, error) {
+	var user models.DbUser
+	result := repo.db.First(&user, "id = ? AND password_reset_token = ? AND password_reset_at > NOW()", id, passwordResetToken)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &user, nil
+}
+
 func (repo *UserRepository) GetByEmail(email string) (*models.DbUser, error) {
 	user := &models.DbUser{Email: email}
 
@@ -56,6 +66,10 @@ func (repo *UserRepository) Create(user *models.DbUser) (uuid.UUID, error) {
 	}).Create(user).Error
 
 	return user.ID, err
+}
+
+func (repo *UserRepository) Save(user *models.DbUser) {
+	repo.db.Save(user)
 }
 
 func (repo *UserRepository) Update(userId uuid.UUID, fields *models.MutableUserFields) error {
@@ -80,4 +94,8 @@ func (repo *UserRepository) Update(userId uuid.UUID, fields *models.MutableUserF
 	}
 
 	return repo.db.Model(&models.DbUser{}).Where("id = ?", userId).Updates(userUpdates).Error
+}
+
+func (repo *UserRepository) SetUserIsVerified(userId uuid.UUID, leadId int) error {
+	return repo.db.Model(&models.DbUser{}).Where("id = ?", userId).Updates(map[string]interface{}{"is_verified": true, "verification_code": nil, "amocrm_lead_id": leadId}).Error
 }
