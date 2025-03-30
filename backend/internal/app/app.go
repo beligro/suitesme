@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"suitesme/internal/config"
 	"suitesme/internal/handlers/api/v1/auth"
+	"suitesme/internal/handlers/api/v1/payment"
 	"suitesme/internal/handlers/api/v1/profile"
 	"suitesme/internal/handlers/api/v1/style"
 	"suitesme/internal/storage"
@@ -62,6 +63,7 @@ func Run() {
 	s3Client := s3.New(sess)
 
 	authController := auth.NewAuthController(&logger, storage, cfg)
+	paymentController := payment.NewPaymentController(&logger, storage, cfg)
 	profileController := profile.NewProfileController(&logger, storage)
 	styleController := style.NewStyleController(&logger, storage, cfg, s3Client)
 
@@ -98,6 +100,11 @@ func Run() {
 	apiV1Auth.POST("/forgot_password", authController.ForgotPassword)
 	apiV1Auth.POST("/password/reset", authController.PasswordReset)
 
+	apiV1Payment := apiV1.Group("/payment")
+
+	apiV1Payment.GET("/link", paymentController.PaymentLink, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
+	apiV1Payment.POST("/callback", paymentController.PaymentCallback)
+
 	apiV1Profile := apiV1.Group("/profile")
 
 	apiV1Profile.POST("/edit", profileController.Edit, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
@@ -105,7 +112,8 @@ func Run() {
 
 	apiV1Style := apiV1.Group("/style")
 
-	apiV1Style.POST("/info", styleController.Info, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
+	apiV1Style.POST("/build", styleController.Build, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
+	apiV1Style.GET("/info", styleController.Info, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
 
 	s := &http.Server{
 		Addr:         cfg.HTTPAddr,

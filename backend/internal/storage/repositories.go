@@ -30,3 +30,9 @@ type TokensRepository interface {
 	GetByUserId(uuid.UUID) (*models.DbTokens, error)
 	GetByPK(uuid.UUID, string) (*models.DbTokens, error)
 }
+
+type PaymentsRepository interface {
+	Get(uuid.UUID) *models.DbPayments
+	Create(*models.DbPayments) error
+	Save(*models.DbPayments)
+}

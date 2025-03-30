@@ -18,6 +18,7 @@ type Storage struct {
 	Styles    *repository.StylesRepository
 	UserStyle *repository.UserStyleRepository
 	Tokens    *repository.TokensRepository
+	Payments  *repository.PaymentsRepository
 }
 
 func MakeMigrations() error {
@@ -27,7 +28,8 @@ func MakeMigrations() error {
 		&models.DbUser{},
 		&models.DbStyle{},
 		&models.DbUserStyle{},
-		&models.DbTokens{}); migrationErr != nil {
+		&models.DbTokens{},
+		&models.DbPayments{}); migrationErr != nil {
 		logger.Errorf("DB Migration Error: %v", migrationErr)
 		return migrationErr
 	}
@@ -57,6 +59,7 @@ func NewDB(params string) (*Storage, error) {
 	storage.Styles = repository.NewStylesRepository(DB)
 	storage.UserStyle = repository.NewUserStyleRepository(DB)
 	storage.Tokens = repository.NewTokensRepository(DB)
+	storage.Payments = repository.NewPaymentsRepository(DB)
 
 	err = MakeMigrations()
 	if err != nil {

@@ -7,6 +7,7 @@ import RegisterPage from './components/RegisterPage';
 import VerifyEmailPage from './components/VerifyEmailPage';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
 import PasswordResetPage from './components/PasswordResetPage';
+import PaymentRedirect from './components/PaymentRedirect';
 import { useNavigationHandler } from './components/NavigationHandlerContext';
 import { setNavigationCallback } from './components/axiosConfig';
 
@@ -25,6 +26,7 @@ const App = () => {
         <Route path="/verify_email" element={<VerifyEmailPage />} />
         <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
         <Route path="/password_reset" element={<PasswordResetPage />} />
+        <Route path="/profile/payment" element={<PaymentRedirect />} />
         <Route
           path="/profile"
           element={isAuthorized ? <ProfilePage /> : <Navigate to="/login" />}
