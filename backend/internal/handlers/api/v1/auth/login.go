@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"net/http"
 	"suitesme/internal/utils/security"
 	"suitesme/pkg/myerrors"
@@ -8,6 +9,7 @@ import (
 	utils_request "suitesme/internal/utils/request"
 
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 type LoginRequest struct {
@@ -36,20 +38,24 @@ func (ctr AuthController) Login(ctx echo.Context) error {
 	}
 
 	user, err := ctr.storage.User.GetByEmail(request.Email)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		ctr.logger.Warn("User not found")
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
+	}
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.ParseGormErrorToHttp(err)
+		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
 	if user == nil {
-		return myerrors.GetHttpErrorByCode(http.StatusNotFound)
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
 	}
 
 	err = security.ComparePasswordWithHash(request.Password, user.PasswordHash)
 	if err != nil {
-		return myerrors.GetHttpErrorByCode(http.StatusConflict)
+		return myerrors.GetHttpErrorByCode(myerrors.DifferrentPasswords, ctx)
 	}
 
-	response, httpErr := security.GenerateTokens(user.ID, ctr.config, ctr.storage)
+	response, httpErr := security.GenerateTokens(user.ID, ctr.config, ctr.storage, ctx)
 
 	if httpErr != nil {
 		return httpErr

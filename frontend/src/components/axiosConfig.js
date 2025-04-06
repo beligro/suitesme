@@ -63,4 +63,15 @@ axiosInstance.interceptors.response.use(
   }
 );
 
+export const fetchContent = async () => {
+  try {
+    const response = await axiosAnotherInstance.get('/api/v1/content/list');
+    const data = response.data;
+    return data;
+  } catch (error) {
+    console.error('Ошибка при получении контента:', error);
+    return null;
+  }
+};
+
 export default axiosInstance;

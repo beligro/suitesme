@@ -4,8 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"suitesme/internal/caches"
 	"suitesme/internal/config"
+	admin_auth "suitesme/internal/handlers/admin/auth"
+	"suitesme/internal/handlers/admin/v1/content"
+	"suitesme/internal/handlers/admin/v1/settings"
 	"suitesme/internal/handlers/api/v1/auth"
+	api_content "suitesme/internal/handlers/api/v1/content"
 	"suitesme/internal/handlers/api/v1/payment"
 	"suitesme/internal/handlers/api/v1/profile"
 	"suitesme/internal/handlers/api/v1/style"
@@ -19,8 +24,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/patrickmn/go-cache"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
@@ -62,10 +69,31 @@ func Run() {
 	}
 	s3Client := s3.New(sess)
 
+	webContentCache := cache.New(15*time.Minute, 20*time.Minute)
+	settingsCache := cache.New(15*time.Minute, 20*time.Minute)
+
+	go func() {
+		for {
+			caches.UpdateWebContentCache(storage, webContentCache)
+			time.Sleep(15 * time.Minute)
+		}
+	}()
+
+	go func() {
+		for {
+			caches.UpdateSettingsCache(storage, settingsCache)
+			time.Sleep(15 * time.Minute)
+		}
+	}()
+
 	authController := auth.NewAuthController(&logger, storage, cfg)
-	paymentController := payment.NewPaymentController(&logger, storage, cfg)
+	paymentController := payment.NewPaymentController(&logger, storage, cfg, settingsCache)
 	profileController := profile.NewProfileController(&logger, storage)
 	styleController := style.NewStyleController(&logger, storage, cfg, s3Client)
+	contentController := content.NewContentController(&logger, storage, cfg)
+	settingsController := settings.NewSettingsController(&logger, storage, cfg)
+	adminAuthController := admin_auth.NewAdminAuthController(&logger, storage, cfg)
+	apiContentController := api_content.NewApiContentController(&logger, storage, cfg, webContentCache)
 
 	e := echo.New()
 	e.Validator = validator.NewValidator()
@@ -114,6 +142,30 @@ func Run() {
 
 	apiV1Style.POST("/build", styleController.Build, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
 	apiV1Style.GET("/info", styleController.Info, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
+
+	apiV1Content := apiV1.Group("/content")
+
+	apiV1Content.GET("/list", apiContentController.List)
+
+	adminRoutes := e.Group("/admin")
+	adminV1 := adminRoutes.Group("/v1")
+	adminV1.Use(LoggerMiddleware(&logger))
+	adminV1.Use(echojwt.JWT(cfg.AdminTokenSecret))
+
+	adminV1.GET("/content", contentController.List)
+	adminV1.GET("/content/:id", contentController.Get)
+	adminV1.PUT("/content/:id", contentController.Put)
+	adminV1.DELETE("/content/:id", contentController.Delete)
+	adminV1.POST("/content", contentController.Post)
+
+	adminV1.GET("/settings", settingsController.List)
+	adminV1.GET("/settings/:id", settingsController.Get)
+	adminV1.PUT("/settings/:id", settingsController.Put)
+	adminV1.DELETE("/settings/:id", settingsController.Delete)
+	adminV1.POST("/settings", settingsController.Post)
+
+	adminAuth := adminRoutes.Group("/auth")
+	adminAuth.POST("/login", adminAuthController.Login)
 
 	s := &http.Server{
 		Addr:         cfg.HTTPAddr,

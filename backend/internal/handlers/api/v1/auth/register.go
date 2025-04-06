@@ -47,20 +47,20 @@ func (ctr AuthController) Register(ctx echo.Context) error {
 
 	if request.Password != request.PasswordConfirm {
 		ctr.logger.Warn("Passwords are different")
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.DifferrentPasswords, ctx)
 	}
 
 	userExists := ctr.storage.User.CheckVerifiedUserExists(request.Email)
 
 	if userExists {
-		return myerrors.GetHttpErrorByCode(http.StatusConflict)
+		return myerrors.GetHttpErrorByCode(myerrors.UserAlreadyExists, ctx)
 	}
 
 	verificationCode := security.GetVerificationCode()
 	passwordHash, err := security.HashPassword(request.Password)
 	if err != nil {
 		ctr.logger.Error(err.Error())
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.IncorrectPassword, ctx)
 	}
 
 	newUser := &models.DbUser{
@@ -73,19 +73,14 @@ func (ctr AuthController) Register(ctx echo.Context) error {
 		IsVerified:       false,
 	}
 
-	userId, err := ctr.storage.User.Create(newUser)
-
-	if err != nil {
-		ctr.logger.Error(err.Error())
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
-	}
+	userId := ctr.storage.User.Create(newUser)
 
 	msg := []byte("Verification code is: " + verificationCode)
 	err = sender.SendEmail(request.Email, msg, ctr.config)
 
 	if err != nil {
 		ctr.logger.Error(err.Error())
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.SendingEmailFailed, ctx)
 	}
 
 	return ctx.JSON(http.StatusOK, RegisterResponse{UserId: userId})

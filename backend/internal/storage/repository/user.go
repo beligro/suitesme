@@ -53,8 +53,8 @@ func (repo *UserRepository) GetByEmail(email string) (*models.DbUser, error) {
 	return user, result.Error
 }
 
-func (repo *UserRepository) Create(user *models.DbUser) (uuid.UUID, error) {
-	err := repo.db.Clauses(clause.OnConflict{
+func (repo *UserRepository) Create(user *models.DbUser) uuid.UUID {
+	repo.db.Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "email"}},
 		DoUpdates: clause.Assignments(map[string]interface{}{
 			"verification_code": user.VerificationCode,
@@ -63,9 +63,9 @@ func (repo *UserRepository) Create(user *models.DbUser) (uuid.UUID, error) {
 			"last_name":         user.LastName,
 			"birth_date":        user.BirthDate,
 		}),
-	}).Create(user).Error
+	}).Create(user)
 
-	return user.ID, err
+	return user.ID
 }
 
 func (repo *UserRepository) Save(user *models.DbUser) {
@@ -96,6 +96,6 @@ func (repo *UserRepository) Update(userId uuid.UUID, fields *models.MutableUserF
 	return repo.db.Model(&models.DbUser{}).Where("id = ?", userId).Updates(userUpdates).Error
 }
 
-func (repo *UserRepository) SetUserIsVerified(userId uuid.UUID, leadId int) error {
-	return repo.db.Model(&models.DbUser{}).Where("id = ?", userId).Updates(map[string]interface{}{"is_verified": true, "verification_code": nil, "amocrm_lead_id": leadId}).Error
+func (repo *UserRepository) SetUserIsVerified(userId uuid.UUID, leadId int) {
+	repo.db.Model(&models.DbUser{}).Where("id = ?", userId).Updates(map[string]interface{}{"is_verified": true, "verification_code": nil, "amocrm_lead_id": leadId})
 }

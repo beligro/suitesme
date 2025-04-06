@@ -22,7 +22,7 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 	userID := ctx.Get("userID")
 	if userID == nil {
-		return myerrors.GetHttpErrorByCode(http.StatusUnauthorized)
+		return myerrors.GetHttpErrorByCode(myerrors.UserUnauthorized, ctx)
 	}
 
 	parsedUserId := userID.(uuid.UUID)
@@ -31,7 +31,7 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 
 	if err != nil && err != gorm.ErrRecordNotFound {
 		ctr.logger.Error(err)
-		return myerrors.ParseGormErrorToHttp(err)
+		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
 
 	if styleId != "" {
@@ -45,13 +45,13 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	photo, err := ctx.FormFile("photo")
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.BadPhotoFormat, ctx)
 	}
 
 	src, err := photo.Open()
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.BadPhotoFormat, ctx)
 	}
 	defer src.Close()
 
@@ -61,7 +61,7 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 
 	if payment == nil || payment.Status != models.Paid {
 		ctr.logger.Error("Не оплачено")
-		return myerrors.GetHttpErrorByCode(http.StatusForbidden)
+		return myerrors.GetHttpErrorByCode(myerrors.NotPaid, ctx)
 	}
 
 	_, err = ctr.s3Client.PutObject(&s3.PutObjectInput{
@@ -72,7 +72,7 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	})
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(http.StatusInternalServerError)
+		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 	}
 
 	photoURL := fmt.Sprintf("%s/%s/%s/%s", ctr.config.MinioFilePathEndpoint, ctr.config.StylePhotoBucket, parsedUserId.String(), fileKey)
@@ -87,11 +87,7 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		StyleId:  styleId,
 	}
 
-	err = ctr.storage.UserStyle.Create(userStyle)
-	if err != nil {
-		ctr.logger.Error(err)
-		return myerrors.ParseGormErrorToHttp(err)
-	}
+	ctr.storage.UserStyle.Create(userStyle)
 
 	return ctx.JSON(http.StatusOK, StyleBuildResult{
 		StyleId: styleId,

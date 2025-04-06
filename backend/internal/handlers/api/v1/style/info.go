@@ -18,7 +18,7 @@ func (ctr StyleController) Info(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 	userID := ctx.Get("userID")
 	if userID == nil {
-		return myerrors.GetHttpErrorByCode(http.StatusUnauthorized)
+		return myerrors.GetHttpErrorByCode(myerrors.UserUnauthorized, ctx)
 	}
 
 	parsedUserId := userID.(uuid.UUID)
@@ -27,7 +27,7 @@ func (ctr StyleController) Info(ctx echo.Context) error {
 
 	if err != nil && err != gorm.ErrRecordNotFound {
 		ctr.logger.Error(err)
-		return myerrors.ParseGormErrorToHttp(err)
+		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
 
 	if styleId != "" {
@@ -42,8 +42,8 @@ func (ctr StyleController) Info(ctx echo.Context) error {
 
 	if payment == nil || payment.Status != models.Paid {
 		ctr.logger.Error("Не оплачено")
-		return myerrors.GetHttpErrorByCode(http.StatusForbidden)
+		return myerrors.GetHttpErrorByCode(myerrors.NotPaid, ctx)
 	}
 
-	return myerrors.GetHttpErrorByCode(http.StatusNotFound)
+	return myerrors.GetHttpErrorByCode(myerrors.StyleNotFound, ctx)
 }

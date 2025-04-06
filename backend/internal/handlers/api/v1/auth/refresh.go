@@ -38,35 +38,35 @@ func (ctr AuthController) Refresh(ctx echo.Context) error {
 	claims, err := security.ParseToken(*request.RefreshToken, ctr.config.RefreshTokenSecret)
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.IncorrectToken, ctx)
 	}
 
 	_, err = ctr.storage.Tokens.GetByPK((*claims).UserId, *request.RefreshToken)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			ctr.logger.Error(err)
-			return myerrors.GetHttpErrorByCode(http.StatusInternalServerError)
+			return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 		}
 
 		err = ctr.storage.Tokens.DeleteTokens((*claims).UserId)
 		if err != nil {
 			ctr.logger.Error(err)
-			return myerrors.GetHttpErrorByCode(http.StatusInternalServerError)
+			return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 		}
 		return echo.NewHTTPError(http.StatusBadRequest, "refresh token is invalid")
 	}
 
 	if claims.ExpiresAt.Time.Before(time.Now()) {
-		return myerrors.GetHttpErrorByCode(http.StatusUnauthorized)
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotExists, ctx)
 	}
 
 	err = ctr.storage.Tokens.DeleteTokens(claims.UserId)
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(http.StatusInternalServerError)
+		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
 
-	response, httpErr := security.GenerateTokens(claims.UserId, ctr.config, ctr.storage)
+	response, httpErr := security.GenerateTokens(claims.UserId, ctr.config, ctr.storage, ctx)
 
 	if httpErr != nil {
 		return httpErr

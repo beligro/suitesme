@@ -18,6 +18,7 @@ type Config struct {
 	RefreshTokenExpMinutes int64
 	AccessTokenSecret      []byte
 	RefreshTokenSecret     []byte
+	AdminTokenSecret       []byte
 	EmailSendFrom          string
 	EmailPassword          string
 	SmtpHost               string
@@ -45,6 +46,7 @@ func New(logger *logging.Logger) *Config {
 		RefreshTokenExpMinutes: getEnvInt64("REFRESH_TOKEN_EXP_MINUTES", 0, logger),
 		AccessTokenSecret:      getEnvBytes("ACCESS_TOKEN_SECRET", "", logger),
 		RefreshTokenSecret:     getEnvBytes("REFRESH_TOKEN_SECRET", "", logger),
+		AdminTokenSecret:       getEnvBytes("ADMIN_TOKEN_SECRET", "", logger),
 		EmailSendFrom:          getEnv("EMAIL_SEND_FROM", "", logger),
 		EmailPassword:          getEnv("EMAIL_PASSWORD", "", logger),
 		SmtpHost:               getEnv("SMTP_HOST", "", logger),

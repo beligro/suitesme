@@ -23,6 +23,6 @@ func (repo *UserStyleRepository) Get(userId uuid.UUID) (string, error) {
 	return user.StyleId, result.Error
 }
 
-func (repository *UserStyleRepository) Create(userStyle *models.DbUserStyle) error {
-	return repository.db.Create(&userStyle).Error
+func (repository *UserStyleRepository) Create(userStyle *models.DbUserStyle) {
+	repository.db.Create(&userStyle)
 }

@@ -23,8 +23,8 @@ func (repo *PaymentsRepository) Get(userId uuid.UUID) *models.DbPayments {
 	return payment
 }
 
-func (repository *PaymentsRepository) Create(payment *models.DbPayments) error {
-	return repository.db.Create(payment).Error
+func (repository *PaymentsRepository) Create(payment *models.DbPayments) {
+	repository.db.Create(payment)
 }
 
 func (repo *PaymentsRepository) Save(payment *models.DbPayments) {

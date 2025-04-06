@@ -39,26 +39,26 @@ func (ctr AuthController) PasswordReset(ctx echo.Context) error {
 
 	if request.Password != request.PasswordConfirm {
 		ctr.logger.Warn("Passwords are different")
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.DifferrentPasswords, ctx)
 	}
 
 	resetInfo, err := security.Decode(request.ResetToken)
 
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.IncorrectToken, ctx)
 	}
 
 	user, err := ctr.storage.User.GetForPasswordReset(resetInfo.UserId, resetInfo.ResetToken)
 
 	if err != nil || user == nil {
-		return myerrors.GetHttpErrorByCode(http.StatusUnauthorized)
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotExists, ctx)
 	}
 
 	passwordHash, err := security.HashPassword(request.Password)
 	if err != nil {
 		ctr.logger.Error(err.Error())
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.IncorrectPassword, ctx)
 	}
 
 	user.PasswordHash = string(passwordHash)

@@ -26,7 +26,7 @@ func (ctr ProfileController) Edit(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 	userID := ctx.Get("userID")
 	if userID == nil {
-		return myerrors.GetHttpErrorByCode(http.StatusUnauthorized)
+		return myerrors.GetHttpErrorByCode(myerrors.UserUnauthorized, ctx)
 	}
 	parsedUserId := userID.(uuid.UUID)
 
@@ -38,7 +38,7 @@ func (ctr ProfileController) Edit(ctx echo.Context) error {
 	err = ctr.storage.User.Update(parsedUserId, request)
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.ParseGormErrorToHttp(err)
+		return myerrors.GetHttpErrorByCode(myerrors.BadUserUpdateParams, ctx)
 	}
 
 	return ctx.JSON(http.StatusOK, models.EmptyResponse{})

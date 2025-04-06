@@ -1,7 +1,6 @@
 package request
 
 import (
-	"net/http"
 	"suitesme/pkg/logging"
 	"suitesme/pkg/myerrors"
 
@@ -14,7 +13,7 @@ func ParseRequest[T any](ctx *echo.Context, logger *logging.Logger) (*T, error) 
 	err := (*ctx).Bind(&request)
 	if err != nil {
 		logger.Warn(err)
-		return nil, myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return nil, myerrors.GetHttpErrorByCode(myerrors.BadRequestJson, *ctx)
 	}
 
 	logger.Info(request)
@@ -22,7 +21,7 @@ func ParseRequest[T any](ctx *echo.Context, logger *logging.Logger) (*T, error) 
 	err = (*ctx).Validate(&request)
 	if err != nil {
 		logger.Warn(err)
-		return nil, myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return nil, myerrors.GetHttpErrorByCode(myerrors.ValidateJsonError, *ctx)
 	}
 
 	return &request, nil

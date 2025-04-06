@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"net/http"
 	"suitesme/internal/models"
 	"suitesme/internal/utils/security"
@@ -11,6 +12,7 @@ import (
 	utils_request "suitesme/internal/utils/request"
 
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 type ForgotPasswordRequest struct {
@@ -38,13 +40,17 @@ func (ctr AuthController) ForgotPassword(ctx echo.Context) error {
 
 	user, err := ctr.storage.User.GetByEmail(request.Email)
 
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		ctr.logger.Warn("User not found")
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
+	}
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.ParseGormErrorToHttp(err)
+		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
 
 	if !user.IsVerified {
-		return myerrors.GetHttpErrorByCode(http.StatusUnauthorized)
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotExists, ctx)
 	}
 
 	resetToken := security.GetResetToken()
@@ -55,7 +61,7 @@ func (ctr AuthController) ForgotPassword(ctx echo.Context) error {
 	urlToken, err := security.Encode(&security.ResetTokenStruct{UserId: user.ID, ResetToken: resetToken})
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.SendingEmailFailed, ctx)
 	}
 
 	ctr.storage.User.Save(user)
@@ -65,7 +71,7 @@ func (ctr AuthController) ForgotPassword(ctx echo.Context) error {
 
 	if err != nil {
 		ctr.logger.Error(err.Error())
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.SendingEmailFailed, ctx)
 	}
 
 	return ctx.JSON(http.StatusOK, models.EmptyResponse{})

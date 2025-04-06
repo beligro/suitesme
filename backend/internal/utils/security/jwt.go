@@ -2,7 +2,6 @@ package security
 
 import (
 	"fmt"
-	"net/http"
 	"suitesme/internal/config"
 	"suitesme/internal/models"
 	"suitesme/internal/storage"
@@ -23,18 +22,18 @@ func (c TokenClaims) Valid() error {
 	return nil
 }
 
-func GenerateTokens(userID uuid.UUID, cfg *config.Config, storage *storage.Storage) (*models.TokensResponse, *echo.HTTPError) {
+func GenerateTokens(userID uuid.UUID, cfg *config.Config, storage *storage.Storage, ctx echo.Context) (*models.TokensResponse, error) {
 	accessExpDuration := time.Minute * time.Duration(cfg.AccessTokenExpMinutes)
 	refreshExpDuration := time.Minute * time.Duration(cfg.RefreshTokenExpMinutes)
 
 	accessToken, err := GenerateToken(userID, accessExpDuration, cfg.AccessTokenSecret)
 	if err != nil {
-		return nil, myerrors.GetHttpErrorByCode(http.StatusForbidden)
+		return nil, myerrors.GetHttpErrorByCode(myerrors.IncorrectToken, ctx)
 	}
 
 	refreshToken, err := GenerateToken(userID, refreshExpDuration, cfg.RefreshTokenSecret)
 	if err != nil {
-		return nil, myerrors.GetHttpErrorByCode(http.StatusForbidden)
+		return nil, myerrors.GetHttpErrorByCode(myerrors.IncorrectToken, ctx)
 	}
 
 	dbToken := models.DbTokens{
@@ -47,7 +46,7 @@ func GenerateTokens(userID uuid.UUID, cfg *config.Config, storage *storage.Stora
 
 	err = storage.Tokens.CreateToken(&dbToken)
 	if err != nil {
-		return nil, myerrors.GetHttpErrorByCode(http.StatusInternalServerError)
+		return nil, myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
 
 	response := models.TokensResponse{

@@ -34,14 +34,14 @@ func (ctr AuthController) Logout(ctx echo.Context) error {
 	claims, err := security.ParseToken(*request.RefreshToken, ctr.config.RefreshTokenSecret)
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.IncorrectToken, ctx)
 	}
 
 	err = ctr.storage.Tokens.DeleteTokens(claims.UserId)
 
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(http.StatusInternalServerError)
+		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
 
 	return ctx.JSON(http.StatusOK, models.EmptyResponse{})

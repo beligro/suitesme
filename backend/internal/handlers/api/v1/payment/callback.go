@@ -90,14 +90,12 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 	isEqual, err := h.Verify(data, ctr.config.ProdamusToken, sign, "sha256", ctr.logger)
 	if err != nil {
 		ctr.logger.Errorln("Error:", err)
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.IncorrectSign, ctx)
 	}
 	if !isEqual {
 		ctr.logger.Error("Different signatures")
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.IncorrectSign, ctx)
 	}
-
-	ctr.logger.Info("EVERYTHING IS OK!!!!!!!!!!!!!")
 
 	jsonData, _ := json.Marshal(data)
 
@@ -107,12 +105,12 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 	payment := ctr.storage.Payments.Get(request.OrderNum)
 	if payment == nil {
 		ctr.logger.Error("Not found payment")
-		return myerrors.GetHttpErrorByCode(http.StatusNotFound)
+		return myerrors.GetHttpErrorByCode(myerrors.PaymentNotFound, ctx)
 	}
 
 	if request.Sum != nil && *request.Sum < payment.PaymentSum {
 		ctr.logger.Error("Sum is less than required")
-		return myerrors.GetHttpErrorByCode(http.StatusConflict)
+		return myerrors.GetHttpErrorByCode(myerrors.DifferentPaymentSum, ctx)
 	}
 
 	payment.ProdamusOrderId = request.OrderId

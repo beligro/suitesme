@@ -13,12 +13,15 @@ import (
 var DB *gorm.DB
 
 type Storage struct {
-	DB        *gorm.DB
-	User      *repository.UserRepository
-	Styles    *repository.StylesRepository
-	UserStyle *repository.UserStyleRepository
-	Tokens    *repository.TokensRepository
-	Payments  *repository.PaymentsRepository
+	DB         *gorm.DB
+	User       *repository.UserRepository
+	Styles     *repository.StylesRepository
+	UserStyle  *repository.UserStyleRepository
+	Tokens     *repository.TokensRepository
+	Payments   *repository.PaymentsRepository
+	WebContent *repository.WebContentRepository
+	Settings   *repository.SettingsRepository
+	AdminUser  *repository.AdminUserRepository
 }
 
 func MakeMigrations() error {
@@ -29,7 +32,10 @@ func MakeMigrations() error {
 		&models.DbStyle{},
 		&models.DbUserStyle{},
 		&models.DbTokens{},
-		&models.DbPayments{}); migrationErr != nil {
+		&models.DbPayments{},
+		&models.DbWebContent{},
+		&models.DbSettings{},
+		&models.DbAdminUser{}); migrationErr != nil {
 		logger.Errorf("DB Migration Error: %v", migrationErr)
 		return migrationErr
 	}
@@ -60,6 +66,9 @@ func NewDB(params string) (*Storage, error) {
 	storage.UserStyle = repository.NewUserStyleRepository(DB)
 	storage.Tokens = repository.NewTokensRepository(DB)
 	storage.Payments = repository.NewPaymentsRepository(DB)
+	storage.WebContent = repository.NewWebContentRepository(DB)
+	storage.Settings = repository.NewSettingsRepository(DB)
+	storage.AdminUser = repository.NewAdminUserRepository(DB)
 
 	err = MakeMigrations()
 	if err != nil {

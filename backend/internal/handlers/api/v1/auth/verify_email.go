@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"net/http"
 	"suitesme/pkg/myerrors"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 type VerifyEmailRequest struct {
@@ -38,39 +40,37 @@ func (ctr AuthController) VerifyEmail(ctx echo.Context) error {
 	}
 
 	user, err := ctr.storage.User.Get(request.UserId)
-
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		ctr.logger.Warn("User not found")
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
+	}
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.ParseGormErrorToHttp(err)
+		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
-
 	if user == nil {
-		return myerrors.GetHttpErrorByCode(http.StatusNotFound)
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
 	}
 
 	if user.IsVerified {
-		return myerrors.GetHttpErrorByCode(http.StatusConflict)
+		return myerrors.GetHttpErrorByCode(myerrors.UserAlreadyVerified, ctx)
 	}
 
 	if user.VerificationCode != request.VerificationCode {
-		return myerrors.GetHttpErrorByCode(http.StatusConflict)
+		return myerrors.GetHttpErrorByCode(myerrors.IncorrectVerificationCode, ctx)
 	}
 
 	leadId, err := external.CreateLead(ctr.config, ctr.logger, user)
 	if err != nil {
 		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 	}
 	if leadId == nil {
 		ctr.logger.Error("Empty lead id")
-		return myerrors.GetHttpErrorByCode(http.StatusBadRequest)
+		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 	}
 
-	err = ctr.storage.User.SetUserIsVerified(request.UserId, *leadId)
-	if err != nil {
-		ctr.logger.Error(err)
-		return myerrors.ParseGormErrorToHttp(err)
-	}
+	ctr.storage.User.SetUserIsVerified(request.UserId, *leadId)
 
 	return ctx.JSON(http.StatusOK, models.EmptyResponse{})
 }
