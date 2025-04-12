@@ -30,7 +30,7 @@ func (ctr ProfileController) Edit(ctx echo.Context) error {
 	}
 	parsedUserId := userID.(uuid.UUID)
 
-	request, err := utils_request.ParseRequest[models.MutableUserFields](&ctx, ctr.logger)
+	request, err := utils_request.ParseRequest[models.MutableUserFields](&ctx)
 	if err != nil {
 		return err
 	}

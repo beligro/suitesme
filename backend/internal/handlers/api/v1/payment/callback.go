@@ -87,7 +87,7 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 	sign := ctx.Request().Header.Get("Sign")
 	ctr.logger.Infoln("header sign is: ", sign)
 	h := security.Hmac{}
-	isEqual, err := h.Verify(data, ctr.config.ProdamusToken, sign, "sha256", ctr.logger)
+	isEqual, err := h.Verify(data, ctr.config.ProdamusToken, sign, "sha256")
 	if err != nil {
 		ctr.logger.Errorln("Error:", err)
 		return myerrors.GetHttpErrorByCode(myerrors.IncorrectSign, ctx)

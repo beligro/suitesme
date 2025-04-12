@@ -33,7 +33,7 @@ type ForgotPasswordRequest struct {
 // @Router			/api/v1/auth/forgot_password [post]
 func (ctr AuthController) ForgotPassword(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
-	request, err := utils_request.ParseRequest[ForgotPasswordRequest](&ctx, ctr.logger)
+	request, err := utils_request.ParseRequest[ForgotPasswordRequest](&ctx)
 	if err != nil {
 		return err
 	}

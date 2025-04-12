@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"suitesme/pkg/logging"
 )
 
 type Hmac struct{}
@@ -34,12 +33,11 @@ func (h *Hmac) create(data interface{}, key string, algo string) (string, error)
 	return fmt.Sprintf("%x", hmac.Sum(nil)), nil
 }
 
-func (h *Hmac) Verify(data interface{}, key, sign, algo string, logger *logging.Logger) (bool, error) {
+func (h *Hmac) Verify(data interface{}, key, sign, algo string) (bool, error) {
 	expectedSign, err := h.create(data, key, algo)
 	if err != nil {
 		return false, err
 	}
-	logger.Infoln("Sign is: ", expectedSign)
 	return strings.EqualFold(expectedSign, sign), nil
 }
 

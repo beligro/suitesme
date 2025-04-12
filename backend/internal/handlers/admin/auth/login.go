@@ -21,7 +21,7 @@ type LoginResponse struct {
 func (ctr AdminAuthController) Login(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
-	request, err := utils_request.ParseRequest[LoginRequest](&ctx, ctr.logger)
+	request, err := utils_request.ParseRequest[LoginRequest](&ctx)
 	if err != nil {
 		return err
 	}

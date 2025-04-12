@@ -19,7 +19,7 @@ func (ctr SettingsController) Put(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.BadIdInPath, ctx)
 	}
 
-	setting, err := utils_request.ParseRequest[models.UpsertSettingRequest](&ctx, ctr.logger)
+	setting, err := utils_request.ParseRequest[models.UpsertSettingRequest](&ctx)
 	if err != nil {
 		return err
 	}

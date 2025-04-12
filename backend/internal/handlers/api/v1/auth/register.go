@@ -40,7 +40,7 @@ type RegisterResponse struct {
 // @Router			/api/v1/auth/register [post]
 func (ctr AuthController) Register(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
-	request, err := utils_request.ParseRequest[RegisterRequest](&ctx, ctr.logger)
+	request, err := utils_request.ParseRequest[RegisterRequest](&ctx)
 	if err != nil {
 		return err
 	}

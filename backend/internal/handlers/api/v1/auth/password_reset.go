@@ -32,7 +32,7 @@ type PasswordResetRequest struct {
 // @Router			/api/v1/auth/password/reset [post]
 func (ctr AuthController) PasswordReset(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
-	request, err := utils_request.ParseRequest[PasswordResetRequest](&ctx, ctr.logger)
+	request, err := utils_request.ParseRequest[PasswordResetRequest](&ctx)
 	if err != nil {
 		return err
 	}

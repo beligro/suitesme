@@ -6,10 +6,17 @@ import (
 	"suitesme/internal/models"
 )
 
-func CreatePaymentLink(user *models.DbUser, settings map[string]string) (string, error) {
-	client := &http.Client{}
+const (
+	defaultProdamusBaseURL = "https://mneidet.payform.ru"
+)
 
-	req, err := http.NewRequest("GET", "https://mneidet.payform.ru/", nil)
+var (
+	prodamusClient  = &http.Client{}
+	prodamusBaseURL = defaultProdamusBaseURL
+)
+
+func CreatePaymentLink(user *models.DbUser, settings map[string]string) (string, error) {
+	req, err := http.NewRequest("GET", prodamusBaseURL+"/", nil)
 	if err != nil {
 		return "", err
 	}
@@ -31,7 +38,7 @@ func CreatePaymentLink(user *models.DbUser, settings map[string]string) (string,
 	query.Add("demo_mode", "1")
 	req.URL.RawQuery = query.Encode()
 
-	resp, err := client.Do(req)
+	resp, err := prodamusClient.Do(req)
 	if err != nil {
 		return "", err
 	}

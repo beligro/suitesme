@@ -19,7 +19,7 @@ func (ctr ContentController) Put(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.BadIdInPath, ctx)
 	}
 
-	content, err := utils_request.ParseRequest[models.UpsertContentRequest](&ctx, ctr.logger)
+	content, err := utils_request.ParseRequest[models.UpsertContentRequest](&ctx)
 	if err != nil {
 		return err
 	}

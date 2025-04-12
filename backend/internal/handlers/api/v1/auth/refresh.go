@@ -30,7 +30,7 @@ type RefreshRequest struct {
 // @Router		/api/v1/auth/refresh [post]
 func (ctr AuthController) Refresh(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
-	request, err := utils_request.ParseRequest[RefreshRequest](&ctx, ctr.logger)
+	request, err := utils_request.ParseRequest[RefreshRequest](&ctx)
 	if err != nil {
 		return err
 	}

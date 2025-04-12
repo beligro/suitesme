@@ -22,12 +22,17 @@ type AmoStatus string
 const (
 	Paid     AmoStatus = "paid"
 	GotStyle AmoStatus = "got_style"
+
+	defaultAmoCRMBaseURL = "https://mneidet.amocrm.ru/api/v4"
+)
+
+var (
+	httpClient    = &http.Client{}
+	amoCRMBaseURL = defaultAmoCRMBaseURL
 )
 
 func findContact(cfg *config.Config, email string) (*int, error) {
-	client := &http.Client{}
-
-	req, err := http.NewRequest("GET", "https://mneidet.amocrm.ru/api/v4/contacts", nil)
+	req, err := http.NewRequest("GET", amoCRMBaseURL+"/contacts", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +43,7 @@ func findContact(cfg *config.Config, email string) (*int, error) {
 
 	req.Header.Set("Authorization", "Bearer "+cfg.AmocrmAccessToken)
 
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +131,7 @@ func createComplexLead(cfg *config.Config, user *models.DbUser, contactId *int) 
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", "https://mneidet.amocrm.ru/api/v4/leads/complex", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", amoCRMBaseURL+"/leads/complex", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err
 	}
@@ -134,8 +139,7 @@ func createComplexLead(cfg *config.Config, user *models.DbUser, contactId *int) 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+cfg.AmocrmAccessToken)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +207,7 @@ func UpdateLeadStatus(cfg *config.Config, logger *logging.Logger, leadId int, st
 		return err
 	}
 
-	req, err := http.NewRequest("PATCH", "https://mneidet.amocrm.ru/api/v4/leads/complex", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("PATCH", amoCRMBaseURL+"/leads/complex", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
 	}
@@ -211,8 +215,7 @@ func UpdateLeadStatus(cfg *config.Config, logger *logging.Logger, leadId int, st
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+cfg.AmocrmAccessToken)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return err
 	}
