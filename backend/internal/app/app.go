@@ -103,7 +103,7 @@ func Run() {
 	e.Use(middleware.Recover())
 	e.Use(TraceIdMiddleware)
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:3000", "http://51.250.84.195:3000"},
+		AllowOrigins: []string{"http://51.250.84.195:3000", "http://51.250.84.195", "http://51.250.84.195:80"},
 		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 	}))

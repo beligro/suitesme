@@ -159,9 +159,15 @@ const ProfilePage = () => {
           <div>
             <h3>Не оплачено</h3>
             <p>Для определения вашего типажа необходимо произвести оплату</p>
-            <a href={paymentLink} target="_blank" rel="noopener noreferrer">
-              <button>Оплатить</button>
+            <a href={paymentLink} target="_blank" style={{ display: 'inline-block', padding: '10px 20px', backgroundColor: '#007bff', color: '#fff', textDecoration: 'none', borderRadius: '5px', textAlign: 'center' }}>
+              Оплатить
             </a>
+            <a href={paymentLink} target="_blank">
+              Оплатить 2
+            </a>
+            <button onClick={() => window.open(paymentLink, '_blank')}>
+              Оплатить 3
+            </button>
             <button onClick={closeModal}>Закрыть</button>
           </div>
         );

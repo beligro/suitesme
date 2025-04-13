@@ -58,6 +58,9 @@ func parseProductField(key string) (index int, productKey string) {
 // @Router			/api/v1/payment/callback [post]
 func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+	if err := ctx.Request().ParseForm(); err != nil {
+		return err
+	}
 
 	data := make(map[string]interface{})
 	products := make([]interface{}, 0)
@@ -84,6 +87,8 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 		data["products"] = products
 	}
 
+	ctr.logger.Infoln(data)
+
 	sign := ctx.Request().Header.Get("Sign")
 	ctr.logger.Infoln("header sign is: ", sign)
 	h := security.Hmac{}
@@ -102,7 +107,10 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 	var request CallbackRequest
 	json.Unmarshal(jsonData, &request)
 
+	ctr.logger.Info("order num is: ", request.OrderNum)
+	ctr.logger.Info("payment status is: ", request.PaymentStatus)
 	payment := ctr.storage.Payments.Get(request.OrderNum)
+	ctr.logger.Infoln("payment is: ", payment)
 	if payment == nil {
 		ctr.logger.Error("Not found payment")
 		return myerrors.GetHttpErrorByCode(myerrors.PaymentNotFound, ctx)
@@ -119,6 +127,8 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 	} else {
 		payment.Status = models.Failed
 	}
+	ctr.logger.Infoln("payment new is: ", payment)
+	ctr.logger.Info("payment status is: ", payment.Status)
 
 	ctr.storage.Payments.Save(payment)
 

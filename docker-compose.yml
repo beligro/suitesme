@@ -4,12 +4,27 @@ networks:
   suitesme:
 
 services:
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - './nginx.conf:/etc/nginx/nginx.conf'
+      - '/etc/letsencrypt:/etc/letsencrypt'
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - suitesme
+
   backend:
-    build: ./
+    build:
+      context: ./backend
     ports:
       - 8080:8080
     volumes:
-      - logs_data:/suitesme/cmd/app/logs
+      - logs_data:/backend/suitesme/cmd/app/logs
     depends_on:
       - postgres
       - minio
@@ -19,6 +34,11 @@ services:
       - .env
     restart: always
 
+  frontend:
+    build:
+      context: ./frontend
+    networks:
+      - suitesme
 
   postgres:
     image: postgres:latest
