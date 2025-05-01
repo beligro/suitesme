@@ -105,7 +105,7 @@ func GetHttpErrorByCode(errorCode ErrorCode, ctx echo.Context) error {
 	case ValidateJsonError:
 		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "Request json validation error"})
 	case IncorrectPassword:
-		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "Incorrect password"})
+		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "Неверный пароль"})
 	case IncorrectToken:
 		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "Incorrect token"})
 	case UserAlreadyVerified:

@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import axiosInstance from './axiosConfig';
-import Cookies from 'js-cookie';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import api from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
 import Modal from './Modal';
+import './ProfilePage.css';
 
 const ProfilePage = () => {
+  // Состояние профиля и UI
   const [profile, setProfile] = useState({ email: '', first_name: '', last_name: '', birth_date: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [photoFile, setPhotoFile] = useState(null);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   
   // Состояния для модального окна
   const [showModal, setShowModal] = useState(false);
@@ -17,20 +19,30 @@ const ProfilePage = () => {
   const [styleId, setStyleId] = useState(null);
   const [paymentLink, setPaymentLink] = useState('');
   const [paymentError, setPaymentError] = useState('');
+  
+  // Хуки для навигации и аутентификации
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { logout } = useAuth();
 
-  // Получаем данные профиля при первоначальной загрузке
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axiosInstance.get('/api/v1/profile/info');
-        setProfile(response.data);
-      } catch (error) {
-        console.error('Ошибка загрузки профиля:', error);
-      }
-    };
-
-    fetchProfile();
+  // Получение данных профиля при первоначальной загрузке
+  const fetchProfile = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await api.get('/api/v1/profile/info');
+      setProfile(response.data);
+      setError('');
+    } catch (error) {
+      console.error('Ошибка загрузки профиля:', error);
+      setError('Не удалось загрузить данные профиля. Пожалуйста, попробуйте позже.');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
   // Проверяем параметр состояния после перенаправления с платежной страницы
   useEffect(() => {
@@ -57,9 +69,13 @@ const ProfilePage = () => {
     }
   }, [location, navigate]);
 
+  // Обновление профиля
   const handleUpdateProfile = async () => {
+    setIsLoading(true);
+    setError('');
+    
     try {
-      await axiosInstance.post('/api/v1/profile/edit', {
+      await api.post('/api/v1/profile/edit', {
         first_name: profile.first_name,
         last_name: profile.last_name,
         birth_date: profile.birth_date
@@ -68,22 +84,29 @@ const ProfilePage = () => {
       setIsEditing(false);
     } catch (error) {
       console.error('Ошибка обновления профиля:', error);
+      setError('Не удалось обновить профиль. Пожалуйста, попробуйте позже.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Загрузка фото
   const handlePhotoUpload = async (e) => {
     e.preventDefault();
 
     if (!photoFile) {
-      console.error('Выберите файл для загрузки');
+      setError('Пожалуйста, выберите файл для загрузки');
       return;
     }
 
+    setIsLoading(true);
+    setError('');
+    
     const formData = new FormData();
     formData.append('photo', photoFile);
 
     try {
-      const response = await axiosInstance.post('/api/v1/style/build', formData, {
+      const response = await api.post('/api/v1/style/build', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -91,25 +114,33 @@ const ProfilePage = () => {
 
       setStyleId(response.data.style_id);
       setModalType('result');
+      setShowModal(true);
     } catch (error) {
       console.error('Ошибка при загрузке фото:', error);
+      setError('Не удалось загрузить фото. Пожалуйста, попробуйте позже.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Вынесем получение ссылки для оплаты в отдельную функцию для переиспользования
-  const fetchPaymentLink = async () => {
+  // Получение ссылки для оплаты
+  const fetchPaymentLink = useCallback(async () => {
     try {
-      const paymentResponse = await axiosInstance.get('/api/v1/payment/link');
-      return paymentResponse.data.payment_link;
+      const paymentResponse = await api.get('/api/v1/payment/link');
+      return paymentResponse.data.link;
     } catch (error) {
       console.error('Ошибка получения ссылки на оплату:', error);
       throw error;
     }
-  };
+  }, []);
 
-  const handleCheckStyle = async () => {
+  // Проверка стиля
+  const handleCheckStyle = useCallback(async () => {
+    setIsLoading(true);
+    setError('');
+    
     try {
-      const response = await axiosInstance.get('/api/v1/style/info');
+      const response = await api.get('/api/v1/style/info');
       setStyleId(response.data.style_id);
       setModalType('result');
       setShowModal(true);
@@ -123,6 +154,7 @@ const ProfilePage = () => {
           setShowModal(true);
         } catch (paymentError) {
           console.error('Ошибка получения ссылки на оплату:', paymentError);
+          setError('Не удалось получить ссылку на оплату. Пожалуйста, попробуйте позже.');
         }
       } else if (error.response && error.response.status === 404) {
         // Если необходимо загрузить фото
@@ -131,22 +163,29 @@ const ProfilePage = () => {
         setPhotoFile(null);
       } else {
         console.error('Ошибка при проверке стиля:', error);
+        setError('Не удалось проверить стиль. Пожалуйста, попробуйте позже.');
       }
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [fetchPaymentLink]);
 
+  // Выход из аккаунта
   const handleLogout = async () => {
     try {
-      await axiosInstance.post('/api/v1/auth/logout', {refresh_token: Cookies.get('refresh_token')});
-      Cookies.remove('access_token');
-      Cookies.remove('refresh_token');
-      localStorage.setItem('isAuthorized', 'false');
-      navigate('/login');
+      const refreshToken = localStorage.getItem('refresh_token');
+      if (refreshToken) {
+        await api.post('/api/v1/auth/logout', { refresh_token: refreshToken });
+      }
+      logout();
     } catch (error) {
       console.error('Ошибка при выходе:', error);
+      // Даже если запрос не удался, все равно выходим локально
+      logout();
     }
   };
 
+  // Закрытие модального окна
   const closeModal = () => {
     setShowModal(false);
   };
@@ -156,53 +195,82 @@ const ProfilePage = () => {
     switch (modalType) {
       case 'payment':
         return (
-          <div>
-            <h3>Не оплачено</h3>
-            <p>Для определения вашего типажа необходимо произвести оплату</p>
-            <a href={paymentLink} target="_blank" style={{ display: 'inline-block', padding: '10px 20px', backgroundColor: '#007bff', color: '#fff', textDecoration: 'none', borderRadius: '5px', textAlign: 'center' }}>
-              Оплатить
-            </a>
-            <a href={paymentLink} target="_blank">
-              Оплатить 2
-            </a>
-            <button onClick={() => window.open(paymentLink, '_blank')}>
-              Оплатить 3
-            </button>
-            <button onClick={closeModal}>Закрыть</button>
+          <div className="modal-content-wrapper">
+            <h3 className="modal-title">Не оплачено</h3>
+            <p className="modal-text">Для определения вашего типажа необходимо произвести оплату</p>
+            <div className="modal-actions">
+              <button 
+                className="btn btn-primary"
+                onClick={() => {
+                  // Открываем ссылку в новом окне
+                  window.open(paymentLink, '_blank');
+                }}
+              >
+                Оплатить
+              </button>
+              <button onClick={closeModal} className="btn btn-outline">Закрыть</button>
+            </div>
           </div>
         );
       case 'paymentFailed':
         return (
-          <div>
-            <h3>Ошибка оплаты</h3>
-            <p>{paymentError}</p>
-            <a href={paymentLink} target="_blank" rel="noopener noreferrer">
-              <button>Попробовать снова</button>
-            </a>
-            <button onClick={closeModal}>Закрыть</button>
+          <div className="modal-content-wrapper">
+            <h3 className="modal-title">Ошибка оплаты</h3>
+            <p className="modal-text error-text">{paymentError}</p>
+            <div className="modal-actions">
+              <button 
+                className="btn btn-primary"
+                onClick={() => {
+                  // Открываем ссылку в новом окне
+                  window.open(paymentLink, '_blank');
+                }}
+              >
+                Попробовать снова
+              </button>
+              <button onClick={closeModal} className="btn btn-outline">Закрыть</button>
+            </div>
           </div>
         );
       case 'upload':
         return (
-          <div>
-            <h3>Загрузите ваше фото</h3>
-            <form onSubmit={handlePhotoUpload}>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={(e) => setPhotoFile(e.target.files[0])} 
-              />
-              <button type="submit">Отправить</button>
+          <div className="modal-content-wrapper">
+            <h3 className="modal-title">Загрузите ваше фото</h3>
+            <p className="modal-text">Загрузите фотографию для определения вашего типажа</p>
+            <form onSubmit={handlePhotoUpload} className="upload-form">
+              <div className="file-input-wrapper">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => setPhotoFile(e.target.files[0])} 
+                  className="file-input"
+                  id="photo-upload"
+                />
+                <label htmlFor="photo-upload" className="file-label">
+                  {photoFile ? photoFile.name : 'Выберите файл'}
+                </label>
+              </div>
+              <div className="modal-actions">
+                <button type="submit" className="btn btn-primary" disabled={!photoFile || isLoading}>
+                  {isLoading ? 'Загрузка...' : 'Отправить'}
+                </button>
+                <button type="button" onClick={closeModal} className="btn btn-outline">Отмена</button>
+              </div>
             </form>
-            <button onClick={closeModal}>Отмена</button>
           </div>
         );
       case 'result':
         return (
-          <div>
-            <h3>Ваш типаж</h3>
-            <p>ID вашего стиля: {styleId}</p>
-            <button onClick={closeModal}>Закрыть</button>
+          <div className="modal-content-wrapper">
+            <h3 className="modal-title">Ваш типаж</h3>
+            <div className="style-result">
+              <p className="modal-text">ID вашего стиля: <span className="style-id">{styleId}</span></p>
+              <p className="style-description">
+                Здесь будет отображаться информация о вашем типаже и рекомендации по стилю.
+              </p>
+            </div>
+            <div className="modal-actions">
+              <button onClick={closeModal} className="btn btn-primary">Закрыть</button>
+            </div>
           </div>
         );
       default:
@@ -210,64 +278,127 @@ const ProfilePage = () => {
     }
   };
 
-  return (
-    <div>
-      <h2>Профиль</h2>
-      <div>
-        <label>Почта: </label>
-        <span>{profile.email}</span>
+  // Показываем индикатор загрузки, если данные профиля еще не загружены
+  if (isLoading && !profile.email) {
+    return (
+      <div className="profile-loading">
+        <div className="loading-spinner"></div>
+        <p>Загрузка профиля...</p>
       </div>
-      <div>
-        <label>Имя: </label>
-        {isEditing ? (
-          <input
-            type="text"
-            value={profile.first_name}
-            onChange={(e) => setProfile({ ...profile, first_name: e.target.value })}
-          />
-        ) : (
-          <span>{profile.first_name}</span>
-        )}
-      </div>
-      <div>
-        <label>Фамилия: </label>
-        {isEditing ? (
-          <input
-            type="text"
-            value={profile.last_name}
-            onChange={(e) => setProfile({ ...profile, last_name: e.target.value })}
-          />
-        ) : (
-          <span>{profile.last_name}</span>
-        )}
-      </div>
-      <div>
-        <label>Дата рождения: </label>
-        {isEditing ? (
-          <input
-            type="date"
-            value={profile.birth_date}
-            onChange={(e) => setProfile({ ...profile, birth_date: e.target.value })}
-          />
-        ) : (
-          <span>{profile.birth_date}</span>
-        )}
-      </div>
-      {isEditing ? (
-        <button onClick={handleUpdateProfile}>Сохранить изменения</button>
-      ) : (
-        <button onClick={() => setIsEditing(true)}>Редактировать</button>
-      )}
-      
-      <div>
-        <h3>Стиль</h3>
-        <button onClick={handleCheckStyle}>Узнать свой типаж</button>
-      </div>
+    );
+  }
 
-      <button onClick={handleLogout}>Выйти</button>
+  return (
+    <div className="profile-page">
+      <div className="profile-card">
+        <div className="profile-header">
+          <h2 className="profile-title">Личный кабинет</h2>
+        </div>
+
+        {error && <div className="alert alert-error">{error}</div>}
+
+        <div className="profile-content">
+          <div className="profile-section">
+            <h3 className="section-title">Личная информация</h3>
+            
+            <div className="profile-info">
+              <div className="info-group">
+                <label className="info-label">Почта:</label>
+                <div className="info-value">{profile.email}</div>
+              </div>
+              
+              <div className="info-group">
+                <label className="info-label">Имя:</label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={profile.first_name || ''}
+                    onChange={(e) => setProfile({ ...profile, first_name: e.target.value })}
+                    className="info-input"
+                    disabled={isLoading}
+                  />
+                ) : (
+                  <div className="info-value">{profile.first_name || '—'}</div>
+                )}
+              </div>
+              
+              <div className="info-group">
+                <label className="info-label">Фамилия:</label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={profile.last_name || ''}
+                    onChange={(e) => setProfile({ ...profile, last_name: e.target.value })}
+                    className="info-input"
+                    disabled={isLoading}
+                  />
+                ) : (
+                  <div className="info-value">{profile.last_name || '—'}</div>
+                )}
+              </div>
+              
+              <div className="info-group">
+                <label className="info-label">Дата рождения:</label>
+                {isEditing ? (
+                  <input
+                    type="date"
+                    value={profile.birth_date || ''}
+                    onChange={(e) => setProfile({ ...profile, birth_date: e.target.value })}
+                    className="info-input"
+                    disabled={isLoading}
+                  />
+                ) : (
+                  <div className="info-value">{profile.birth_date || '—'}</div>
+                )}
+              </div>
+            </div>
+            
+            <div className="profile-actions">
+              {isEditing ? (
+                <button 
+                  onClick={handleUpdateProfile} 
+                  className="btn btn-primary"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Сохранение...' : 'Сохранить изменения'}
+                </button>
+              ) : (
+                <button 
+                  onClick={() => setIsEditing(true)} 
+                  className="btn btn-outline"
+                >
+                  Редактировать
+                </button>
+              )}
+            </div>
+          </div>
+          
+          <div className="profile-section">
+            <h3 className="section-title">Мой стиль</h3>
+            <p className="section-description">
+              Узнайте свой типаж и получите персональные рекомендации по стилю
+            </p>
+            <div className="profile-actions">
+              <button 
+                onClick={handleCheckStyle} 
+                className="btn btn-primary"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Загрузка...' : 'Узнать свой типаж'}
+              </button>
+            </div>
+          </div>
+          
+          <div className="profile-section">
+            <div className="profile-actions">
+              <button onClick={handleLogout} className="btn btn-outline">Выйти из аккаунта</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Модальное окно */}
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+      <Modal isOpen={showModal} onClose={closeModal}>
         {renderModalContent()}
       </Modal>
     </div>

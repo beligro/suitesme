@@ -15,12 +15,12 @@ func NewPaymentsRepository(db *gorm.DB) *PaymentsRepository {
 	return &PaymentsRepository{db: db}
 }
 
-func (repo *PaymentsRepository) Get(userId uuid.UUID) *models.DbPayments {
+func (repo *PaymentsRepository) Get(userId uuid.UUID) (*models.DbPayments, error) {
 	payment := &models.DbPayments{UserId: userId}
 
-	repo.db.First(payment)
+	err := repo.db.First(payment).Error
 
-	return payment
+	return payment, err
 }
 
 func (repository *PaymentsRepository) Create(payment *models.DbPayments) {

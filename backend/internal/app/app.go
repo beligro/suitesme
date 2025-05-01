@@ -131,6 +131,8 @@ func Run() {
 	apiV1Payment := apiV1.Group("/payment")
 
 	apiV1Payment.GET("/link", paymentController.PaymentLink, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
+	apiV1Payment.GET("/info", paymentController.Info, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
+	apiV1Payment.POST("/notify", paymentController.PaymentNotify, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
 	apiV1Payment.POST("/callback", paymentController.PaymentCallback)
 
 	apiV1Profile := apiV1.Group("/profile")

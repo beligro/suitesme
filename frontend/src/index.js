@@ -1,17 +1,24 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client'; // Обратите внимание, что мы импортируем из 'react-dom/client'
+import ReactDOM from 'react-dom/client';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import { NavigationHandlerProvider } from './components/NavigationHandlerContext';
+import { AuthProvider } from './contexts/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 
+// Styles are now imported in App.js
 
-const root = ReactDOM.createRoot(document.getElementById('root')); // Создаем "корень"
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <NavigationHandlerProvider>
-        <App />
-      </NavigationHandlerProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <NavigationHandlerProvider>
+            <App />
+          </NavigationHandlerProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   </React.StrictMode>
 );

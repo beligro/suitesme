@@ -1,25 +1,27 @@
 package payment
 
 import (
-	"encoding/json"
+	"errors"
 	"net/http"
 	"net/url"
 	"strconv"
 	"suitesme/internal/models"
+	"suitesme/internal/utils/external"
 	"suitesme/internal/utils/security"
 	"suitesme/pkg/myerrors"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 type CallbackRequest struct {
-	OrderId                  *string   `json:"order_id"`
+	OrderId                  string    `json:"order_id"`
 	OrderNum                 uuid.UUID `json:"order_num" validate:"required"`
-	Domain                   *string   `json:"domain"`
-	Sum                      *string   `json:"sum"`
+	Domain                   string    `json:"domain"`
+	Sum                      string    `json:"sum"`
 	PaymentStatus            string    `json:"payment_status" validate:"required"`
-	PaymentStatusDescription *string   `json:"payment_status_description"`
+	PaymentStatusDescription string    `json:"payment_status_description"`
 }
 
 func isProductField(key string) bool {
@@ -58,6 +60,7 @@ func parseProductField(key string) (index int, productKey string) {
 // @Router			/api/v1/payment/callback [post]
 func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+	ctr.logger.Info("Content-Type is: ", ctx.Request().Header.Get("Content-Type"))
 	if err := ctx.Request().ParseForm(); err != nil {
 		return err
 	}
@@ -102,35 +105,67 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.IncorrectSign, ctx)
 	}
 
-	jsonData, _ := json.Marshal(data)
+	paymentStatus, exists := data["payment_status"].(string)
+	if !exists {
+		ctr.logger.Info("Not found payment_status")
+		return myerrors.GetHttpErrorByCode(myerrors.BadRequestJson, ctx)
+	}
 
-	var request CallbackRequest
-	json.Unmarshal(jsonData, &request)
+	prodamusOrderId, exists := data["order_id"].(string)
+	if !exists {
+		ctr.logger.Info("Not found order_id")
+		return myerrors.GetHttpErrorByCode(myerrors.BadRequestJson, ctx)
+	}
 
-	ctr.logger.Info("order num is: ", request.OrderNum)
-	ctr.logger.Info("payment status is: ", request.PaymentStatus)
-	payment := ctr.storage.Payments.Get(request.OrderNum)
+	orderNumStr, exists := data["order_num"].(string)
+	if !exists {
+		return myerrors.GetHttpErrorByCode(myerrors.BadRequestJson, ctx)
+	}
+
+	orderNum, err := uuid.Parse(orderNumStr)
+	if err != nil {
+		ctr.logger.Info(err)
+		ctr.logger.Info("Order num is not UUID, probably it is another flow")
+		return ctx.JSON(http.StatusOK, models.EmptyResponse{})
+	}
+
+	user, err := ctr.storage.User.Get(orderNum)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		ctr.logger.Warn("User not found")
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
+	}
+	if err != nil {
+		ctr.logger.Error(err)
+		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
+	}
+	if user == nil {
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
+	}
+
+	payment, err := ctr.storage.Payments.Get(orderNum)
+	if err != nil {
+		ctr.logger.Error("Not found payment")
+		return myerrors.GetHttpErrorByCode(myerrors.PaymentNotFound, ctx)
+	}
 	ctr.logger.Infoln("payment is: ", payment)
 	if payment == nil {
 		ctr.logger.Error("Not found payment")
 		return myerrors.GetHttpErrorByCode(myerrors.PaymentNotFound, ctx)
 	}
 
-	if request.Sum != nil && *request.Sum < payment.PaymentSum {
-		ctr.logger.Error("Sum is less than required")
-		return myerrors.GetHttpErrorByCode(myerrors.DifferentPaymentSum, ctx)
-	}
-
-	payment.ProdamusOrderId = request.OrderId
-	if request.PaymentStatus == "success" {
+	payment.ProdamusOrderId = &prodamusOrderId
+	if paymentStatus == "success" {
 		payment.Status = models.Paid
 	} else {
 		payment.Status = models.Failed
 	}
-	ctr.logger.Infoln("payment new is: ", payment)
-	ctr.logger.Info("payment status is: ", payment.Status)
 
 	ctr.storage.Payments.Save(payment)
+
+	if payment.Status == models.Paid {
+		external.UpdateLeadStatus(ctr.config, ctr.logger, user.AmocrmLeadId, external.Paid, nil)
+	}
 
 	return ctx.JSON(http.StatusOK, models.EmptyResponse{})
 }

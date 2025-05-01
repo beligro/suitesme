@@ -54,9 +54,10 @@ func TestPaymentsRepository_Get_Success(t *testing.T) {
 		WillReturnRows(rows)
 
 	// Execute
-	payment := repo.Get(userId)
+	payment, err := repo.Get(userId)
 
 	// Assert
+	assert.NoError(t, err)
 	assert.NotNil(t, payment)
 	assert.Equal(t, userId, payment.UserId)
 	assert.Equal(t, status, payment.Status)
@@ -75,7 +76,7 @@ func TestPaymentsRepository_Get_NotFound(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"user_id", "status", "payment_link", "payment_sum", "created_at", "updated_at"}))
 
 	// Execute
-	payment := repo.Get(userId)
+	payment, err := repo.Get(userId)
 
 	// Assert
 	assert.NotNil(t, payment) // GORM initializes the struct with the provided values
@@ -83,6 +84,7 @@ func TestPaymentsRepository_Get_NotFound(t *testing.T) {
 	assert.Equal(t, models.PaymentStatus(""), payment.Status) // Default value for PaymentStatus
 	assert.Equal(t, "", payment.PaymentLink)                  // Default value for string
 	assert.Equal(t, "", payment.PaymentSum)                   // Default value for string
+	assert.ErrorContains(t, err, "not found")
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
@@ -122,7 +124,7 @@ func TestPaymentsRepository_Create(t *testing.T) {
 		WillReturnRows(rows)
 
 	// Retrieve the payment we just created
-	retrievedPayment := repo.Get(userId)
+	retrievedPayment, err := repo.Get(userId)
 
 	// Assert that the retrieved payment matches what we inserted
 	assert.NotNil(t, retrievedPayment)
@@ -130,6 +132,7 @@ func TestPaymentsRepository_Create(t *testing.T) {
 	assert.Equal(t, status, retrievedPayment.Status)
 	assert.Equal(t, paymentLink, retrievedPayment.PaymentLink)
 	assert.Equal(t, paymentSum, retrievedPayment.PaymentSum)
+	assert.NoError(t, err)
 
 	// Verify all expectations were met
 	assert.NoError(t, mock.ExpectationsWereMet())

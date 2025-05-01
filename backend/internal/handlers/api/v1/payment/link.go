@@ -3,6 +3,7 @@ package payment
 import (
 	"errors"
 	"net/http"
+	"strings"
 	"suitesme/pkg/myerrors"
 
 	"suitesme/internal/caches"
@@ -61,9 +62,13 @@ func (ctr PaymentController) PaymentLink(ctx echo.Context) error {
 		ctr.logger.Error(err)
 		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 	}
+	if !strings.HasPrefix(link, "http") {
+		ctr.logger.Warn("Error while retrieving link: ", link)
+		return ctx.JSON(http.StatusBadRequest, myerrors.MyError{Code: "bad_request", Message: link})
+	}
 
-	activePayment := ctr.storage.Payments.Get(parsedUserId)
-	if activePayment != nil {
+	activePayment, err := ctr.storage.Payments.Get(parsedUserId)
+	if err == nil && activePayment != nil {
 		if activePayment.Status == models.Paid {
 			ctr.logger.Info("Already paid")
 			return myerrors.GetHttpErrorByCode(myerrors.AlreadyPaid, ctx)

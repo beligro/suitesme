@@ -1,51 +1,140 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axiosInstance from './axiosConfig';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import React, { useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import api from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
+import useForm from '../hooks/useForm';
+import { validateForm } from '../utils/validation';
+import './AuthPage.css';
 
 const AuthPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const isAuthorized = localStorage.getItem('isAuthorized') === 'true';
+  const { isAuthenticated, login } = useAuth();
 
-  const handleLogin = useCallback(async (emailToUse = email, passwordToUse = password) => {
+  // Правила валидации для формы входа
+  const validationRules = {
+    email: [
+      { type: 'required', message: 'Email обязателен' },
+      { type: 'email', message: 'Некорректный формат email' }
+    ],
+    password: [
+      { type: 'required', message: 'Пароль обязателен' }
+    ]
+  };
+
+  // Обработчик отправки формы
+  const handleLoginSubmit = async (values) => {
     try {
-      const response = await axiosInstance.post('/api/v1/auth/login', { email: emailToUse, password: passwordToUse });
+      const response = await api.post('/api/v1/auth/login', {
+        email: values.email,
+        password: values.password
+      });
+      
       const { access_token, refresh_token } = response.data;
-
-      Cookies.set('access_token', access_token); // Без httpOnly
-      Cookies.set('refresh_token', refresh_token);
-
-      localStorage.setItem('isAuthorized', 'true');
+      
+      // Используем функцию login из контекста аутентификации
+      login(access_token, refresh_token);
+      
+      // Перенаправляем на страницу профиля
       navigate('/profile');
+      
+      return response.data;
     } catch (error) {
       console.error('Ошибка авторизации:', error);
+      throw new Error(error.response?.data?.message || 'Ошибка авторизации. Проверьте введенные данные.');
     }
-  }, [email, password, navigate]);
+  };
 
+  // Инициализируем хук формы
+  const { 
+    values, 
+    errors, 
+    isSubmitting, 
+    handleChange, 
+    handleSubmit,
+    setAllValues
+  } = useForm(
+    { email: '', password: '' }, 
+    validationRules, 
+    handleLoginSubmit
+  );
+
+  // Если пользователь уже авторизован, перенаправляем на страницу профиля
   useEffect(() => {
-    if (isAuthorized) {
+    if (isAuthenticated) {
       navigate('/profile');
     }
+  }, [isAuthenticated, navigate]);
+
+  // Если есть данные в location.state, используем их для автоматического входа
+  useEffect(() => {
     if (location.state) {
-      const { email: passedEmail, password: passedPassword } = location.state;
-      if (passedEmail && passedPassword) {
-        setEmail(passedEmail);
-        setPassword(passedPassword);
-        handleLogin(passedEmail, passedPassword);
+      const { email, password } = location.state;
+      if (email && password) {
+        setAllValues({ email, password });
+        handleSubmit();
       }
     }
-  }, [location, handleLogin, isAuthorized, navigate]);
+  }, [location.state, setAllValues, handleSubmit]);
 
   return (
-    <div>
-      <h2>Авторизация</h2>
-      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Пароль" />
-      <button onClick={() => handleLogin()}>Войти</button>
-      <button onClick={() => navigate('/forgotpassword')}>Забыли пароль?</button>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-header">
+          <h2 className="auth-title">Вход в аккаунт</h2>
+          <p className="auth-subtitle">Введите свои данные для входа</p>
+        </div>
+
+        {errors._general && <div className="alert alert-error">{errors._general}</div>}
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input 
+              type="email" 
+              id="email"
+              name="email"
+              value={values.email} 
+              onChange={handleChange} 
+              placeholder="Введите ваш email" 
+              disabled={isSubmitting}
+            />
+            {errors.email && <div className="form-error">{errors.email}</div>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Пароль</label>
+            <input 
+              type="password" 
+              id="password"
+              name="password"
+              value={values.password} 
+              onChange={handleChange} 
+              placeholder="Введите ваш пароль" 
+              disabled={isSubmitting}
+            />
+            {errors.password && <div className="form-error">{errors.password}</div>}
+          </div>
+
+          <div className="form-actions">
+            <button 
+              type="submit" 
+              className="btn btn-primary btn-lg w-full" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Вход...' : 'Войти'}
+            </button>
+          </div>
+        </form>
+
+        <div className="auth-footer">
+          <Link to="/forgotpassword" className="auth-link">Забыли пароль?</Link>
+          <div className="auth-separator">
+            <span>Нет аккаунта?</span>
+          </div>
+          <Link to="/register" className="btn btn-outline w-full">Зарегистрироваться</Link>
+        </div>
+      </div>
     </div>
   );
 };

@@ -32,7 +32,7 @@ type TokensRepository interface {
 }
 
 type PaymentsRepository interface {
-	Get(uuid.UUID) *models.DbPayments
+	Get(uuid.UUID) (*models.DbPayments, error)
 	Create(*models.DbPayments)
 	Save(*models.DbPayments)
 }

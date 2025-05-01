@@ -1,6 +1,7 @@
 package style
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"suitesme/internal/models"
@@ -26,6 +27,20 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	}
 
 	parsedUserId := userID.(uuid.UUID)
+
+	user, err := ctr.storage.User.Get(parsedUserId)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		ctr.logger.Warn("User not found")
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
+	}
+	if err != nil {
+		ctr.logger.Error(err)
+		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
+	}
+	if user == nil {
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
+	}
 
 	styleId, err := ctr.storage.UserStyle.Get(parsedUserId)
 
@@ -57,9 +72,9 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 
 	fileKey := photo.Filename
 
-	payment := ctr.storage.Payments.Get(parsedUserId)
+	payment, err := ctr.storage.Payments.Get(parsedUserId)
 
-	if payment == nil || payment.Status != models.Paid {
+	if err != nil || payment == nil || payment.Status != models.Paid {
 		ctr.logger.Error("Не оплачено")
 		return myerrors.GetHttpErrorByCode(myerrors.NotPaid, ctx)
 	}
@@ -88,6 +103,8 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	}
 
 	ctr.storage.UserStyle.Create(userStyle)
+
+	external.UpdateLeadStatus(ctr.config, ctr.logger, user.AmocrmLeadId, external.GotStyle, &styleId)
 
 	return ctx.JSON(http.StatusOK, StyleBuildResult{
 		StyleId: styleId,

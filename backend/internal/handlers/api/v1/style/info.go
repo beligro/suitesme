@@ -38,9 +38,9 @@ func (ctr StyleController) Info(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, response)
 	}
 
-	payment := ctr.storage.Payments.Get(parsedUserId)
+	payment, err := ctr.storage.Payments.Get(parsedUserId)
 
-	if payment == nil || payment.Status != models.Paid {
+	if err != nil || payment == nil || payment.Status != models.Paid {
 		ctr.logger.Error("Не оплачено")
 		return myerrors.GetHttpErrorByCode(myerrors.NotPaid, ctx)
 	}

@@ -52,7 +52,7 @@ func (ctr AuthController) Login(ctx echo.Context) error {
 
 	err = security.ComparePasswordWithHash(request.Password, user.PasswordHash)
 	if err != nil {
-		return myerrors.GetHttpErrorByCode(myerrors.DifferrentPasswords, ctx)
+		return myerrors.GetHttpErrorByCode(myerrors.IncorrectPassword, ctx)
 	}
 
 	response, httpErr := security.GenerateTokens(user.ID, ctr.config, ctr.storage, ctx)

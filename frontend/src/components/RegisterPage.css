@@ -1,0 +1,32 @@
+/* RegisterPage.css */
+@import '../styles/variables.css';
+
+.register-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-lg);
+}
+
+/* Reuse auth-card styles from AuthPage.css */
+.register-page .auth-card {
+  max-width: 550px;
+}
+
+.form-row {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
