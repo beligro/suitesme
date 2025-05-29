@@ -41,7 +41,7 @@ const HeroSection = () => {
           <div className={styles.descriptionBorder1}></div>
           <div className={styles.descriptionBorder2}></div>
           <p className={styles.descriptionText}>
-            Наш искусственный интеллект анализирует черты лица и определяет типаж по системе<br />
+            Наш искусственный интеллект анализирует черты лица и определяет типаж по системе {' '}
             <strong>MNE IDET</strong>
           </p>
         </div>

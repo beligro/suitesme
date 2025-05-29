@@ -64,6 +64,7 @@
   background-size: cover;
   background-position: center;
   filter: blur(9.8px);
+  opacity: 0.6;
   z-index: 3;
 }
 
@@ -76,6 +77,7 @@
   background-image: url('../../assets/images/hero-bg-blur-2.jpg');
   background-size: cover;
   background-position: center;
+  opacity: 0.6;
   z-index: 3;
 }
 
@@ -117,19 +119,18 @@
   text-transform: uppercase;
   color: #FFFFFF;
   margin-bottom: 38px;
-  backdrop-filter: blur(16.6px);
 }
 
 .description {
   position: relative;
   width: 301px;
   height: 121px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid #FFFFFF;
-  border-radius: 21.5px;
+  background: transparent;
   padding: 15px 26px;
   margin-bottom: 84px;
-  backdrop-filter: blur(16.6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .descriptionText {
