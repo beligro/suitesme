@@ -50,7 +50,7 @@ const HeroSection = () => {
           className={styles.ctaButton}
           onClick={handleCTAClick}
         >
-          {isAuthenticated ? 'Перейти в профиль' : 'Начать анализ'}
+          Узнать свой типаж
         </button>
       </div>
     </section>

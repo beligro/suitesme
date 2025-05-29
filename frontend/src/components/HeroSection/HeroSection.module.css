@@ -1,6 +1,6 @@
 .heroSection {
   position: relative;
-  width: 100%;
+  width: 100vw;
   height: 1040px;
   background: #BBBBBB;
   overflow: hidden;
@@ -8,8 +8,9 @@
   align-items: center;
   justify-content: flex-start;
   padding-left: 380px;
-  margin-top: -130px; /* Compensate for fixed header */
-  padding-top: 130px; /* Add padding to account for header */
+  margin-left: calc(-50vw + 50%);
+  margin-top: -130px;
+  padding-top: 130px;
 }
 
 .backgroundImages {
@@ -24,9 +25,9 @@
 .mainBackground {
   position: absolute;
   top: 0;
-  left: 278px;
-  width: 1966px;
-  height: 1040px;
+  left: 14.5%;
+  width: 102%;
+  height: 100%;
   background-image: url('../../assets/images/hero-bg-main.jpg');
   background-size: cover;
   background-position: center;
@@ -37,8 +38,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 632px;
-  height: 1040px;
+  width: 33%;
+  height: 100%;
   background: linear-gradient(90deg, rgba(217, 217, 217, 0) 0%, #D6E1E5 100%);
   z-index: 2;
 }
@@ -47,18 +48,18 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 302px;
-  height: 1040px;
+  width: 16%;
+  height: 100%;
   background: linear-gradient(270deg, rgba(153, 166, 169, 0) 0%, #7B949B 100%);
   z-index: 2;
 }
 
 .blurredImage1 {
   position: absolute;
-  top: -347px;
-  right: -375px;
-  width: 845px;
-  height: 955px;
+  top: -33%;
+  right: -20%;
+  width: 44%;
+  height: 92%;
   background-image: url('../../assets/images/hero-bg-blur-1.jpg');
   background-size: cover;
   background-position: center;
@@ -68,10 +69,10 @@
 
 .blurredImage2 {
   position: absolute;
-  top: 254px;
-  left: -533px;
-  width: 978px;
-  height: 873px;
+  top: 24%;
+  left: -28%;
+  width: 51%;
+  height: 84%;
   background-image: url('../../assets/images/hero-bg-blur-2.jpg');
   background-size: cover;
   background-position: center;
@@ -80,10 +81,10 @@
 
 .blurredCircle1 {
   position: absolute;
-  top: -50px;
-  left: 166px;
-  width: 822px;
-  height: 1001px;
+  top: -5%;
+  left: 8.6%;
+  width: 43%;
+  height: 96%;
   background: #90A3AB;
   border-radius: 50%;
   filter: blur(400px);
@@ -92,10 +93,10 @@
 
 .blurredCircle2 {
   position: absolute;
-  top: -187px;
-  right: 160px;
-  width: 738px;
-  height: 634px;
+  top: -18%;
+  right: 8.3%;
+  width: 38%;
+  height: 61%;
   background: #83989D;
   border-radius: 50%;
   filter: blur(400px);
