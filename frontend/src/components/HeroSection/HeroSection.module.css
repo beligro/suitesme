@@ -40,17 +40,7 @@
   left: 0;
   width: 33%;
   height: 100%;
-  background: linear-gradient(90deg, rgba(217, 217, 217, 0) 0%, #D6E1E5 100%);
-  z-index: 2;
-}
-
-.rightGradient {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 16%;
-  height: 100%;
-  background: linear-gradient(270deg, rgba(153, 166, 169, 0) 0%, #7B949B 100%);
+  background: linear-gradient(90deg, rgba(217, 217, 217, 0) 0%, rgba(214, 225, 229, 0.3) 100%);
   z-index: 2;
 }
 
@@ -63,8 +53,8 @@
   background-image: url('../../assets/images/hero-bg-blur-1.jpg');
   background-size: cover;
   background-position: center;
-  filter: blur(9.8px);
-  opacity: 0.6;
+  filter: blur(9.8px) brightness(1.5);
+  opacity: 0.4;
   z-index: 3;
 }
 
@@ -77,7 +67,8 @@
   background-image: url('../../assets/images/hero-bg-blur-2.jpg');
   background-size: cover;
   background-position: center;
-  opacity: 0.6;
+  filter: brightness(1.5);
+  opacity: 0.4;
   z-index: 3;
 }
 
@@ -150,17 +141,23 @@
   width: 34px;
   height: 121px;
   border: 1px solid #FFFFFF;
-  border-radius: 21.5px;
+  border-radius: 0;
 }
 
 .descriptionBorder1 {
   left: 0;
   top: 0;
+  border-right: none;
+  border-top-left-radius: 21.5px;
+  border-bottom-left-radius: 21.5px;
 }
 
 .descriptionBorder2 {
   right: 0;
   top: 0;
+  border-left: none;
+  border-top-right-radius: 21.5px;
+  border-bottom-right-radius: 21.5px;
 }
 
 .ctaButton {

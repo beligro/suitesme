@@ -21,7 +21,6 @@ const HeroSection = () => {
       <div className={styles.backgroundImages}>
         <div className={styles.mainBackground}></div>
         <div className={styles.leftGradient}></div>
-        <div className={styles.rightGradient}></div>
         <div className={styles.blurredImage1}></div>
         <div className={styles.blurredImage2}></div>
         <div className={styles.blurredCircle1}></div>
