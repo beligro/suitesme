@@ -1,0 +1,41 @@
+/* Figma Design Variables - Based on MNEIDET Design */
+:root {
+  /* Figma Design Colors */
+  --figma-primary-dark: #1B3C4D; /* Dark blue from design */
+  --figma-primary-medium: #031C2D; /* Very dark blue gradient */
+  --figma-primary-light: #90A3AB; /* Light blue-gray */
+  
+  --figma-secondary: #83989D; /* Blue-gray accent */
+  --figma-secondary-light: #C2CED8; /* Light gray-blue */
+  --figma-secondary-dark: #7B949B; /* Darker blue-gray */
+  
+  --figma-bg-main: #F7F7F7; /* Main background */
+  --figma-bg-section: #BBBBBB; /* Section background */
+  
+  --figma-text-white: #FFFFFF; /* White text */
+  --figma-text-light: #90A3AB; /* Light text */
+  
+  /* Figma Typography */
+  --figma-font-heading: 'Unbounded', 'Arial Black', sans-serif;
+  --figma-font-body: 'Montserrat', 'Arial', sans-serif;
+  --figma-font-accent: 'Unbounded', 'Arial', sans-serif;
+  
+  /* Figma Specific Sizes */
+  --figma-hero-title-size: 74px;
+  --figma-brand-size: 24px;
+  --figma-nav-size: 16px;
+  --figma-button-size: 16px;
+  
+  /* Figma Effects */
+  --figma-blur-strong: blur(400px);
+  --figma-blur-medium: blur(16.6px);
+  --figma-blur-light: blur(13.2px);
+  --figma-blur-small: blur(9.8px);
+  
+  --figma-shadow-button: 0px 4px 28px 0px rgba(0, 0, 0, 0.13);
+  
+  /* Figma Gradients */
+  --figma-gradient-header: linear-gradient(180deg, #031C2D 0%, rgba(141, 141, 141, 0) 100%);
+  --figma-gradient-left: linear-gradient(90deg, rgba(217, 217, 217, 0) 0%, #D6E1E5 100%);
+  --figma-gradient-right: linear-gradient(270deg, rgba(153, 166, 169, 0) 0%, #7B949B 100%);
+}

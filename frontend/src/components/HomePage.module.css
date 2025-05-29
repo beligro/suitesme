@@ -1,0 +1,339 @@
+/* HomePage.module.css - Based on Figma Design */
+@import '../styles/variables.css';
+@import '../styles/figma-variables.css';
+
+.homePage {
+  min-height: 100vh;
+  background-color: var(--figma-bg-main);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hero Section */
+.heroSection {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--figma-bg-section);
+}
+
+/* Background Images */
+.heroBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.heroPhoto {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 2;
+}
+
+.decorativeElement1 {
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 50%;
+  height: 120%;
+  object-fit: cover;
+  filter: var(--figma-blur-small);
+  z-index: 1;
+}
+
+.decorativeElement2 {
+  position: absolute;
+  top: 20%;
+  left: -20%;
+  width: 60%;
+  height: 80%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* Gradient Overlays */
+.gradientLeft {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: var(--figma-gradient-left);
+  z-index: 3;
+}
+
+.gradientRight {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20%;
+  height: 100%;
+  background: var(--figma-gradient-right);
+  z-index: 3;
+}
+
+/* Blur Effects */
+.blurCircle1 {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 800px;
+  height: 1000px;
+  background-color: var(--figma-primary-light);
+  border-radius: 50%;
+  filter: var(--figma-blur-strong);
+  z-index: 2;
+}
+
+.blurCircle2 {
+  position: absolute;
+  top: -20%;
+  right: 20%;
+  width: 700px;
+  height: 600px;
+  background-color: var(--figma-secondary);
+  border-radius: 50%;
+  filter: var(--figma-blur-strong);
+  z-index: 2;
+}
+
+/* Content */
+.heroContent {
+  position: relative;
+  z-index: 10;
+  max-width: 600px;
+  padding: 0 var(--spacing-lg);
+  margin-left: 20%;
+}
+
+.heroTitle {
+  font-family: var(--figma-font-accent);
+  font-size: var(--figma-hero-title-size);
+  font-weight: 300;
+  line-height: 1.08;
+  text-transform: uppercase;
+  color: var(--figma-text-white);
+  margin-bottom: var(--spacing-xl);
+  backdrop-filter: var(--figma-blur-medium);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.heroDescription {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: var(--figma-blur-medium);
+  border: 1px solid var(--figma-text-white);
+  border-radius: 22px;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  max-width: 300px;
+}
+
+.heroDescriptionText {
+  font-family: var(--figma-font-body);
+  font-size: var(--figma-nav-size);
+  font-weight: 400;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--figma-text-white);
+  margin: 0;
+}
+
+.heroDescriptionIcon1,
+.heroDescriptionIcon2 {
+  position: absolute;
+  width: 34px;
+  height: 121px;
+  background: var(--figma-text-white);
+  border: 1px solid var(--figma-text-white);
+  border-radius: 22px;
+}
+
+.heroDescriptionIcon1 {
+  left: 0;
+  top: 0;
+}
+
+.heroDescriptionIcon2 {
+  right: 0;
+  top: 0;
+}
+
+.heroButton {
+  font-family: var(--figma-font-accent);
+  font-size: var(--figma-button-size);
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--figma-text-white);
+  background-color: var(--figma-primary-dark);
+  border: none;
+  border-radius: 50px;
+  padding: 25px 50px;
+  box-shadow: var(--figma-shadow-button);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  margin-left: 40%;
+}
+
+.heroButton:hover {
+  background-color: var(--figma-secondary-light);
+  color: var(--figma-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 32px 0px rgba(0, 0, 0, 0.18);
+}
+
+/* Navigation Header */
+.navigationHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--figma-gradient-header);
+  backdrop-filter: var(--figma-blur-light);
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-xl);
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.logoMain {
+  font-family: var(--figma-font-heading);
+  font-size: var(--figma-brand-size);
+  font-weight: 700;
+  color: var(--figma-text-white);
+}
+
+.logoSub {
+  font-family: var(--figma-font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--figma-text-white);
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+
+.navMenu {
+  display: flex;
+  align-items: flex-end;
+  gap: 60px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navItem {
+  font-family: var(--figma-font-body);
+  font-size: var(--figma-nav-size);
+  font-weight: 500;
+  line-height: 1.75;
+  color: var(--figma-text-white);
+  cursor: pointer;
+  transition: opacity var(--transition-normal) ease;
+}
+
+.navItem:hover {
+  opacity: 0.8;
+}
+
+.loginButton {
+  font-family: var(--figma-font-accent);
+  font-size: var(--figma-button-size);
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--figma-text-white);
+  background: transparent;
+  border: 1px solid var(--figma-text-white);
+  border-radius: 50px;
+  padding: 20px 43px;
+  box-shadow: var(--figma-shadow-button);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+}
+
+.loginButton:hover {
+  background-color: var(--figma-secondary-light);
+  color: var(--figma-primary-dark);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .heroTitle {
+    font-size: 60px;
+  }
+  
+  .heroContent {
+    margin-left: 10%;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 48px;
+  }
+  
+  .heroContent {
+    margin-left: 0;
+    text-align: center;
+    max-width: 90%;
+  }
+  
+  .heroButton {
+    margin-left: 0;
+  }
+  
+  .navigation {
+    gap: 30px;
+  }
+  
+  .navMenu {
+    gap: 30px;
+  }
+  
+  .navigationHeader {
+    padding: 0 var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 36px;
+  }
+  
+  .navMenu {
+    display: none;
+  }
+  
+  .heroPhoto {
+    width: 100%;
+  }
+  
+  .gradientLeft {
+    width: 60%;
+  }
+}

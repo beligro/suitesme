@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchContent } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
-import './HomePage.css';
+import styles from './HomePage.module.css';
+
+// Import images
+import heroPhoto from '../assets/images/hero-photo.jpg';
+import decorativeElement1 from '../assets/images/decorative-element-1.jpg';
+import decorativeElement2 from '../assets/images/decorative-element-2.jpg';
 
 const HomePage = () => {
   const [content, setContent] = useState({});
@@ -31,14 +36,32 @@ const HomePage = () => {
     loadContent();
   }, []);
 
-  return (
-    <div className="home-page">
-      {isLoading ? (
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      navigate('/profile');
+    } else {
+      navigate('/register');
+    }
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
+  if (isLoading) {
+    return (
+      <div className={styles.homePage}>
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Загрузка контента...</p>
         </div>
-      ) : error ? (
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.homePage}>
         <div className="error-container">
           <p className="error-message">{error}</p>
           <button 
@@ -48,71 +71,85 @@ const HomePage = () => {
             Попробовать снова
           </button>
         </div>
-      ) : (
-        <>
-          <section className="hero">
-            <div className="hero-content">
-              <h1 className="hero-title">{content['hello_text']?.ru_value || 'Добро пожаловать в SuitesMe'}</h1>
-              <p className="hero-subtitle">Откройте свой уникальный стиль с помощью нашего сервиса</p>
-              
-              <div className="hero-buttons">
-                {isAuthenticated ? (
-                  <button className="btn btn-primary btn-lg" onClick={() => navigate('/profile')}>
-                    Мой профиль
-                  </button>
-                ) : (
-                  <>
-                    <button className="btn btn-primary btn-lg" onClick={() => navigate('/register')}>
-                      Начать сейчас
-                    </button>
-                    <button className="btn btn-outline btn-lg ml-md" onClick={() => navigate('/login')}>
-                      Войти
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </section>
+      </div>
+    );
+  }
 
-          <section className="features">
-            <h2 className="section-title">Как это работает</h2>
-            <div className="feature-grid">
-              <div className="feature-card">
-                <div className="feature-icon">1</div>
-                <h3 className="feature-title">Регистрация</h3>
-                <p className="feature-description">Создайте аккаунт и заполните информацию о себе</p>
-              </div>
-              <div className="feature-card">
-                <div className="feature-icon">2</div>
-                <h3 className="feature-title">Загрузка фото</h3>
-                <p className="feature-description">Загрузите свою фотографию для анализа</p>
-              </div>
-              <div className="feature-card">
-                <div className="feature-icon">3</div>
-                <h3 className="feature-title">Анализ</h3>
-                <p className="feature-description">Наша система определит ваш типаж и подберет рекомендации</p>
-              </div>
-              <div className="feature-card">
-                <div className="feature-icon">4</div>
-                <h3 className="feature-title">Результат</h3>
-                <p className="feature-description">Получите персональные рекомендации по стилю</p>
-              </div>
-            </div>
-          </section>
+  return (
+    <div className={styles.homePage}>
+      {/* Navigation Header */}
+      <header className={styles.navigationHeader}>
+        <div className={styles.logo} onClick={() => navigate('/')}>
+          <span className={styles.logoMain}>MNE</span>
+          <span className={styles.logoSub}>IDET</span>
+        </div>
+        
+        <nav className={styles.navigation}>
+          <ul className={styles.navMenu}>
+            <li className={styles.navItem}>Преимущества</li>
+            <li className={styles.navItem}>О сервисе</li>
+            <li className={styles.navItem}>Ответы на вопросы</li>
+            <li className={styles.navItem}>Примеры результатов</li>
+          </ul>
+          
+          {!isAuthenticated && (
+            <button className={styles.loginButton} onClick={handleLogin}>
+              Войти
+            </button>
+          )}
+        </nav>
+      </header>
 
-          <section className="cta">
-            <div className="cta-content">
-              <h2 className="cta-title">Готовы узнать свой стиль?</h2>
-              <p className="cta-description">Присоединяйтесь к тысячам людей, которые уже нашли свой уникальный стиль с SuitesMe</p>
-              {!isAuthenticated && (
-                <button className="btn btn-primary btn-lg" onClick={() => navigate('/register')}>
-                  Зарегистрироваться
-                </button>
-              )}
-            </div>
-          </section>
-        </>
-      )}
+      {/* Hero Section */}
+      <section className={styles.heroSection}>
+        {/* Background Images */}
+        <img 
+          src={heroPhoto} 
+          alt="Hero" 
+          className={styles.heroPhoto}
+        />
+        <img 
+          src={decorativeElement1} 
+          alt="Decorative" 
+          className={styles.decorativeElement1}
+        />
+        <img 
+          src={decorativeElement2} 
+          alt="Decorative" 
+          className={styles.decorativeElement2}
+        />
+        
+        {/* Gradient Overlays */}
+        <div className={styles.gradientLeft}></div>
+        <div className={styles.gradientRight}></div>
+        
+        {/* Blur Effects */}
+        <div className={styles.blurCircle1}></div>
+        <div className={styles.blurCircle2}></div>
+        
+        {/* Hero Content */}
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>
+            Узнай,<br />
+            что тебе<br />
+            действи-тельно<br />
+            идёт
+          </h1>
+          
+          <div className={styles.heroDescription}>
+            <div className={styles.heroDescriptionIcon1}></div>
+            <div className={styles.heroDescriptionIcon2}></div>
+            <p className={styles.heroDescriptionText}>
+              Наш искусственный интеллект анализирует черты лица и определяет типаж по системе<br />
+              MNE IDET
+            </p>
+          </div>
+          
+          <button className={styles.heroButton} onClick={handleGetStarted}>
+            {isAuthenticated ? 'Мой профиль' : 'Узнать свой типаж'}
+          </button>
+        </div>
+      </section>
     </div>
   );
 };

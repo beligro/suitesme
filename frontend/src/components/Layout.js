@@ -1,11 +1,15 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './Layout.css';
 
 const Layout = ({ children }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, logout } = useAuth();
+  
+  // Hide header and footer on home page
+  const isHomePage = location.pathname === '/';
 
   const handleLogout = () => {
     logout();
@@ -13,7 +17,8 @@ const Layout = ({ children }) => {
 
   return (
     <div className="layout">
-      <header className="header">
+      {!isHomePage && (
+        <header className="header">
         <div className="container">
           <div className="header-content">
             <div className="logo" onClick={() => navigate('/')}>
@@ -52,15 +57,17 @@ const Layout = ({ children }) => {
             </nav>
           </div>
         </div>
-      </header>
+        </header>
+      )}
 
-      <main className="main">
+      <main className={isHomePage ? "main main--fullscreen" : "main"}>
         <div className="container">
           {children}
         </div>
       </main>
 
-      <footer className="footer">
+      {!isHomePage && (
+        <footer className="footer">
         <div className="container">
           <div className="footer-content">
             <div className="footer-logo">
@@ -103,7 +110,8 @@ const Layout = ({ children }) => {
             <p className="copyright">© {new Date().getFullYear()} SuitesMe. Все права защищены.</p>
           </div>
         </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 };

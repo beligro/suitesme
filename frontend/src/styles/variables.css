@@ -1,28 +1,28 @@
 :root {
-    /* Color Palette */
-    --primary-color: #6366f1; /* Indigo */
-    --primary-light: #818cf8;
-    --primary-dark: #4f46e5;
+    /* Color Palette - Based on Figma Design */
+    --primary-color: #1B3C4D; /* Dark blue from design */
+    --primary-light: #90A3AB; /* Light blue-gray */
+    --primary-dark: #031C2D; /* Very dark blue */
     
-    --secondary-color: #f59e0b; /* Amber */
-    --secondary-light: #fbbf24;
-    --secondary-dark: #d97706;
+    --secondary-color: #83989D; /* Blue-gray accent */
+    --secondary-light: #C2CED8; /* Light gray-blue */
+    --secondary-dark: #7B949B; /* Darker blue-gray */
     
     --success-color: #10b981; /* Emerald */
     --error-color: #ef4444; /* Red */
     --warning-color: #f59e0b; /* Amber */
     --info-color: #3b82f6; /* Blue */
     
-    --text-primary: #1f2937; /* Gray 800 */
-    --text-secondary: #4b5563; /* Gray 600 */
-    --text-tertiary: #9ca3af; /* Gray 400 */
+    --text-primary: #FFFFFF; /* White text from design */
+    --text-secondary: #FFFFFF; /* White text */
+    --text-tertiary: #90A3AB; /* Light blue-gray */
     
-    --bg-primary: #ffffff;
-    --bg-secondary: #f9fafb; /* Gray 50 */
-    --bg-tertiary: #f3f4f6; /* Gray 100 */
+    --bg-primary: #F7F7F7; /* Light gray background */
+    --bg-secondary: #BBBBBB; /* Medium gray */
+    --bg-tertiary: #90A3AB; /* Blue-gray */
     
-    --border-color: #e5e7eb; /* Gray 200 */
-    --border-color-dark: #d1d5db; /* Gray 300 */
+    --border-color: #FFFFFF; /* White borders */
+    --border-color-dark: #90A3AB; /* Blue-gray borders */
     
     /* Typography */
     --font-family: 'Roboto', 'Segoe UI', 'Helvetica Neue', sans-serif;
@@ -71,4 +71,3 @@
     --z-index-popover: 1060;
     --z-index-tooltip: 1070;
   }
-  

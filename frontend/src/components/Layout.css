@@ -65,6 +65,15 @@
   padding: var(--spacing-xl) 0;
 }
 
+.main--fullscreen {
+  padding: 0;
+}
+
+.main--fullscreen .container {
+  max-width: none;
+  padding: 0;
+}
+
 /* Footer */
 .footer {
   background-color: var(--bg-tertiary);
