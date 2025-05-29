@@ -55,6 +55,7 @@ func (ctr PaymentController) PaymentNotify(ctx echo.Context) error {
 	if activePayment.Status == models.CreatedLink {
 		activePayment.Status = models.InProgress
 	}
+	ctr.storage.Payments.Save(activePayment)
 
 	return ctx.JSON(http.StatusOK, models.EmptyResponse{})
 }

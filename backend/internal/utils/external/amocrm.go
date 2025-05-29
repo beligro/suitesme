@@ -183,6 +183,7 @@ func UpdateLeadStatus(cfg *config.Config, logger *logging.Logger, leadId int, st
 	case GotStyle:
 		statusId = 74695570
 	}
+	logger.Info("status id is:", statusId)
 	leadData := map[string]interface{}{
 		"id":                   leadId,
 		"status_id":            statusId,
@@ -206,8 +207,9 @@ func UpdateLeadStatus(cfg *config.Config, logger *logging.Logger, leadId int, st
 	if err != nil {
 		return err
 	}
+	logger.Infoln(jsonData)
 
-	req, err := http.NewRequest("PATCH", amoCRMBaseURL+"/leads/complex", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("PATCH", amoCRMBaseURL+"/leads", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
 	}

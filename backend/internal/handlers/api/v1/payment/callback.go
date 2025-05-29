@@ -162,9 +162,14 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 	}
 
 	ctr.storage.Payments.Save(payment)
+	ctr.logger.Info("Payment status new is: ", payment.Status)
 
 	if payment.Status == models.Paid {
-		external.UpdateLeadStatus(ctr.config, ctr.logger, user.AmocrmLeadId, external.Paid, nil)
+		ctr.logger.Info("Updating lead status")
+		err = external.UpdateLeadStatus(ctr.config, ctr.logger, user.AmocrmLeadId, external.Paid, nil)
+		if err != nil {
+			ctr.logger.Error(err)
+		}
 	}
 
 	return ctx.JSON(http.StatusOK, models.EmptyResponse{})

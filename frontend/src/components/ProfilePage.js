@@ -15,10 +15,11 @@ const ProfilePage = () => {
   
   // Состояния для модального окна
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState(''); // 'payment', 'upload', 'result', 'paymentFailed'
+  const [modalType, setModalType] = useState(''); // 'payment', 'upload', 'result', 'paymentFailed', 'paymentProcessing'
   const [styleId, setStyleId] = useState(null);
   const [paymentLink, setPaymentLink] = useState('');
   const [paymentError, setPaymentError] = useState('');
+  const [pollingInterval, setPollingInterval] = useState(null);
   
   // Хуки для навигации и аутентификации
   const navigate = useNavigate();
@@ -43,31 +44,6 @@ const ProfilePage = () => {
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
-
-  // Проверяем параметр состояния после перенаправления с платежной страницы
-  useEffect(() => {
-    if (location.state && location.state.fromPayment) {
-      if (location.state.paymentStatus === 'ok') {
-        // Если оплата успешна, проверяем информацию о стиле
-        handleCheckStyle();
-      } else if (location.state.paymentStatus === 'fail') {
-        // Если оплата не удалась, показываем сообщение об ошибке и предлагаем повторить
-        fetchPaymentLink()
-          .then(link => {
-            setPaymentLink(link);
-            setPaymentError('Оплата не была выполнена. Пожалуйста, попробуйте снова.');
-            setModalType('paymentFailed');
-            setShowModal(true);
-          })
-          .catch(error => {
-            console.error('Ошибка получения ссылки на оплату:', error);
-          });
-      }
-      
-      // Очищаем состояние, чтобы избежать повторного срабатывания при обновлении страницы
-      navigate(location.pathname, { replace: true });
-    }
-  }, [location, navigate]);
 
   // Обновление профиля
   const handleUpdateProfile = async () => {
@@ -134,41 +110,194 @@ const ProfilePage = () => {
     }
   }, []);
 
+  // Проверка статуса оплаты
+  const checkPaymentStatus = useCallback(async () => {
+    try {
+      const response = await api.get('/api/v1/payment/info');
+      return response.data.payment_status;
+    } catch (error) {
+      console.error('Ошибка проверки статуса оплаты:', error);
+      throw error;
+    }
+  }, []);
+
+  // Запуск поллинга статуса оплаты
+  const startPaymentStatusPolling = useCallback(() => {
+    // Очищаем предыдущий интервал, если он существует
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+    }
+    
+    // Устанавливаем новый интервал
+    const interval = setInterval(async () => {
+      try {
+        const status = await checkPaymentStatus();
+        
+        // Если статус оплаты "paid", останавливаем поллинг и проверяем стиль
+        if (status === 'paid') {
+          clearInterval(interval);
+          setPollingInterval(null);
+          
+          // Проверяем информацию о стиле
+          try {
+            const styleResponse = await api.get('/api/v1/style/info');
+            setStyleId(styleResponse.data.style_id);
+            setModalType('result');
+            setShowModal(true);
+          } catch (styleError) {
+            if (styleError.response && styleError.response.status === 404) {
+              // Если необходимо загрузить фото
+              setModalType('upload');
+              setShowModal(true);
+              setPhotoFile(null);
+            } else {
+              console.error('Ошибка при проверке стиля:', styleError);
+              setError('Не удалось проверить стиль. Пожалуйста, попробуйте позже.');
+            }
+          }
+        } 
+        // Если статус "failed" или "not_found", останавливаем поллинг и показываем ошибку
+        else if (status === 'failed' || status === 'not_found') {
+          clearInterval(interval);
+          setPollingInterval(null);
+          
+          try {
+            const link = await fetchPaymentLink();
+            setPaymentLink(link);
+            setPaymentError('Оплата не была выполнена. Пожалуйста, попробуйте снова.');
+            setModalType('paymentFailed');
+            setShowModal(true);
+          } catch (linkError) {
+            console.error('Ошибка получения ссылки на оплату:', linkError);
+            setError('Не удалось получить ссылку на оплату. Пожалуйста, попробуйте позже.');
+          }
+        }
+        // Если статус "in_progress", показываем сообщение о обработке
+        else if (status === 'in_progress') {
+          setModalType('paymentProcessing');
+          setShowModal(true);
+        }
+        // Для статусов "created_link" и "in_progress" продолжаем поллинг
+      } catch (error) {
+        console.error('Ошибка при поллинге статуса оплаты:', error);
+      }
+    }, 5000); // Поллинг каждые 5 секунд
+    
+    setPollingInterval(interval);
+    
+    // Очистка интервала при размонтировании компонента
+    return () => {
+      clearInterval(interval);
+    };
+  }, [checkPaymentStatus]);
+
+  // Очистка интервала поллинга при размонтировании компонента
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [pollingInterval]);
+
   // Проверка стиля
   const handleCheckStyle = useCallback(async () => {
     setIsLoading(true);
     setError('');
     
     try {
-      const response = await api.get('/api/v1/style/info');
-      setStyleId(response.data.style_id);
-      setModalType('result');
-      setShowModal(true);
-    } catch (error) {
-      if (error.response && error.response.status === 403) {
+      // Сначала проверяем статус оплаты
+      const paymentStatus = await checkPaymentStatus();
+      console.log('Payment status is: ', paymentStatus);
+      
+      // Обрабатываем различные статусы оплаты
+      if (paymentStatus === 'paid') {
+        // Если оплачено, проверяем информацию о стиле
+        try {
+          const response = await api.get('/api/v1/style/info');
+          setStyleId(response.data.style_id);
+          setModalType('result');
+          setShowModal(true);
+        } catch (styleError) {
+          if (styleError.response && styleError.response.status === 404) {
+            // Если необходимо загрузить фото
+            setModalType('upload');
+            setShowModal(true);
+            setPhotoFile(null);
+          } else {
+            console.error('Ошибка при проверке стиля:', styleError);
+            setError('Не удалось проверить стиль. Пожалуйста, попробуйте позже.');
+          }
+        }
+      } else if (paymentStatus === 'failed' || paymentStatus === 'not_found') {
         // Если не оплачено, получаем ссылку для оплаты
         try {
+          console.log('I am here');
           const link = await fetchPaymentLink();
+          console.log('Payment link is: ', link);
           setPaymentLink(link);
           setModalType('payment');
+          console.log('Payment modal is: ', modalType);
           setShowModal(true);
         } catch (paymentError) {
           console.error('Ошибка получения ссылки на оплату:', paymentError);
           setError('Не удалось получить ссылку на оплату. Пожалуйста, попробуйте позже.');
         }
-      } else if (error.response && error.response.status === 404) {
-        // Если необходимо загрузить фото
-        setModalType('upload');
+      } else if (paymentStatus === 'in_progress') {
+        // Если оплата в процессе, показываем соответствующее сообщение
+        setModalType('paymentProcessing');
         setShowModal(true);
-        setPhotoFile(null);
-      } else {
-        console.error('Ошибка при проверке стиля:', error);
-        setError('Не удалось проверить стиль. Пожалуйста, попробуйте позже.');
+        
+        // Запускаем поллинг для статусов "in_progress"
+        startPaymentStatusPolling();
+      } else if (paymentStatus === 'created_link') {
+        // Если ссылка создана, но оплата не начата, получаем ссылку для оплаты
+        try {
+          const link = await fetchPaymentLink();
+          setPaymentLink(link);
+          setModalType('payment');
+          setShowModal(true);
+          
+          // Запускаем поллинг для статуса "created_link"
+          startPaymentStatusPolling();
+        } catch (paymentError) {
+          console.error('Ошибка получения ссылки на оплату:', paymentError);
+          setError('Не удалось получить ссылку на оплату. Пожалуйста, попробуйте позже.');
+        }
+      }
+    } catch (error) {
+      // Если произошла ошибка при проверке статуса оплаты, пробуем проверить стиль напрямую
+      try {
+        const response = await api.get('/api/v1/style/info');
+        setStyleId(response.data.style_id);
+        setModalType('result');
+        setShowModal(true);
+      } catch (styleError) {
+        if (styleError.response && styleError.response.status === 403) {
+          // Если не оплачено, получаем ссылку для оплаты
+          try {
+            const link = await fetchPaymentLink();
+            setPaymentLink(link);
+            setModalType('payment');
+            setShowModal(true);
+          } catch (paymentError) {
+            console.error('Ошибка получения ссылки на оплату:', paymentError);
+            setError('Не удалось получить ссылку на оплату. Пожалуйста, попробуйте позже.');
+          }
+        } else if (styleError.response && styleError.response.status === 404) {
+          // Если необходимо загрузить фото
+          setModalType('upload');
+          setShowModal(true);
+          setPhotoFile(null);
+        } else {
+          console.error('Ошибка при проверке стиля:', styleError);
+          setError('Не удалось проверить стиль. Пожалуйста, попробуйте позже.');
+        }
       }
     } finally {
       setIsLoading(false);
     }
-  }, [fetchPaymentLink]);
+  }, [checkPaymentStatus, fetchPaymentLink, startPaymentStatusPolling]);
 
   // Выход из аккаунта
   const handleLogout = async () => {
@@ -184,10 +313,43 @@ const ProfilePage = () => {
       logout();
     }
   };
+  
+  // Проверяем параметр состояния после перенаправления с платежной страницы
+  // Размещаем этот useEffect после определения всех необходимых функций
+  useEffect(() => {
+    if (location.state && location.state.fromPayment) {
+      if (location.state.paymentStatus === 'ok') {
+        // Если оплата успешна, проверяем статус оплаты через API
+        handleCheckStyle();
+      } else if (location.state.paymentStatus === 'fail') {
+        // Если оплата не удалась, показываем сообщение об ошибке и предлагаем повторить
+        fetchPaymentLink()
+          .then(link => {
+            setPaymentLink(link);
+            setPaymentError('Оплата не была выполнена. Пожалуйста, попробуйте снова.');
+            setModalType('paymentFailed');
+            setShowModal(true);
+          })
+          .catch(error => {
+            console.error('Ошибка получения ссылки на оплату:', error);
+          });
+      }
+      
+      // Очищаем состояние, чтобы избежать повторного срабатывания при обновлении страницы
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, navigate, handleCheckStyle, fetchPaymentLink]);
 
   // Закрытие модального окна
   const closeModal = () => {
     setShowModal(false);
+    
+    // Если модальное окно закрывается, и это окно обработки платежа,
+    // то останавливаем поллинг
+    if ((modalType === 'paymentProcessing' || modalType === 'payment' || modalType === 'paymentFailed') && pollingInterval) {
+      clearInterval(pollingInterval);
+      setPollingInterval(null);
+    }
   };
 
   // Рендерим содержимое модального окна в зависимости от типа
@@ -204,10 +366,24 @@ const ProfilePage = () => {
                 onClick={() => {
                   // Открываем ссылку в новом окне
                   window.open(paymentLink, '_blank');
+                  
+                  // Запускаем поллинг статуса оплаты
+                  startPaymentStatusPolling();
                 }}
               >
                 Оплатить
               </button>
+              <button onClick={closeModal} className="btn btn-outline">Закрыть</button>
+            </div>
+          </div>
+        );
+      case 'paymentProcessing':
+        return (
+          <div className="modal-content-wrapper">
+            <h3 className="modal-title">Обработка оплаты</h3>
+            <p className="modal-text">Оплата находится в обработке. Пожалуйста, подождите.</p>
+            <div className="loading-spinner"></div>
+            <div className="modal-actions">
               <button onClick={closeModal} className="btn btn-outline">Закрыть</button>
             </div>
           </div>
@@ -223,6 +399,9 @@ const ProfilePage = () => {
                 onClick={() => {
                   // Открываем ссылку в новом окне
                   window.open(paymentLink, '_blank');
+                  
+                  // Запускаем поллинг статуса оплаты
+                  startPaymentStatusPolling();
                 }}
               >
                 Попробовать снова
