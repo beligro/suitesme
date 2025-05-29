@@ -1,58 +1,15 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import Header from './Header';
 import './Layout.css';
 
 const Layout = ({ children }) => {
-  const navigate = useNavigate();
-  const { isAuthenticated, logout } = useAuth();
-
-  const handleLogout = () => {
-    logout();
-  };
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="layout">
-      <header className="header">
-        <div className="container">
-          <div className="header-content">
-            <div className="logo" onClick={() => navigate('/')}>
-              <span className="logo-text">SuitesMe</span>
-            </div>
-            <nav className="nav">
-              <ul className="nav-list">
-                <li className="nav-item">
-                  <Link to="/" className="nav-link">Главная</Link>
-                </li>
-                {isAuthenticated ? (
-                  <>
-                    <li className="nav-item">
-                      <Link to="/profile" className="nav-link">Профиль</Link>
-                    </li>
-                    <li className="nav-item">
-                      <button 
-                        className="btn btn-outline nav-button"
-                        onClick={handleLogout}
-                      >
-                        Выйти
-                      </button>
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li className="nav-item">
-                      <Link to="/login" className="nav-link">Войти</Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link to="/register" className="btn btn-primary nav-button">Регистрация</Link>
-                    </li>
-                  </>
-                )}
-              </ul>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="main">
         <div className="container">
