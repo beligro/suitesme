@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchContent } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
+import HeroSection from './HeroSection';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -50,29 +51,7 @@ const HomePage = () => {
         </div>
       ) : (
         <>
-          <section className="hero">
-            <div className="hero-content">
-              <h1 className="hero-title">{content['hello_text']?.ru_value || 'Добро пожаловать в SuitesMe'}</h1>
-              <p className="hero-subtitle">Откройте свой уникальный стиль с помощью нашего сервиса</p>
-              
-              <div className="hero-buttons">
-                {isAuthenticated ? (
-                  <button className="btn btn-primary btn-lg" onClick={() => navigate('/profile')}>
-                    Мой профиль
-                  </button>
-                ) : (
-                  <>
-                    <button className="btn btn-primary btn-lg" onClick={() => navigate('/register')}>
-                      Начать сейчас
-                    </button>
-                    <button className="btn btn-outline btn-lg ml-md" onClick={() => navigate('/login')}>
-                      Войти
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </section>
+          <HeroSection />
 
           <section className="features">
             <h2 className="section-title">Как это работает</h2>
