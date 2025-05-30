@@ -8,61 +8,13 @@
   min-height: 100vh;
 }
 
-/* Header */
-.header {
-  background-color: var(--bg-primary);
-  box-shadow: var(--shadow-sm);
-  position: sticky;
-  top: 0;
-  z-index: var(--z-index-sticky);
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-md) 0;
-}
-
-.logo {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.logo-text {
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-.nav-list {
-  display: flex;
-  list-style: none;
-  align-items: center;
-  gap: var(--spacing-lg);
-}
-
-.nav-link {
-  color: var(--text-primary);
-  font-weight: 500;
-  transition: color var(--transition-fast) ease;
-  text-decoration: none;
-}
-
-.nav-link:hover {
-  color: var(--primary-color);
-  text-decoration: none;
-}
-
-.nav-button {
-  margin-left: var(--spacing-sm);
-}
+/* Header стили теперь в Header.module.css */
 
 /* Main content */
 .main {
   flex: 1;
-  padding: var(--spacing-xl) 0;
+  padding-top: 130px; /* Отступ для фиксированного header */
+  padding-bottom: var(--spacing-xl);
 }
 
 /* Footer */
@@ -139,15 +91,8 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: var(--spacing-md);
-  }
-  
-  .nav-list {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--spacing-md);
+  .main {
+    padding-top: 80px; /* Меньший отступ для мобильных */
   }
   
   .footer-content {
@@ -158,5 +103,11 @@
   .footer-links {
     flex-direction: column;
     gap: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding-top: 100px; /* Адаптивный отступ для очень маленьких экранов */
   }
 }

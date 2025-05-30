@@ -1,0 +1,286 @@
+/* Header.module.css */
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 130px;
+  background: linear-gradient(180deg, #031C2D 0%, rgba(141, 141, 141, 0) 100%);
+  backdrop-filter: blur(13.2px);
+  -webkit-backdrop-filter: blur(13.2px);
+}
+
+.container {
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 100%;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 140px;
+}
+
+/* Логотип */
+.logo {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.logo:hover {
+  opacity: 0.8;
+}
+
+.logoMne {
+  font-family: 'HeadingNow-96Bold', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.167;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.logoIdet {
+  font-family: 'HeadingNow-96Bold', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 21.74px;
+  line-height: 1.167;
+  color: #FFFFFF;
+  margin-left: 4px;
+  margin-top: 2px;
+}
+
+/* Навигация */
+.nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  margin-left: 60px;
+}
+
+.navList {
+  display: flex;
+  align-items: flex-end;
+  gap: 60px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navItem {
+  margin: 0;
+}
+
+.navLink {
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #FFFFFF;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+}
+
+.navLink:hover {
+  opacity: 0.7;
+}
+
+/* Секция авторизации */
+.authSection {
+  margin-left: 60px;
+}
+
+.loginButton {
+  width: 160px;
+  height: 60px;
+  background: transparent;
+  border: 1px solid #FFFFFF;
+  border-radius: 50px;
+  font-family: 'Unbounded', Arial, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.24;
+  letter-spacing: 4%;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0px 4px 28px 0px rgba(0, 0, 0, 0.13);
+}
+
+.loginButton:hover {
+  background: #C2CED8;
+  color: #1B3C4D;
+}
+
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profileLink {
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #FFFFFF;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.profileLink:hover {
+  opacity: 0.7;
+}
+
+.logoutButton {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid #FFFFFF;
+  border-radius: 25px;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logoutButton:hover {
+  background: #FFFFFF;
+  color: #031C2D;
+}
+
+/* Адаптивность */
+@media (max-width: 1440px) {
+  .headerContent {
+    padding: 0 80px;
+  }
+  
+  .navList {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .headerContent {
+    padding: 0 40px;
+  }
+  
+  .navList {
+    gap: 30px;
+  }
+  
+  .navLink {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 992px) {
+  .headerContent {
+    padding: 0 20px;
+  }
+  
+  .nav {
+    margin-left: 30px;
+  }
+  
+  .authSection {
+    margin-left: 30px;
+  }
+  
+  .navList {
+    gap: 20px;
+  }
+  
+  .loginButton {
+    width: 120px;
+    height: 50px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    height: 80px;
+  }
+  
+  .headerContent {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 20px;
+  }
+  
+  .logo {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 4px;
+  }
+  
+  .logoMne {
+    font-size: 20px;
+  }
+  
+  .logoIdet {
+    font-size: 18px;
+    margin-left: 0;
+    margin-top: 0;
+  }
+  
+  .nav {
+    margin-left: 0;
+    order: 3;
+  }
+  
+  .navList {
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .navLink {
+    font-size: 12px;
+  }
+  
+  .authSection {
+    margin-left: 0;
+    order: 2;
+  }
+  
+  .loginButton {
+    width: 100px;
+    height: 40px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    height: auto;
+    min-height: 80px;
+    padding: 10px 0;
+  }
+  
+  .navList {
+    display: none; /* Скрываем меню на очень маленьких экранах */
+  }
+  
+  .headerContent {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .nav {
+    display: none;
+  }
+}
