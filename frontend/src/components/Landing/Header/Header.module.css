@@ -1,0 +1,205 @@
+/* Header Component Styles */
+
+/* CSS Variables from Design System */
+:root {
+  --color-primary: #1B3C4D;
+  --color-secondary: #8296A6;
+  --color-white: #FFFFFF;
+  --color-background: #F7F7F7;
+  --font-heading: 'HeadingNow-96Bold', sans-serif;
+  --font-body: 'Montserrat', sans-serif;
+  --backdrop-blur: blur(19.1px);
+}
+
+/* Header Base Styles */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 62px;
+  background: linear-gradient(180deg, #031C2D 0%, rgba(141, 141, 141, 0) 100%);
+  backdrop-filter: var(--backdrop-blur);
+  z-index: 1000;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 20px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+/* Logo Styles */
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logoText {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 18.746px;
+  line-height: 1.167;
+  color: var(--color-white);
+  text-decoration: none;
+}
+
+/* Menu Button Styles */
+.menuButton {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 19.5px;
+  height: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.menuLine {
+  width: 100%;
+  height: 1.3px;
+  background-color: var(--color-white);
+  transition: all 0.3s ease;
+}
+
+.menuButton:hover .menuLine {
+  background-color: var(--color-secondary);
+}
+
+/* Mobile Menu Overlay */
+.mobileMenu {
+  position: fixed;
+  top: 62px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-secondary);
+  z-index: 999;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobileMenuContent {
+  padding: 40px 20px;
+  max-width: 360px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Navigation Styles */
+.navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.navLink {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-white);
+  text-decoration: none;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+.navLink:hover {
+  color: var(--color-primary);
+}
+
+/* Login Button */
+.loginButton {
+  width: 160px;
+  height: 60px;
+  background: transparent;
+  border: 1px solid var(--color-white);
+  border-radius: 50px;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.24;
+  letter-spacing: 4%;
+  text-transform: uppercase;
+  color: var(--color-white);
+  cursor: pointer;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  box-shadow: 0px 4px 28px rgba(0, 0, 0, 0.13);
+}
+
+.loginButton:hover {
+  background: var(--color-white);
+  color: var(--color-primary);
+}
+
+/* Tablet Styles */
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+    padding: 0 40px;
+  }
+}
+
+/* Desktop Styles */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1920px;
+    padding: 0 80px;
+  }
+  
+  .header {
+    height: 130px;
+  }
+  
+  .logoText {
+    font-size: 24px;
+  }
+  
+  /* Desktop Navigation - показываем навигацию вместо кнопки меню */
+  .menuButton {
+    display: none;
+  }
+  
+  .navigation {
+    display: flex;
+    flex-direction: row;
+    gap: 60px;
+    margin-right: 40px;
+  }
+  
+  .mobileMenu {
+    position: static;
+    background: transparent;
+    display: flex;
+    align-items: center;
+  }
+  
+  .mobileMenuContent {
+    padding: 0;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 40px;
+  }
+}

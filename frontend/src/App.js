@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './components/HomePage';
+import Landing from './components/Landing/Landing';
 import AuthPage from './components/AuthPage';
 import ProfilePage from './components/ProfilePage';
 import RegisterPage from './components/RegisterPage';
@@ -31,6 +32,7 @@ const App = () => {
       <Routes>
         {/* Публичные маршруты */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify_email" element={<VerifyEmailPage />} />

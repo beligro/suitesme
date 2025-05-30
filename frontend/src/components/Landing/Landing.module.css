@@ -1,0 +1,20 @@
+/* Landing Page Styles */
+.landing {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #F7F7F7;
+  overflow-x: hidden;
+}
+
+/* Mobile First Approach */
+@media (min-width: 768px) {
+  .landing {
+    /* Tablet styles will be added later */
+  }
+}
+
+@media (min-width: 1200px) {
+  .landing {
+    /* Desktop styles will be added later */
+  }
+}

@@ -1,0 +1,20 @@
+.hero {
+  min-height: 100vh;
+  padding-top: 62px;
+  background: #8296A6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.container h1 {
+  color: white;
+  font-family: 'Unbounded', sans-serif;
+}

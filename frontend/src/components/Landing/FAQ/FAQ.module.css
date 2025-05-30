@@ -1,0 +1,14 @@
+.faq {
+  min-height: 50vh;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  text-align: center;
+}
