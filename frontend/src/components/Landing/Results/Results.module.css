@@ -1,0 +1,156 @@
+/* Results section styles */
+.results {
+  background-color: #F7F7F7;
+  padding: 60px 0;
+  position: relative;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.heading {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #1B3C4D;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+}
+
+.resultCard {
+  background-color: #FFFFFF;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.resultCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.resultImage {
+  height: 200px;
+  background-color: #C2CED8;
+  background-image: url('https://via.placeholder.com/400x200/8296A6/FFFFFF?text=Before+and+After');
+  background-size: cover;
+  background-position: center;
+}
+
+.resultInfo {
+  padding: 20px;
+}
+
+.resultTitle {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.2;
+  color: #1B3C4D;
+  margin-bottom: 10px;
+}
+
+.resultDescription {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #3F4E56;
+  margin-bottom: 15px;
+  font-style: italic;
+}
+
+.resultType {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #1B3C4D;
+  background-color: #F0F0F0;
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+/* Media queries */
+@media (min-width: 768px) {
+  .results {
+    padding: 100px 0;
+  }
+
+  .container {
+    padding: 0 40px;
+  }
+
+  .heading {
+    font-size: 40px;
+    margin-bottom: 60px;
+    text-align: left;
+  }
+
+  .resultsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+  }
+
+  .resultCard {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .resultImage {
+    width: 40%;
+    height: auto;
+  }
+
+  .resultInfo {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 1024px) {
+  .resultsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .resultCard {
+    flex-direction: column;
+  }
+
+  .resultImage {
+    width: 100%;
+    height: 200px;
+  }
+
+  .resultInfo {
+    width: 100%;
+  }
+
+  .resultTitle {
+    font-size: 18px;
+  }
+
+  .resultDescription {
+    font-size: 16px;
+  }
+
+  .resultType {
+    font-size: 14px;
+  }
+}

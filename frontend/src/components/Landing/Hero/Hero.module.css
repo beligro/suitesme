@@ -1,0 +1,147 @@
+/* Hero section styles */
+.hero {
+  background-color: #8296A6;
+  min-height: 100vh;
+  padding-top: 62px; /* Header height */
+  position: relative;
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 62px);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 60px;
+  z-index: 2;
+  max-width: 100%;
+}
+
+.heading {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 300;
+  font-size: 26px;
+  line-height: 1.08;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  max-width: 330px;
+}
+
+.subheading {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 1.2;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  max-width: 320px;
+}
+
+.ctaButton {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 300;
+  font-size: 11px;
+  line-height: 1.24;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  background-color: #1B3C4D;
+  border: none;
+  border-radius: 50px;
+  padding: 18px 28px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
+  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.13);
+  backdrop-filter: blur(12px);
+}
+
+.ctaButton:hover {
+  background-color: rgba(253, 253, 253, 0.44);
+  color: #1B3C4D;
+}
+
+.imageContainer {
+  position: relative;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.phoneImage {
+  background-image: url('https://via.placeholder.com/150x300/1B3C4D/FFFFFF?text=Phone+Mockup');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 150px;
+  height: 300px;
+  position: relative;
+  z-index: 2;
+}
+
+.backgroundCircle {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background-color: #758B9C;
+  filter: blur(150px);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+/* Media queries */
+@media (min-width: 768px) {
+  .container {
+    flex-direction: row;
+    align-items: center;
+    padding: 0 40px;
+  }
+
+  .content {
+    flex: 1;
+    padding-top: 0;
+  }
+
+  .heading {
+    font-size: 74px;
+    max-width: 545px;
+  }
+
+  .subheading {
+    font-size: 16px;
+    max-width: 500px;
+  }
+
+  .ctaButton {
+    font-size: 16px;
+    padding: 25px 50px;
+  }
+
+  .imageContainer {
+    flex: 1;
+  }
+
+  .phoneImage {
+    width: 250px;
+    height: 500px;
+  }
+
+  .backgroundCircle {
+    width: 600px;
+    height: 600px;
+  }
+}

@@ -1,0 +1,230 @@
+/* How It Works section styles */
+.howItWorks {
+  background-color: #F7F7F7;
+  padding: 60px 0;
+  position: relative;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.heading {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #1B3C4D;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.textContent {
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.description {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 200;
+  font-size: 27px;
+  line-height: 1.11;
+  text-transform: uppercase;
+  color: #3F4E56;
+  text-align: justify;
+  max-width: 323px;
+  margin: 0 auto;
+}
+
+.bonusInfo {
+  background-color: #F7F7F7;
+  padding: 10px 16px;
+  border-radius: 15px;
+  position: relative;
+  max-width: 324px;
+  margin: 0 auto;
+}
+
+.bonusText {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: #1B3C4D;
+  text-align: center;
+}
+
+.arrowIcons {
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+}
+
+.leftArrow, .rightArrow {
+  width: 12px;
+  height: 45px;
+  position: relative;
+}
+
+.leftArrow:before, .rightArrow:before {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: 45px;
+  background-color: #1B3C4D;
+  transform: rotate(45deg);
+  transform-origin: bottom;
+}
+
+.leftArrow:before {
+  left: 0;
+}
+
+.rightArrow:before {
+  right: 0;
+  transform: rotate(-45deg);
+}
+
+.imageSection {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.phoneContainer {
+  width: 150px;
+  height: 300px;
+  position: relative;
+  z-index: 2;
+}
+
+.phoneImage {
+  width: 100%;
+  height: 100%;
+  background-image: url('https://via.placeholder.com/150x300/1B3C4D/FFFFFF?text=Phone+Screen');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+}
+
+.pricingCircle {
+  position: absolute;
+  right: 20px;
+  bottom: -40px;
+  width: 164px;
+  height: 110px;
+  background-color: #C2CED8;
+  border-radius: 50%;
+  filter: blur(60px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+.pricingLabel {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: #1B3C4D;
+  margin-bottom: 5px;
+}
+
+.price {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1;
+  color: #1B3C4D;
+}
+
+/* Media queries */
+@media (min-width: 768px) {
+  .howItWorks {
+    padding: 100px 0;
+  }
+
+  .container {
+    padding: 0 40px;
+  }
+
+  .heading {
+    font-size: 40px;
+    margin-bottom: 60px;
+    text-align: left;
+  }
+
+  .content {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 60px;
+  }
+
+  .textContent {
+    flex: 1;
+    max-width: 600px;
+  }
+
+  .description {
+    font-size: 84px;
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .bonusInfo {
+    max-width: 100%;
+    padding: 32px 26px;
+  }
+
+  .bonusText {
+    font-size: 16px;
+  }
+
+  .imageSection {
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .phoneContainer {
+    width: 250px;
+    height: 500px;
+  }
+
+  .pricingCircle {
+    width: 300px;
+    height: 200px;
+    right: auto;
+    left: 50px;
+    bottom: 50px;
+  }
+
+  .pricingLabel {
+    font-size: 16px;
+  }
+
+  .price {
+    font-size: 40px;
+  }
+}

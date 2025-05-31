@@ -1,0 +1,58 @@
+/* Main landing container */
+.landing {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #F7F7F7;
+  color: #3F4E56;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* For importing Unbounded font */
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap');
+
+/* Custom properties for the landing page */
+:root {
+  /* Colors */
+  --landing-primary: #1B3C4D;
+  --landing-secondary: #8296A6;
+  --landing-background: #F7F7F7;
+  --landing-white: #FFFFFF;
+  --landing-text: #3F4E56;
+  
+  /* Typography */
+  --landing-heading-font: 'Unbounded', sans-serif;
+  --landing-body-font: 'Montserrat', sans-serif;
+  
+  /* Spacing */
+  --landing-spacing-sm: 16px;
+  --landing-spacing-md: 24px;
+  --landing-spacing-lg: 32px;
+  --landing-spacing-xl: 60px;
+  
+  /* Border radius */
+  --landing-border-radius-sm: 15px;
+  --landing-border-radius-md: 30px;
+  --landing-border-radius-lg: 50px;
+}
+
+/* Responsive container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Media queries */
+@media (min-width: 768px) {
+  .container {
+    padding: 0 40px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 0 60px;
+  }
+}

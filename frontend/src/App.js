@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './components/HomePage';
+import Landing from './components/Landing/Landing';
 import AuthPage from './components/AuthPage';
 import ProfilePage from './components/ProfilePage';
 import RegisterPage from './components/RegisterPage';
@@ -27,8 +28,12 @@ const App = () => {
   }, [handleNavigation]);
 
   return (
-    <Layout>
-      <Routes>
+    <Routes>
+      {/* Landing page route - outside of Layout */}
+      <Route path="/landing" element={<Landing />} />
+      
+      {/* Routes with Layout */}
+      <Route element={<Layout />}>
         {/* Публичные маршруты */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<AuthPage />} />
@@ -42,8 +47,8 @@ const App = () => {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/payment" element={<PaymentRedirect />} />
         </Route>
-      </Routes>
-    </Layout>
+      </Route>
+    </Routes>
   );
 };
 

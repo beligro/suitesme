@@ -1,0 +1,135 @@
+/* FAQ section styles */
+.faq {
+  background-color: #F7F7F7;
+  padding: 60px 0;
+  position: relative;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.heading {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #1B3C4D;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faqItem {
+  background-color: #FFFFFF;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+.faqItem:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.faqQuestion {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.faqQuestion:hover {
+  background-color: #F0F0F0;
+}
+
+.faqQuestion h3 {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.2;
+  color: #1B3C4D;
+  margin: 0;
+}
+
+.faqToggle {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.faqToggle span {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: #1B3C4D;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  transition: transform 0.3s ease;
+}
+
+.faqToggle span:last-child {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.open .faqToggle span:last-child {
+  transform: translateY(-50%) rotate(0);
+}
+
+.faqAnswer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.open .faqAnswer {
+  max-height: 500px;
+  padding: 0 20px 20px;
+}
+
+.faqAnswer p {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #3F4E56;
+  margin: 0;
+}
+
+/* Media queries */
+@media (min-width: 768px) {
+  .faq {
+    padding: 100px 0;
+  }
+
+  .container {
+    padding: 0 40px;
+  }
+
+  .heading {
+    font-size: 40px;
+    margin-bottom: 60px;
+    text-align: left;
+  }
+
+  .faqQuestion h3 {
+    font-size: 18px;
+  }
+
+  .faqAnswer p {
+    font-size: 16px;
+  }
+}

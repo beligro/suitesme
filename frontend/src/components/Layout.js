@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './Layout.css';
 
@@ -56,7 +56,7 @@ const Layout = ({ children }) => {
 
       <main className="main">
         <div className="container">
-          {children}
+          <Outlet />
         </div>
       </main>
 

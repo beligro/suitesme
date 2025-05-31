@@ -1,0 +1,139 @@
+/* Header styles */
+.header {
+  background: linear-gradient(to bottom, #031C2D, rgba(141, 141, 141, 0));
+  height: 62px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  backdrop-filter: blur(19.1px);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'HeadingNow-96Bold', 'Unbounded', sans-serif;
+  font-weight: 700;
+  font-size: 18.75px;
+  color: #FFFFFF;
+  line-height: 1.17;
+}
+
+.menuIcon {
+  width: 24px;
+  height: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.menuIcon span {
+  display: block;
+  width: 100%;
+  height: 1.3px;
+  background-color: #FFFFFF;
+  transition: transform 0.3s ease;
+}
+
+/* Mobile menu */
+.mobileMenu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #8296A6;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.closeIcon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.closeIcon span {
+  position: absolute;
+  width: 100%;
+  height: 1.3px;
+  background-color: #FFFFFF;
+}
+
+.closeIcon span:first-child {
+  transform: rotate(45deg);
+}
+
+.closeIcon span:last-child {
+  transform: rotate(-45deg);
+}
+
+.menuItems {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 30px;
+}
+
+.menuItems li {
+  margin-bottom: 20px;
+}
+
+.menuItems a {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #FFFFFF;
+  text-decoration: none;
+  line-height: 1.6;
+}
+
+.loginButton {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #FFFFFF;
+  background: transparent;
+  border: 1px solid #FFFFFF;
+  border-radius: 50px;
+  padding: 20px 43px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 30px;
+  align-self: center;
+}
+
+.loginButton:hover {
+  background-color: #C2CED8;
+  color: #1B3C4D;
+}
+
+/* Media queries */
+@media (min-width: 768px) {
+  .container {
+    padding: 0 40px;
+  }
+}
