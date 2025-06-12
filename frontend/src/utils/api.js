@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 // Константы для API
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://51.250.84.195:8080';
+const API_BASE_URL = import.meta.env.API_URL || 'http://51.250.84.195:8080';
 const API_TIMEOUT = 15000; // 15 секунд
 
 // Создаем основной экземпляр axios

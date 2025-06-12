@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { validateForm } from '../utils/validation';
+import { validateForm } from '../utils/validation.js';
 
 /**
  * Хук для управления формами с валидацией
