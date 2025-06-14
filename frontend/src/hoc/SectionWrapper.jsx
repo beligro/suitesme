@@ -10,11 +10,11 @@ const SectionWrapper = (Component , idName)=>
         initial="hidden"
         whileInView='show'
         viewport={{once:true , amount:0.25}}
-        className={`sm:px-16 px-6 sm:py-16 py-10 max-w-7xl mx-auto relative z-0`}
+        className={``}
         
         >
 
-            <span className="hah-span" id={idName}>
+            <span className="hah-span h-[0.05px]" id={idName}>
                 &nbsp;
             </span>
             <Component/>
