@@ -25,7 +25,7 @@ const Flower = () => {
                     <p className="font-unbounded text-[30px] line-through">7980 ₽</p>
                 </div>
                 <div className="w-full flex justify-center mt-32 pb-5">
-                    <div className="w-[240px] h-[50px] text-[14px] font-light flex items-center justify-center rounded-full bg-[#23274B] text-white uppercase cursor-pointer cursor-pointer hover:shadow-xl transition duration-200">
+                    <div className="w-[240px] h-[50px] text-[14px] font-light flex items-center justify-center rounded-full bg-[#1B3C4D] text-white uppercase cursor-pointer cursor-pointer hover:shadow-xl transition duration-200">
                         начать анализ
                     </div>
                 </div>
