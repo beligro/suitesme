@@ -15,6 +15,18 @@ const TopMain = () => {
         return () => clearInterval(interval);
     }, []);
 
+    React.useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [isOpen]);
+
     return (
         <div className="w-full lg:h-auto min-h-screen relative bg-white">
             <img className="lg:w-full h-screen object-cover lg:ml-[10%] z-0 top-0 lg:block hidden" src="/photos/main/main-top.webp" alt="" />
@@ -68,20 +80,19 @@ const TopMain = () => {
                     <img src="/photos/main/MNEIDET.svg" alt="" className="mx-auto h-[20px]"/>
                     <img src="/photos/main/cross-svgrepo-com.svg" alt="" className="absolute right-5 top-3 w-[36px] cursor-pointer" onClick={() => setIsOpen(!isOpen)}/>
                 </div>
-                <div className="w-full flex flex-col items-center justify-center">
-                    <div className="flex flex-col gap-5 sm:mt-[7%] mt-[20%] text-center">
-                        <a className="font-montserrat font-medium text-[16px] text-white whitespace-nowrap cursor-pointer" href='#why-main'>Преимущества</a>
-                        <a className="font-montserrat font-medium text-[16px] text-white whitespace-nowrap cursor-pointer" href='#about'>О сервисе</a>
-                        <a className="font-montserrat font-medium text-[16px] text-white whitespace-nowrap cursor-pointer"  href='#questions'>Ответы на вопросы</a>
-                        <a className="font-montserrat font-medium text-[16px] text-white whitespace-nowrap cursor-pointer" href='#examples' >Результаты</a>
+                <div className="w-full flex flex-col items-center justify-center h-full gap-14">
+                    <div className="flex flex-col gap-5 text-center">
+                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer" href='#why-main'>Преимущества</a>
+                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer" href='#about'>О сервисе</a>
+                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer"  href='#questions'>Ответы на вопросы</a>
+                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer" href='#examples'>Результаты</a>
                     </div>
                     <div
-                        onClick={() => nav("/login")}
-                        className="flex w-full flex-col gap-3 items-center justify-center sm:mt-[7%] mt-[20%]">
-                        <div className="w-16 h-16 border rounded-full border-white flex items-center justify-center">
-                            <img src="/photos/main/Profile.svg" className="w-8 cursor-pointer" alt=""/>
+                        className="flex w-full flex-col gap-3 items-center justify-center">
+                        <div className="w-12 h-12 border rounded-full border-white flex items-center justify-center cursor-pointer" onClick={() => nav("/login")}>
+                            <img src="/photos/main/Profile.svg" className="w-6" alt=""/>
                         </div>
-                        <p className="text-center font-montserrat font-light text-[20px] text-white cursor-pointer" >Войти</p>
+                        <p className="text-center font-montserrat font-light text-[16px] text-white cursor-pointer" onClick={() => nav("/login")}>Войти</p>
                     </div>
                 </div>
             </div>

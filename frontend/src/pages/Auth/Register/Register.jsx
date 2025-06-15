@@ -205,8 +205,8 @@ const Register = () => {
                         <p className="uppercase font-unbounded font-light text-white">зарегистрироваться</p>
                     </button>
                     <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">уже есть аккаунт? <span className="cursor-pointer text-black" onClick={() => {nav("/login")}}>Войти</span> </div>
-                    <div className="w-full flex justify-center">
-                        <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt=""/>
+                    <div className="w-full hidden justify-center sm:flex">
+                        <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt="" onClick={() => {nav("/")}}/>
                     </div>
                 </div>
             </div>
