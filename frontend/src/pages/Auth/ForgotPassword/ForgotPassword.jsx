@@ -165,13 +165,14 @@ const ForgotPassword = () => {
                             </div>
                             <div className="w-full flex flex-col gap-10">
                                 <button
-                                    className="w-full bg-[#1B3C4D] py-5 rounded-2xl"
+                                    className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32"
                                     onClick={() => {onSubmit()}}
                                 >
                                     <p className="uppercase font-unbounded font-light text-white">отправить</p>
                                 </button>
-                                <div className="w-full flex justify-center">
-                                    <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt=""/>
+                                <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">ЕЩЕ НЕТ аккаунтА? <span className="cursor-pointer text-black" onClick={() => {nav("/register")}}> ЗАРЕГИСТРИРОВАТЬСЯ</span> </div>
+                                <div className="w-full hidden justify-center sm:flex">
+                                    <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt="" onClick={() => {nav("/")}}/>
                                 </div>
                             </div>
                         </div>
@@ -220,13 +221,14 @@ const ForgotPassword = () => {
                                 </p>
 
                                 <button
-                                    className="w-full bg-[#1B3C4D] py-5 rounded-2xl"
+                                    className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32"
                                     onClick={() => {setStep(2)}}
                                 >
                                     <p className="uppercase font-unbounded font-light text-white">отправить</p>
                                 </button>
-                                <div className="w-full flex justify-center">
-                                    <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt=""/>
+                                <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">ЕЩЕ НЕТ аккаунтА? <span className="cursor-pointer text-black" onClick={() => {nav("/register")}}> ЗАРЕГИСТРИРОВАТЬСЯ</span> </div>
+                                <div className="w-full hidden justify-center sm:flex">
+                                    <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt="" onClick={() => {nav("/")}}/>
                                 </div>
                             </div>
                         </div>
@@ -272,14 +274,15 @@ const ForgotPassword = () => {
                             </div>
                             <div className="w-full flex flex-col gap-10">
                                 <button
-                                    className="w-full bg-[#1B3C4D] py-5 rounded-2xl"
+                                    className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32"
                                     onClick={handlePasswordSubmit}
                                     disabled={isPasswordSubmitting}
                                 >
                                     <p className="uppercase font-unbounded font-light text-white">отправить</p>
                                 </button>
-                                <div className="w-full flex justify-center">
-                                    <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt=""/>
+                                <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">ЕЩЕ НЕТ аккаунтА? <span className="cursor-pointer text-black" onClick={() => {nav("/register")}}> ЗАРЕГИСТРИРОВАТЬСЯ</span> </div>
+                                <div className="w-full hidden justify-center sm:flex">
+                                    <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt="" onClick={() => {nav("/")}}/>
                                 </div>
                             </div>
                         </div>
@@ -297,10 +300,11 @@ const ForgotPassword = () => {
                             </div>
                             <div className="w-full flex flex-col gap-10">
                                 <button className="w-full bg-[#1B3C4D] py-5 rounded-2xl" onClick={() => {nav("/")}}>
-                                    <p className="uppercase font-unbounded font-light text-white">Вернуться ко входу</p>
+                                    <p className="uppercase font-unbounded font-light text-white mb-32">Вернуться ко входу</p>
                                 </button>
-                                <div className="w-full flex justify-center">
-                                    <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt=""/>
+                                <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">ЕЩЕ НЕТ аккаунтА? <span className="cursor-pointer text-black" onClick={() => {nav("/register")}}> ЗАРЕГИСТРИРОВАТЬСЯ</span> </div>
+                                <div className="w-full hidden justify-center sm:flex">
+                                    <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt="" onClick={() => {nav("/")}}/>
                                 </div>
                             </div>
                         </div>
