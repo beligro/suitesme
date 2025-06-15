@@ -16,10 +16,10 @@ const Footer = () => {
                 </div>
                 <div className="flex flex-col lg:justify-between gap-5 lg:min-h-[250px]">
                     <div className="flex flex-col gap-2">
-                        <p className="font-montserrat  text-[16px] font-light cursor-pointer lg:text-left text-center">Преимущества</p>
-                        <p className="font-montserrat  text-[16px] font-light cursor-pointer lg:text-left text-center">О сервисе</p>
-                        <p className="font-montserrat  text-[16px] font-light cursor-pointer lg:text-left text-center">Ответы на вопросы</p>
-                        <p className="font-montserrat  text-[16px] font-light cursor-pointer lg:text-left text-center">Результаты</p>
+                        <a className="font-montserrat  text-[16px] font-light cursor-pointer lg:text-left text-center" href='#why-main'>Преимущества</a>
+                        <a className="font-montserrat  text-[16px] font-light cursor-pointer lg:text-left text-center" href='#about'>О сервисе</a>
+                        <a className="font-montserrat  text-[16px] font-light cursor-pointer lg:text-left text-center" href='#questions'>Ответы на вопросы</a>
+                        <a className="font-montserrat  text-[16px] font-light cursor-pointer lg:text-left text-center" href='#examples'>Результаты</a>
                     </div>
                     <div className="flex flex-row items-center lg:justify-end justify-center gap-5">
                         <img src="/photos/main/TG.png" alt="" />

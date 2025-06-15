@@ -12,45 +12,55 @@ const Carusel2 = () => {
                 </p>
             </div>
 
-            <div className="w-full pb-32 overflow-hidden">
-                <div
-                    className="flex"
-                    style={{
-                        width: '200%',
-                        animation: 'scrollLeft 30s linear infinite',
-                    }}
-                >
-                    {[1, 2, 3].map((n) => (
-                        <img
-                            key={`a-${n}`}
-                            className="h-80 lg:w-[100vw] w-[120vw] object-cover"
-                            src="/photos/main/Circulation.png"
-                            alt=""
-                        />
-                    ))}
-                    {[1, 2, 3].map((n) => (
-                        <img
-                            key={`b-${n}`}
-                            className="lg:h-80 lg:w-[100vw] h-auto object-cover"
-                            src="/photos/main/Circulation.png"
-                            alt=""
-                        />
-                    ))}
+            <div className="w-full pb-32 overflow-hidden relative">
+                <div className="flex w-max">
+                    <div
+                        className="flex"
+                        style={{
+                            animation: 'scrollLeft 30s linear infinite',
+                        }}
+                    >
+                        {[1, 2, 3, 4, 5, 6].map((n) => (
+                            <img
+                                key={`img-${n}`}
+                                className="h-80 w-auto object-cover"
+                                src="/photos/main/Circulation.png"
+                                alt="Fashion style"
+                                loading="lazy"
+                            />
+                        ))}
+                    </div>
+                    <div
+                        className="flex"
+                        style={{
+                            animation: 'scrollLeft 30s linear infinite',
+                        }}
+                    >
+                        {[1, 2, 3, 4, 5, 6].map((n) => (
+                            <img
+                                key={`img-clone-${n}`}
+                                className="h-80 w-auto object-cover"
+                                src="/photos/main/Circulation.png"
+                                alt="Fashion style"
+                                loading="lazy"
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
 
             <style>{`
-        @keyframes scrollLeft {
-          0% {
-            transform: translateX(0%);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-      `}</style>
+                @keyframes scrollLeft {
+                    0% {
+                        transform: translateX(0);
+                    }
+                    100% {
+                        transform: translateX(-50%);
+                    }
+                }
+            `}</style>
         </div>
     );
 };
 
-export default SectionWrapper(Carusel2 , 'examples');
+export default SectionWrapper(Carusel2, 'examples');
