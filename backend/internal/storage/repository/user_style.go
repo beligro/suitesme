@@ -16,11 +16,12 @@ func NewUserStyleRepository(db *gorm.DB) *UserStyleRepository {
 }
 
 func (repo *UserStyleRepository) Get(userId uuid.UUID) (string, error) {
-	user := &models.DbUserStyle{UserId: userId}
+	var userStyle models.DbUserStyle
 
-	result := repo.db.First(user)
+	// Order by created_at desc to get the latest style
+	result := repo.db.Where("user_id = ?", userId).Order("created_at desc").First(&userStyle)
 
-	return user.StyleId, result.Error
+	return userStyle.StyleId, result.Error
 }
 
 func (repository *UserStyleRepository) Create(userStyle *models.DbUserStyle) {

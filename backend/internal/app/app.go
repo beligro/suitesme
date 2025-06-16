@@ -9,6 +9,7 @@ import (
 	admin_auth "suitesme/internal/handlers/admin/auth"
 	"suitesme/internal/handlers/admin/v1/content"
 	"suitesme/internal/handlers/admin/v1/settings"
+	"suitesme/internal/handlers/admin/v1/styles"
 	"suitesme/internal/handlers/api/v1/auth"
 	api_content "suitesme/internal/handlers/api/v1/content"
 	"suitesme/internal/handlers/api/v1/payment"
@@ -92,6 +93,7 @@ func Run() {
 	styleController := style.NewStyleController(&logger, storage, cfg, s3Client)
 	contentController := content.NewContentController(&logger, storage, cfg)
 	settingsController := settings.NewSettingsController(&logger, storage, cfg)
+	stylesController := styles.NewStylesController(&logger, storage, cfg, s3Client)
 	adminAuthController := admin_auth.NewAdminAuthController(&logger, storage, cfg)
 	apiContentController := api_content.NewApiContentController(&logger, storage, cfg, webContentCache)
 
@@ -103,7 +105,7 @@ func Run() {
 	e.Use(middleware.Recover())
 	e.Use(TraceIdMiddleware)
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://51.250.84.195:3000", "http://51.250.84.195", "http://51.250.84.195:80"},
+		AllowOrigins: []string{"http://51.250.84.195:3000", "http://51.250.84.195", "http://51.250.84.195:80", "http://localhost:5173", "http://localhost", "localhost:5173"},
 		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 	}))
@@ -165,6 +167,12 @@ func Run() {
 	adminV1.PUT("/settings/:id", settingsController.Put)
 	adminV1.DELETE("/settings/:id", settingsController.Delete)
 	adminV1.POST("/settings", settingsController.Post)
+
+	adminV1.GET("/styles", stylesController.List)
+	adminV1.GET("/styles/:id", stylesController.Get)
+	adminV1.PUT("/styles/:id", stylesController.Put)
+	adminV1.DELETE("/styles/:id", stylesController.Delete)
+	adminV1.POST("/styles", stylesController.Post)
 
 	adminAuth := adminRoutes.Group("/auth")
 	adminAuth.POST("/login", adminAuthController.Login)

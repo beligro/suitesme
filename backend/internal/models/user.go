@@ -17,6 +17,7 @@ type DbUser struct {
 	BirthDate          string    `pg:"birth_date" gorm:"type:varchar(10);not null"`
 	VerificationCode   string    `pg:"verification_code"`
 	IsVerified         bool      `pg:"is_verified" gorm:"not null;default:false"`
+	IsAdmin            bool      `pg:"is_admin" gorm:"not null;default:false"`
 	PasswordResetToken string    `pg:"password_reset_token"`
 	PasswordResetAt    time.Time `pg:"password_reset_at"`
 	AmocrmLeadId       int       `pg:"amocrm_lead_id"`
