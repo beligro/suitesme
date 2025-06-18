@@ -16,9 +16,9 @@ func NewPaymentsRepository(db *gorm.DB) *PaymentsRepository {
 }
 
 func (repo *PaymentsRepository) Get(userId uuid.UUID) (*models.DbPayments, error) {
-	payment := &models.DbPayments{UserId: userId}
+	payment := &models.DbPayments{}
 
-	err := repo.db.First(payment).Error
+	err := repo.db.Model(&models.DbPayments{}).Where("user_id = ?", userId).First(payment).Error
 
 	return payment, err
 }

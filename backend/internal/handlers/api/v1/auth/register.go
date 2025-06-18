@@ -75,9 +75,28 @@ func (ctr AuthController) Register(ctx echo.Context) error {
 
 	userId := ctr.storage.User.Create(newUser)
 
-	msg := []byte("Verification code is: " + verificationCode)
-	err = sender.SendEmail(request.Email, msg, ctr.config)
+	// Create a better formatted email with HTML content
+	plainText := "Your verification code is: " + verificationCode + "\n\nThank you for registering with SuitesMe!"
+	htmlContent := "<html><body>" +
+		"<h2>Welcome to SuitesMe!</h2>" +
+		"<p>Thank you for registering. Please use the verification code below to complete your registration:</p>" +
+		"<div style='background-color: #f5f5f5; padding: 10px; margin: 20px 0; font-size: 18px; font-weight: bold; text-align: center;'>" +
+		verificationCode +
+		"</div>" +
+		"<p>If you didn't request this verification code, please ignore this email.</p>" +
+		"</body></html>"
 
+	// Create email message
+	emailMsg := sender.EmailMessage{
+		From:        ctr.config.EmailSendFrom,
+		To:          request.Email,
+		Subject:     "Welcome to SuitesMe - Verify Your Account",
+		PlainText:   plainText,
+		HTMLContent: htmlContent,
+	}
+
+	// Send the email
+	err = sender.SendFormattedEmail(request.Email, emailMsg, ctr.config)
 	if err != nil {
 		ctr.logger.Error(err.Error())
 		return myerrors.GetHttpErrorByCode(myerrors.SendingEmailFailed, ctx)

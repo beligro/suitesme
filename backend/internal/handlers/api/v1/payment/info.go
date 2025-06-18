@@ -53,6 +53,10 @@ func (ctr PaymentController) Info(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
 	}
 
+	if user.IsAdmin {
+		return ctx.JSON(http.StatusOK, PaymentInfoResponse{Status: models.Paid})
+	}
+
 	activePayment, err := ctr.storage.Payments.Get(parsedUserId)
 	if err != nil || activePayment == nil {
 		ctr.logger.Info("Not found payment")
@@ -61,7 +65,7 @@ func (ctr PaymentController) Info(ctx echo.Context) error {
 
 	if (activePayment.Status == models.InProgress || activePayment.Status == models.CreatedLink) && int(time.Since(activePayment.UpdatedAt).Minutes()) >= 10 {
 		ctr.logger.Info("Expired link")
-		return ctx.JSON(http.StatusOK, PaymentInfoResponse{Status: models.Failed})
+		return ctx.JSON(http.StatusOK, PaymentInfoResponse{Status: models.NotFound})
 	}
 
 	return ctx.JSON(http.StatusOK, PaymentInfoResponse{Status: activePayment.Status})

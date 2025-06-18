@@ -83,9 +83,13 @@ func TestUserRepository_Get_Success(t *testing.T) {
 	passwordHash := "hashed_password"
 	isVerified := true
 	birthDate := "1990-01-01"
+	createdAt := time.Now()
+	updatedAt := time.Now()
+	var deletedAt gorm.DeletedAt
 
-	rows := sqlmock.NewRows([]string{"id", "email", "first_name", "last_name", "password_hash", "is_verified", "birth_date"}).
-		AddRow(userId, email, firstName, lastName, passwordHash, isVerified, birthDate)
+	// Include gorm.Model fields (ID, CreatedAt, UpdatedAt, DeletedAt)
+	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "email", "first_name", "last_name", "password_hash", "is_verified", "birth_date"}).
+		AddRow(userId, createdAt, updatedAt, deletedAt, email, firstName, lastName, passwordHash, isVerified, birthDate)
 
 	// Using simplified SQL query expectation
 	mock.ExpectQuery(`SELECT(.*)`).
@@ -134,9 +138,13 @@ func TestUserRepository_GetForPasswordReset_Success(t *testing.T) {
 	passwordResetToken := "reset_token"
 	email := "test@example.com"
 	passwordResetAt := time.Now().Add(1 * time.Hour)
+	createdAt := time.Now()
+	updatedAt := time.Now()
+	var deletedAt gorm.DeletedAt
 
-	rows := sqlmock.NewRows([]string{"id", "email", "password_reset_token", "password_reset_at"}).
-		AddRow(userId, email, passwordResetToken, passwordResetAt)
+	// Include gorm.Model fields (ID, CreatedAt, UpdatedAt, DeletedAt)
+	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "email", "password_reset_token", "password_reset_at"}).
+		AddRow(userId, createdAt, updatedAt, deletedAt, email, passwordResetToken, passwordResetAt)
 
 	// Using simplified SQL query expectation
 	mock.ExpectQuery(`SELECT(.*)`).
@@ -181,9 +189,13 @@ func TestUserRepository_GetByEmail_Success(t *testing.T) {
 	email := "test@example.com"
 	firstName := "John"
 	lastName := "Doe"
+	createdAt := time.Now()
+	updatedAt := time.Now()
+	var deletedAt gorm.DeletedAt
 
-	rows := sqlmock.NewRows([]string{"id", "email", "first_name", "last_name"}).
-		AddRow(userId, email, firstName, lastName)
+	// Include gorm.Model fields (ID, CreatedAt, UpdatedAt, DeletedAt)
+	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "email", "first_name", "last_name"}).
+		AddRow(userId, createdAt, updatedAt, deletedAt, email, firstName, lastName)
 
 	// Using simplified SQL query expectation
 	mock.ExpectQuery(`SELECT(.*)`).
@@ -261,9 +273,11 @@ func TestUserRepository_Create(t *testing.T) {
 	// This simulates checking the database after the insert
 	createdAt := time.Now() // Mock a creation time
 	updatedAt := time.Now() // Mock an update time
+	var deletedAt gorm.DeletedAt
 
-	rows := sqlmock.NewRows([]string{"id", "email", "first_name", "last_name", "password_hash", "verification_code", "birth_date", "is_verified", "created_at", "updated_at"}).
-		AddRow(userId, email, firstName, lastName, passwordHash, verificationCode, birthDate, isVerified, createdAt, updatedAt)
+	// Include gorm.Model fields (ID, CreatedAt, UpdatedAt, DeletedAt)
+	rows := sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "email", "first_name", "last_name", "password_hash", "verification_code", "birth_date", "is_verified"}).
+		AddRow(userId, createdAt, updatedAt, deletedAt, email, firstName, lastName, passwordHash, verificationCode, birthDate, isVerified)
 
 	mock.ExpectQuery(`SELECT(.*)`).
 		WillReturnRows(rows)

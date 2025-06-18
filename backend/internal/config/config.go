@@ -29,6 +29,7 @@ type Config struct {
 	MinioFilePathEndpoint  string
 	MinioRegion            string
 	StylePhotoBucket       string
+	StylePdfBucket         string
 	AmocrmAccessToken      string
 	ProdamusToken          string
 }
@@ -57,6 +58,7 @@ func New(logger *logging.Logger) *Config {
 		MinioFilePathEndpoint:  getEnv("MINIO_FILE_PATH_ENDPOINT", "", logger),
 		MinioRegion:            getEnv("MINIO_REGION", "", logger),
 		StylePhotoBucket:       getEnv("STYLE_PHOTO_BUCKET", "", logger),
+		StylePdfBucket:         getEnv("STYLE_PDF_BUCKET", "", logger),
 		AmocrmAccessToken:      getEnv("AMOCRM_ACCESS_TOKEN", "", logger),
 		ProdamusToken:          getEnv("PRODAMUS_TOKEN", "", logger),
 	}

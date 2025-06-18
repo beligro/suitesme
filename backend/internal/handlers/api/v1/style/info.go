@@ -11,7 +11,8 @@ import (
 )
 
 type StyleInfo struct {
-	StyleId string `json:"style_id"`
+	StyleId         string `json:"style_id"`
+	CanUploadPhotos bool   `json:"can_upload_photos"`
 }
 
 func (ctr StyleController) Info(ctx echo.Context) error {
@@ -30,19 +31,43 @@ func (ctr StyleController) Info(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
 
+	// Get user to check if admin
+	user, err := ctr.storage.User.Get(parsedUserId)
+	if err != nil {
+		ctr.logger.Error(err)
+		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
+	}
+
+	// Admin users can always upload photos
+	canUploadPhotos := user.IsAdmin
+
 	if styleId != "" {
 		response := StyleInfo{
-			StyleId: styleId,
+			StyleId:         styleId,
+			CanUploadPhotos: canUploadPhotos,
 		}
 
 		return ctx.JSON(http.StatusOK, response)
 	}
 
-	payment, err := ctr.storage.Payments.Get(parsedUserId)
+	// If not admin, check payment
+	if !canUploadPhotos {
+		payment, err := ctr.storage.Payments.Get(parsedUserId)
+		if err != nil || payment == nil || payment.Status != models.Paid {
+			ctr.logger.Error("Не оплачено")
+			return myerrors.GetHttpErrorByCode(myerrors.NotPaid, ctx)
+		}
+		// Regular users with payment can upload one photo
+		canUploadPhotos = true
+	}
 
-	if err != nil || payment == nil || payment.Status != models.Paid {
-		ctr.logger.Error("Не оплачено")
-		return myerrors.GetHttpErrorByCode(myerrors.NotPaid, ctx)
+	// No style found yet, but user can upload
+	if canUploadPhotos {
+		response := StyleInfo{
+			StyleId:         "",
+			CanUploadPhotos: true,
+		}
+		return ctx.JSON(http.StatusOK, response)
 	}
 
 	return myerrors.GetHttpErrorByCode(myerrors.StyleNotFound, ctx)

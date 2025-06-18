@@ -3,6 +3,7 @@ FROM node:alpine as build
 COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
+ENV PUBLIC_URL=/admin
 RUN npm run build
 
 FROM nginx:stable-alpine

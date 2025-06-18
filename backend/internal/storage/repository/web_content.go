@@ -31,9 +31,9 @@ func (repo *WebContentRepository) ListAll() []models.DbWebContent {
 }
 
 func (repo *WebContentRepository) Get(id int) (*models.DbWebContent, error) {
-	content := &models.DbWebContent{ID: id}
+	content := &models.DbWebContent{}
 
-	result := repo.db.First(content)
+	result := repo.db.Model(&models.DbWebContent{}).Where("id = ?", id).First(content)
 
 	return content, result.Error
 }

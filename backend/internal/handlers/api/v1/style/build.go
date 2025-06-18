@@ -49,7 +49,8 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
 
-	if styleId != "" {
+	// Regular users can only upload once
+	if styleId != "" && !user.IsAdmin {
 		response := StyleBuildResult{
 			StyleId: styleId,
 		}
@@ -72,11 +73,14 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 
 	fileKey := photo.Filename
 
-	payment, err := ctr.storage.Payments.Get(parsedUserId)
-
-	if err != nil || payment == nil || payment.Status != models.Paid {
-		ctr.logger.Error("Не оплачено")
-		return myerrors.GetHttpErrorByCode(myerrors.NotPaid, ctx)
+	// Check if user is admin
+	if !user.IsAdmin {
+		// If not admin, check payment
+		payment, err := ctr.storage.Payments.Get(parsedUserId)
+		if err != nil || payment == nil || payment.Status != models.Paid {
+			ctr.logger.Error("Не оплачено")
+			return myerrors.GetHttpErrorByCode(myerrors.NotPaid, ctx)
+		}
 	}
 
 	_, err = ctr.s3Client.PutObject(&s3.PutObjectInput{

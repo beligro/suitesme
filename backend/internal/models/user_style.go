@@ -7,7 +7,8 @@ import (
 )
 
 type DbUserStyle struct {
-	UserId    uuid.UUID `pg:"user_id,pk" gorm:"type:uuid;primaryKey"`
+	ID        uuid.UUID `pg:"id,pk" gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	UserId    uuid.UUID `pg:"user_id" gorm:"type:uuid;not null;index"`
 	PhotoUrl  string    `pg:"photo_url" gorm:"type:varchar(128);not null"`
 	StyleId   string    `pg:"style_id" gorm:"type:varchar(64);not null"`
 	CreatedAt time.Time `pg:"created_at" gorm:"autoCreateTime;not null"`
