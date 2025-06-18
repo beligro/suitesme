@@ -1,9 +1,9 @@
 FROM node:alpine as build
 
-COPY package.json yarn.lock ./
-RUN yarn install
+COPY package.json package-lock.json ./
+RUN npm install
 COPY . .
-RUN yarn run build
+RUN npm run build
 
 FROM nginx:stable-alpine
 

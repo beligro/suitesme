@@ -1,6 +1,6 @@
 const AuthProvider = {
     login: async ({ username, password }) => {
-        const request = new Request('http://51.250.84.195:8080/admin/auth/login', {
+        const request = new Request('/api/admin/auth/login', {
             method: 'POST',
             headers: new Headers({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ username, password }),

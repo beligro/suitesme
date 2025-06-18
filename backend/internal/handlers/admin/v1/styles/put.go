@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"suitesme/internal/models"
-	utils_request "suitesme/internal/utils/request"
 	"suitesme/pkg/myerrors"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -33,10 +32,26 @@ func (ctr StylesController) Put(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
 
-	// Parse the form data
-	styleData, err := utils_request.ParseRequest[StyleRequest](&ctx)
-	if err != nil {
-		return err
+	// Parse the multipart form data
+	if err := ctx.Request().ParseMultipartForm(10 << 20); err != nil { // 10 MB max
+		ctr.logger.Error(err)
+		return myerrors.GetHttpErrorByCode(myerrors.BadRequestJson, ctx)
+	}
+
+	// Extract form fields
+	name := ctx.FormValue("name")
+	comment := ctx.FormValue("comment")
+
+	// Validate required fields
+	if name == "" || comment == "" {
+		return myerrors.GetHttpErrorByCode(myerrors.ValidateJsonError, ctx)
+	}
+
+	// Create style data struct
+	styleData := &StyleRequest{
+		Id:      id,
+		Name:    name,
+		Comment: comment,
 	}
 
 	// Update the style fields
@@ -54,11 +69,11 @@ func (ctr StylesController) Put(ctx echo.Context) error {
 		}
 		defer src.Close()
 
-		fileKey := fmt.Sprintf("styles/%s/%s", id, pdfFile.Filename)
+		fileKey := fmt.Sprintf("%s/%s", id, pdfFile.Filename)
 
 		// Upload the PDF to S3
 		_, err = ctr.s3Client.PutObject(&s3.PutObjectInput{
-			Bucket:      aws.String(ctr.config.StylePhotoBucket),
+			Bucket:      aws.String(ctr.config.StylePdfBucket),
 			Key:         aws.String(fileKey),
 			Body:        src,
 			ContentType: aws.String("application/pdf"),

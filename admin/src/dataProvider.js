@@ -1,7 +1,8 @@
 import { fetchUtils } from 'react-admin';
 import jsonServerProvider from 'ra-data-json-server';
 
-const apiUrl = 'http://51.250.84.195:8080/admin/v1';
+// Use relative URL instead of hardcoded IP
+const apiUrl = '/api/admin/v1';
 
 const httpClient = (url, options = {}) => {
   if (!options.headers) {
@@ -16,6 +17,14 @@ const defaultDataProvider = jsonServerProvider(apiUrl, httpClient);
 
 const dataProvider = {
   ...defaultDataProvider,
+  
+  // Override getOne method to handle styles resource
+  getOne: (resource, params) => {
+    console.log('getOne', resource, params);
+    
+    // Use the default implementation
+    return defaultDataProvider.getOne(resource, params);
+  },
   
   // Override create method to handle file uploads
   create: (resource, params) => {

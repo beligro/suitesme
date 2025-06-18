@@ -31,9 +31,9 @@ func (repo *SettingsRepository) ListAll() []models.DbSettings {
 }
 
 func (repo *SettingsRepository) Get(id int) (*models.DbSettings, error) {
-	setting := &models.DbSettings{ID: id}
+	setting := &models.DbSettings{}
 
-	result := repo.db.First(setting)
+	result := repo.db.Model(&models.DbSettings{}).Where("id = ?", id).First(setting)
 
 	return setting, result.Error
 }

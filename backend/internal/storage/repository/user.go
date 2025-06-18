@@ -37,7 +37,7 @@ func (repo *UserRepository) Get(id uuid.UUID) (*models.DbUser, error) {
 
 func (repo *UserRepository) GetForPasswordReset(id uuid.UUID, passwordResetToken string) (*models.DbUser, error) {
 	var user models.DbUser
-	result := repo.db.First(&user, "id = ? AND password_reset_token = ? AND password_reset_at > NOW()", id, passwordResetToken)
+	result := repo.db.Model(&models.DbUser{}).Where("id = ? AND password_reset_token = ? AND password_reset_at > NOW()", id, passwordResetToken).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -46,9 +46,9 @@ func (repo *UserRepository) GetForPasswordReset(id uuid.UUID, passwordResetToken
 }
 
 func (repo *UserRepository) GetByEmail(email string) (*models.DbUser, error) {
-	user := &models.DbUser{Email: email}
+	user := &models.DbUser{}
 
-	result := repo.db.First(user)
+	result := repo.db.Model(&models.DbUser{}).Where("email = ?", email).First(user)
 
 	return user, result.Error
 }
