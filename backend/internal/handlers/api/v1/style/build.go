@@ -1,8 +1,10 @@
 package style
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"suitesme/internal/models"
 	"suitesme/internal/utils/external"
@@ -71,6 +73,13 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	}
 	defer src.Close()
 
+	// Read photo data for ML service
+	photoData, err := io.ReadAll(src)
+	if err != nil {
+		ctr.logger.Error(err)
+		return myerrors.GetHttpErrorByCode(myerrors.BadPhotoFormat, ctx)
+	}
+
 	fileKey := photo.Filename
 
 	// Check if user is admin
@@ -86,7 +95,7 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	_, err = ctr.s3Client.PutObject(&s3.PutObjectInput{
 		Bucket:      aws.String(ctr.config.StylePhotoBucket),
 		Key:         aws.String(fmt.Sprintf("%s/%s", parsedUserId.String(), fileKey)),
-		Body:        src,
+		Body:        bytes.NewReader(photoData),
 		ContentType: aws.String(photo.Header.Get("Content-Type")),
 	})
 	if err != nil {
@@ -98,7 +107,11 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 
 	ctr.logger.Info(photoURL)
 
-	styleId = external.GetStyle()
+	styleId, err = external.GetStyle(photoData)
+	if err != nil {
+		ctr.logger.Error("Failed to get style from ML service:", err)
+		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
+	}
 
 	userStyle := &models.DbUserStyle{
 		UserId:   parsedUserId,

@@ -47,6 +47,15 @@ services:
     networks:
       - suitesme
 
+  ml:
+    build:
+      context: ./ml
+    ports:
+      - "8000:8000"
+    networks:
+      - suitesme
+    restart: always
+
   postgres:
     image: postgres:latest
     environment:

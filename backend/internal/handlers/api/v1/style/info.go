@@ -61,14 +61,5 @@ func (ctr StyleController) Info(ctx echo.Context) error {
 		canUploadPhotos = true
 	}
 
-	// No style found yet, but user can upload
-	if canUploadPhotos {
-		response := StyleInfo{
-			StyleId:         "",
-			CanUploadPhotos: true,
-		}
-		return ctx.JSON(http.StatusOK, response)
-	}
-
 	return myerrors.GetHttpErrorByCode(myerrors.StyleNotFound, ctx)
 }
