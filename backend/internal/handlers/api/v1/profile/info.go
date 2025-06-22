@@ -23,7 +23,7 @@ type ProfileInfo struct {
 // @Produce		json
 // @Tags		user
 // @Param		Authorization	header		string	true			"Bearer token"
-// @Success		200				{object}	models.UserInfoResponse	"ok"
+// @Success		200				{object}	ProfileInfo	"ok"
 // @Failure		400				{object}	models.ErrorResponse
 // @Failure		404				{object}	models.ErrorResponse
 // @Failure		500				{object}	models.ErrorResponse
