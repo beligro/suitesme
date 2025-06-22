@@ -39,6 +39,8 @@ func GetStyle(photoData []byte) (string, error) {
 	}
 	defer resp.Body.Close()
 
+	// TODO: process 400 from ml
+
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("ML service returned status %d", resp.StatusCode)
 	}
