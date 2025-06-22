@@ -1,6 +1,9 @@
 package main
 
-import "suitesme/internal/app"
+import (
+	_ "suitesme/docs" // Import swagger docs
+	"suitesme/internal/app"
+)
 
 func main() {
 	app.Run()
