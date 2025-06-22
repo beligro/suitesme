@@ -28,7 +28,7 @@ services:
       - logs_data:/backend/suitesme/cmd/app/logs
     depends_on:
       - postgres
-      - minio
+      - seaweedfs
     networks:
       - suitesme
     env_file:
@@ -69,23 +69,44 @@ services:
       - suitesme
     restart: always
 
-  minio:
-    image: minio/minio
-    container_name: minio
-    environment:
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+  # SeaweedFS server with S3 API
+  seaweedfs:
+    image: chrislusf/seaweedfs
+    container_name: seaweedfs
     ports:
-      - "9000:9000"
-      - "9001:9001"
-    command: server /data --console-address ":9001"
+      - "9000:9000"  # S3 API port
+      - "9001:9001"  # Console port
+      - "8888:8888"  # Filer port
+    environment:
+      - WEED_S3_AUDITLOG_DIR=/data/s3_audit
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+    command: "server -dir=/data -s3 -s3.config=/data/s3_config.json -s3.allowEmptyFolder=true -s3.domainName=localhost -s3.enableAuth=false"
+    volumes:
+      - seaweedfs_data:/data
+      - ./seaweedfs_s3_config.json:/data/s3_config.json
     networks:
       - suitesme
-    volumes:
-      - minio_data:/data
     restart: always
+
+  # Initialize SeaweedFS buckets
+  seaweedfs-init:
+    image: curlimages/curl
+    container_name: seaweedfs-init
+    depends_on:
+      - seaweedfs
+    networks:
+      - suitesme
+    command: >
+      sh -c "
+        sleep 10 &&
+        curl -X PUT http://seaweedfs:9000/${STYLE_PHOTO_BUCKET} &&
+        curl -X PUT http://seaweedfs:9000/${STYLE_PDF_BUCKET} &&
+        echo 'Buckets created successfully'
+      "
+    restart: "no"
 
 volumes:
   db_data:
-  minio_data:
+  seaweedfs_data:
   logs_data:
