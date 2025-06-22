@@ -1,13 +1,59 @@
 import React from 'react';
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import api from '../../../utils/api';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const Header = () => {
-
     const [isBouncing, setIsBouncing] = React.useState(false);
     const [isOpen, setIsOpen] = React.useState(false);
     const nav = useNavigate();
+    const { isAuthenticated } = useAuth();
 
-    const [step, setStep] = React.useState(0); //0 1 2 - функциональные, 3 - загрузка
+    const [step, setStep] = React.useState(0); // 0 1 2 - функциональные, 3 - загрузка
+    const [photoFile, setPhotoFile] = React.useState(null);
+    const [styleId, setStyleId] = React.useState(null);
+    const [error, setError] = React.useState('');
+    const [paymentStatus, setPaymentStatus] = React.useState(null);
+
+
+    React.useEffect(() => {
+        const checkAuthAndPayment = async () => {
+            // if (!isAuthenticated) {
+            //     nav('/payment');
+            //     return;
+            // }
+
+            try {
+                setPaymentStatus('checking');
+                // Проверяем статус платежа
+                const paymentResponse = await api.get('/api/v1/payment/info');
+
+                if (paymentResponse.data.payment_status === 'paid') {
+                    setPaymentStatus('paid');
+                    // Проверяем наличие стиля
+                    try {
+                        const styleResponse = await api.get('/api/v1/style/info');
+                        setStyleId(styleResponse.data.style_id);
+                        setStep(1);
+                    } catch (styleError) {
+                        if (styleError.response?.status === 404) {
+                            setStep(0);
+                        }
+                    }
+                } else {
+                    setPaymentStatus('unpaid');
+                    // nav('/payment');
+                }
+            } catch (error) {
+                console.error('Ошибка проверки платежа:', error);
+                setError('Не удалось проверить статус платежа');
+                setPaymentStatus('unpaid');
+                // nav('/payment');
+            }
+        };
+
+        checkAuthAndPayment();
+    }, [isAuthenticated, nav]);
 
     React.useEffect(() => {
         const interval = setInterval(() => {
@@ -29,6 +75,50 @@ const Header = () => {
         };
     }, [isOpen]);
 
+    const handlePhotoUpload = async (file) => {
+        // if (!isAuthenticated || paymentStatus !== 'paid') {
+        //     nav('/payment');
+        //     return;
+        // }
+
+        if (!file) return;
+        setStep(3);
+
+        const formData = new FormData();
+        formData.append('photo', file);
+
+        try {
+            const response = await api.post('/api/v1/style/build', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            setStyleId(response.data.style_id);
+            setStep(1);
+        } catch (err) {
+            console.error('Ошибка загрузки:', err);
+            setError('Ошибка при загрузке фото');
+            setStep(0);
+        }
+    };
+
+    // Если проверка платежа еще не завершена, показываем загрузку
+    if (paymentStatus === 'checking') {
+        return (
+            <div className="w-full h-screen flex items-center justify-center bg-[#C2CED8]">
+                <div className="text-center">
+                    <p className="text-[#1B3C4D] font-montserrat">Проверка статуса...</p>
+                    {/* Можно добавить спиннер загрузки */}
+                </div>
+            </div>
+        );
+    }
+
+    // Если не авторизован или не оплачено, этот код не выполнится из-за redirect
+    // Но на случай если redirect не сработал, добавим проверку
+    // if (!isAuthenticated || paymentStatus !== 'paid') {
+    //     return null;
+    // }
+
     return (
         <div className={`w-full lg:h-auto min-h-screen relative`}>
             <img src="/photos/LK/WomanLK.png" alt="" className={`absolute lg:hidden top-0 left-0 min-h-screen ${step === 3 ? "object-cover scale-150" : "object-cover"}`} />
@@ -41,8 +131,7 @@ const Header = () => {
             }`} />
 
             <img src="/photos/LK/Shadow.png" alt="" className={`absolute top-0 left-0 lg:hidden ${step === 0 || step === 3 ? "hidden" : ""}`} />
-
-            <img src="/photos/LK/BottomBlurLK.png" alt="" className="absolute -bottom-28 left-1/2 -translate-x-1/2  w-full lg:hidden"/>
+            <img src="/photos/LK/BottomBlurLK.png" alt="" className="absolute -bottom-28 left-1/2 -translate-x-1/2  w-full lg:hidden" />
 
             <div className={`lg:backdrop-blur-none backdrop-blur-sm z-30 w-full lg:h-[100px] h-[60px] absolute top-0 left-0 flex flex-row items-center justify-between lg:px-20 px-5 ${
                 step === 0
@@ -51,36 +140,42 @@ const Header = () => {
             }`}>
                 <img src="/photos/main/Profile.svg" className="h-[20px] lg:hidden block cursor-pointer" alt="" />
                 <img className="w-[110px]" src="/photos/main/MNEIDET.svg" alt="" />
-                <img src="/photos/main/Burger.svg" className="h-[20px] lg:hidden block cursor-pointer" alt="" onClick={() => setIsOpen(!isOpen)}/>
+                <img src="/photos/main/Burger.svg" className="h-[20px] lg:hidden block cursor-pointer" alt="" onClick={() => setIsOpen(!isOpen)} />
                 <div className="lg:flex flex-row xl:gap-[45px] gap-[25px] items-center justify-end hidden">
-                    <a className="font-montserrat font-medium text-[12px] text-white whitespace-nowrap cursor-pointer" href='#why-main'>Преимущества</a>
-                    <a className="font-montserrat font-medium text-[12px] text-white whitespace-nowrap cursor-pointer" href='#about'>О сервисе</a>
-                    <a className="font-montserrat font-medium text-[12px] text-white whitespace-nowrap cursor-pointer" href='#questions'>Ответы на вопросы</a>
-                    <a className="font-montserrat font-medium text-[12px] text-white whitespace-nowrap cursor-pointer" href='#examples'>Примеры результатов</a>
+                    <a className="font-montserrat font-medium text-[12px] text-white whitespace-nowrap cursor-pointer" href='/#why-main'>Преимущества</a>
+                    <a className="font-montserrat font-medium text-[12px] text-white whitespace-nowrap cursor-pointer" href='/#about'>О сервисе</a>
+                    <a className="font-montserrat font-medium text-[12px] text-white whitespace-nowrap cursor-pointer" href='/#questions'>Ответы на вопросы</a>
+                    <a className="font-montserrat font-medium text-[12px] text-white whitespace-nowrap cursor-pointer" href='/#examples'>Примеры результатов</a>
                     <a className="px-7 h-12 flex items-center justify-center rounded-full !border text-[11px] !border-white font-light uppercase text-white font-unbounded cursor-pointer" onClick={() => nav("/login")}>войти</a>
                 </div>
             </div>
 
-
             {step === 0 && (
                 <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 lg:h-[80%] h-[70%] lg:block flex flex-col items-center justify-between text-[#1B3C4D]">
                     <div className="flex flex-col items-center lg:justify-around justify-start h-full gap-4">
-                        <p className="lg:text-[30px] text-[23px] font-unbounded font-extralight text-center uppercase lg:mb-4 mb-4" >Добро пожаловать в <br className="lg:block hidden" /> SUITSME.AI</p>
+                        <p className="lg:text-[30px] text-[23px] font-unbounded font-extralight text-center uppercase lg:mb-4 mb-4">Добро пожаловать в <br className="lg:block hidden" /> SUITSME.AI</p>
 
-                        <div className="w-[35%] min-w-[200px] lg:border-none border border-[#607E96] py-12 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl bg-[#FFFFFF6E] gap-6 cursor-pointer hover:scale-95 transition duration-200 easy-in-out"
-                             onClick={() => setStep(1)}
-                        >
+                        <div className="relative w-[35%] min-w-[200px] lg:border-none border border-[#607E96] py-12 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl bg-[#FFFFFF6E] gap-6 cursor-pointer hover:scale-95 transition duration-200 easy-in-out">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    if (e.target.files[0]) {
+                                        setPhotoFile(e.target.files[0]);
+                                        handlePhotoUpload(e.target.files[0]);
+                                    }
+                                }}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50"
+                            />
                             <img className="w-[15%]" src="/photos/LK/Plus.svg" alt="" />
-                            <p className="uppercase text-[#1B3C4D] text-[14px] font-unbounded font-light text-center">Загрузите<br/>
-                                своё<br/>
-                                селфи</p>
+                            <p className="uppercase text-[#1B3C4D] text-[14px] font-unbounded font-light text-center">Загрузите<br/> своё<br/> селфи</p>
                         </div>
 
                         <p className="text-center font-montserrat font-light text-[12px] uppercase">
-                            наш AI проанализирует черты лица <br className="lg:block hidden"/>
+                            наш <span className="">AI</span> проанализирует черты лица <br className="lg:block hidden" />
                             и определит типаж
                         </p>
-                        <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>
+                        <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt="" />
                     </div>
                     <div className="uppercase font-light text-center text-[13px] lg:hidden block">
                         Здесь может быть размещен
@@ -154,26 +249,22 @@ const Header = () => {
                 </div>
             )}
 
-
-            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[750px] lg:block hidden w-auto z-20 transform ease-in-out lg:left-0 md:-left-[50%] -left-[40%] ${isBouncing ? "lg:top-[10%] -top-[20%]" : "lg:top-[5%] -top-[25%]" }`} src="/photos/main/Soplya.png" alt=""/>
-            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[580px] lg:block hidden z-20 lg:right-0 md:-right-[20%] -right-[50%] transform ease-in-out ${isBouncing ? "top-[0%]" : "-top-[5%]" }`} src="/photos/main/Soplya3.png" alt=""/>
+            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[750px] lg:block hidden w-auto z-20 transform ease-in-out lg:left-0 md:-left-[50%] -left-[40%] ${isBouncing ? "lg:top-[10%] -top-[20%]" : "lg:top-[5%] -top-[25%]"}`} src="/photos/main/Soplya.png" alt="" />
+            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[580px] lg:block hidden z-20 lg:right-0 md:-right-[20%] -right-[50%] transform ease-in-out ${isBouncing ? "top-[0%]" : "-top-[5%]"}`} src="/photos/main/Soplya3.png" alt="" />
             <div className={`${isOpen ? "flex" : "hidden"} w-full z-50 absolute top-0 left-0 flex-col bg-[rgb(130,148,155)] h-full`}>
                 <div className="w-full flex mt-5">
-                    <img src="/photos/main/MNEIDET.svg" alt="" className="mx-auto h-[20px]"/>
-                    <img src="/photos/main/cross-svgrepo-com.svg" alt="" className="absolute right-5 top-3 w-[36px] cursor-pointer" onClick={() => setIsOpen(!isOpen)}/>
+                    <img src="/photos/main/MNEIDET.svg" alt="" className="mx-auto h-[20px]" />
+                    <img src="/photos/main/cross-svgrepo-com.svg" alt="" className="absolute right-5 top-3 w-[36px] cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
                 </div>
                 <div className="w-full flex flex-col items-center justify-center h-full gap-14">
                     <div className="flex flex-col gap-5 text-center">
-                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer" href=''>Преимущества</a>
-                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer" href=''>О сервисе</a>
-                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer"  href=''>Ответы на вопросы</a>
-                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer" href=''>Результаты</a>
+                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer" href='/#why-main'>Преимущества</a>
+                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer" href='/#about'>О сервисе</a>
+                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer" href='/#questions'>Ответы на вопросы</a>
+                        <a className="font-montserrat font-normal text-[16px] text-white whitespace-nowrap cursor-pointer" href='/#examples'>Результаты</a>
                     </div>
-                    <div
-                        className="flex w-full flex-col gap-3 items-center justify-center">
-                        <div className="w-12 h-12 border rounded-full border-white flex items-center justify-center cursor-pointer" onClick={() => nav("/login")}>
-                            <img src="/photos/main/Profile.svg" className="w-6" alt=""/>
-                        </div>
+                    <div className="flex w-full flex-col gap-3 items-center justify-center">
+                        <div className="w-12 h-12 border rounded-full border-white flex items-center justify-center cursor-pointer" onClick={() => nav("/login")}> <img src="/photos/main/Profile.svg" className="w-6" alt="" /> </div>
                         <p className="text-center font-montserrat font-light text-[16px] text-white cursor-pointer" onClick={() => nav("/login")}>Войти</p>
                     </div>
                 </div>

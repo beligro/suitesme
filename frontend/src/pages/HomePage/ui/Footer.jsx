@@ -8,7 +8,7 @@ const Footer = () => {
                 <div className="flex flex-col lg:justify-between gap-5 lg:min-h-[200px]">
                     <div className="flex flex-col lg:gap-10 gap-5 lg:items-left items-center">
                         <img src="/photos/main/MNEIDET_BLACK.svg" alt="" className="w-[150px]"/>
-                        <p className="font-montserrat uppercase text-[20px] font-light lg:text-left text-center">Email</p>
+                        <p className="lg:font-montserrat font-unbounded lg:uppercase lg:text-[20px] lg:font-light font-semibold lg:text-left text-center w-full">Email</p>
                     </div>
                     <p className="font-montserrat uppercase text-[12px] font-light lg:block hidden">
                         ИП Трофимова Мария Андреевна<br/>ИНН 230115188508<br/>ОГРНИП 319237500065543

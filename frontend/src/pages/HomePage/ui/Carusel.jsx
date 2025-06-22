@@ -5,6 +5,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "../../../index.css";
+import {useNavigate} from "react-router-dom";
 
 const clients = [
     "photos/main/womans/Woman1.png",
@@ -16,6 +17,7 @@ const clients = [
 const Carusel = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [activeClientIndex, setActiveClientIndex] = useState(null);
+    const nav = useNavigate()
 
     useEffect(() => {
         document.body.style.overflow = modalOpen ? 'hidden' : 'auto';
@@ -88,7 +90,9 @@ const Carusel = () => {
                 </div>
 
                 <div className="w-full flex justify-center lg:mt-32 mt-10 pb-5">
-                    <div className="w-[240px] h-[50px] text-[14px] font-light flex items-center justify-center rounded-full bg-[#1B3C4D] text-white uppercase cursor-pointer hover:shadow-xl transition duration-200">
+                    <div className="w-[240px] h-[50px] text-[14px] font-light flex items-center justify-center rounded-full bg-[#1B3C4D] text-white uppercase cursor-pointer hover:shadow-xl transition duration-200"
+                         onClick={() => nav("/LK")}
+                    >
                         узнать свой типаж
                     </div>
                 </div>
