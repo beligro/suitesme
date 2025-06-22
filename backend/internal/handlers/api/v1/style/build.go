@@ -21,6 +21,21 @@ type StyleBuildResult struct {
 	StyleId string `json:"style_id" validate:"required"`
 }
 
+// Build godoc
+// @Summary Upload user photo and determine style
+// @Description Upload user photo, save it to S3, and determine user's style using ML service
+// @Tags style
+// @Accept multipart/form-data
+// @Produce json
+// @Param Authorization header string true "Bearer token"
+// @Param photo formData file true "User photo"
+// @Success 200 {object} StyleBuildResult
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/v1/style/build [post]
 func (ctr StyleController) Build(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 	userID := ctx.Get("userID")
@@ -110,6 +125,10 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	styleId, err = external.GetStyle(photoData)
 	if err != nil {
 		ctr.logger.Error("Failed to get style from ML service:", err)
+		// Check if the error is about no face detected
+		if err.Error() == "no face detected in the photo" {
+			return myerrors.GetHttpErrorByCode(myerrors.NoFaceDetected, ctx)
+		}
 		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 	}
 

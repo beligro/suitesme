@@ -39,7 +39,10 @@ func GetStyle(photoData []byte) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	// TODO: process 400 from ml
+	// Process 400 from ML service - indicates no face detected in the photo
+	if resp.StatusCode == http.StatusBadRequest {
+		return "", fmt.Errorf("no face detected in the photo")
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("ML service returned status %d", resp.StatusCode)

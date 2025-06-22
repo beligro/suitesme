@@ -26,6 +26,7 @@ const (
 	BadPhotoFormat    ErrorCode = "bad_photo_format"
 	BadRequestJson    ErrorCode = "bad_request_json"
 	ValidateJsonError ErrorCode = "validate_json_error"
+	NoFaceDetected    ErrorCode = "no_face_detected"
 
 	ContentNotFound  ErrorCode = "content_not_found"
 	SettingsNotFound ErrorCode = "settings_not_found"
@@ -114,6 +115,8 @@ func GetHttpErrorByCode(errorCode ErrorCode, ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "Incorrect sign"})
 	case BadUserUpdateParams:
 		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "Bad user update params"})
+	case NoFaceDetected:
+		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "No face detected in the photo"})
 
 	case UserUnauthorized:
 		return ctx.JSON(http.StatusUnauthorized, MyError{Code: string(errorCode), Message: "User is unauthorized"})

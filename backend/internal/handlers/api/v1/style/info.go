@@ -15,6 +15,20 @@ type StyleInfo struct {
 	CanUploadPhotos bool   `json:"can_upload_photos"`
 }
 
+// Info godoc
+// @Summary Get user style information
+// @Description Get user's style ID and check if they can upload photos
+// @Tags style
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer token"
+// @Success 200 {object} StyleInfo
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/v1/style/info [get]
 func (ctr StyleController) Info(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 	userID := ctx.Get("userID")
