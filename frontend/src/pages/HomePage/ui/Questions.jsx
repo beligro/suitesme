@@ -31,7 +31,7 @@ const Questions = () => {
     return (
         <div className="w-full flex justify-center mt-32">
             <div className="lg:w-[1000px] w-full lg:bg-white bg-[#C2CED8] lg:rounded-none rounded-t-2xl lg:p-0 px-5 py-7 flex flex-col gap-5">
-                <p className="text-[25px]  font-unbounded lg:text-left text-center font-medium text-[#1B3C4D]">Ответы на вопросы</p>
+                <p className="lg:text-[25px] text-[20px] font-unbounded lg:text-left text-center font-medium text-[#1B3C4D] lg:pt-0 pt-12">Ответы на вопросы</p>
 
                 <div className="w-full">
                     {faqItems.map((item, index) => (
@@ -40,11 +40,11 @@ const Questions = () => {
                                 onClick={() => toggle(index)}
                                 className="flex justify-between items-center w-full text-left text-[#1B3C4D] lg:font-medium font-light text-[16px]"
                             >
-                                <span className="max-w-[90%] font-montserrat font-normal">{item.question}</span>
+                                <span className="max-w-[90%] font-montserrat font-light">{item.question}</span>
                                 {openIndex === index ? <ChevronUp size={26} /> : <ChevronDown size={26} />}
                             </button>
                             {openIndex === index && (
-                                <div className="mt-6 text-[#1B3C4D] text-[15px] font-montserrat font-normal">{item.answer}</div>
+                                <div className="mt-6 text-[#1B3C4D] text-[15px] font-montserrat font-light">{item.answer}</div>
                             )}
                         </div>
                     ))}
