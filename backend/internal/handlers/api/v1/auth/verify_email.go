@@ -31,7 +31,7 @@ type VerifyEmailRequest struct {
 // @Failure		404		{object}	models.ErrorResponse
 // @Failure		409		{object}	models.ErrorResponse
 // @Failure		500		{object}	models.ErrorResponse
-// @Router			/api/v1/auth/email/verify [post]
+// @Router			/api/v1/auth/verify_email [post]
 func (ctr AuthController) VerifyEmail(ctx echo.Context) error {
 	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 	request, err := utils_request.ParseRequest[VerifyEmailRequest](&ctx)

@@ -49,6 +49,9 @@ func (ctr AuthController) Login(ctx echo.Context) error {
 	if user == nil {
 		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
 	}
+	if !user.IsVerified {
+		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
+	}
 
 	err = security.ComparePasswordWithHash(request.Password, user.PasswordHash)
 	if err != nil {

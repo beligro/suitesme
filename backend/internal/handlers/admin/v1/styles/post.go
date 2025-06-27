@@ -81,7 +81,7 @@ func (ctr StylesController) Post(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 	}
 
-	pdfURL := fmt.Sprintf("%s/%s/%s", ctr.config.MinioFilePathEndpoint, ctr.config.StylePhotoBucket, fileKey)
+	pdfURL := fmt.Sprintf("%s/%s/%s", ctr.config.MinioFilePathEndpoint, ctr.config.StylePdfBucket, fileKey)
 
 	// Create the style in the database
 	dbStyle := &models.DbStyle{

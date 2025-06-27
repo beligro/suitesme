@@ -182,45 +182,6 @@ info:
   title: SuitesMe Service
   version: "1.0"
 paths:
-  /api/v1/auth/email/verify:
-    post:
-      consumes:
-      - application/json
-      description: Verify user email
-      operationId: auth-verify-email
-      parameters:
-      - description: Request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/auth.VerifyEmailRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ok
-          schema:
-            $ref: '#/definitions/models.EmptyResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "409":
-          description: Conflict
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      summary: Verify user email
-      tags:
-      - auth
   /api/v1/auth/forgot_password:
     post:
       consumes:
@@ -435,6 +396,45 @@ paths:
           schema:
             $ref: '#/definitions/models.ErrorResponse'
       summary: Register user
+      tags:
+      - auth
+  /api/v1/auth/verify_email:
+    post:
+      consumes:
+      - application/json
+      description: Verify user email
+      operationId: auth-verify-email
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.VerifyEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/models.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Verify user email
       tags:
       - auth
   /api/v1/payment/callback:
