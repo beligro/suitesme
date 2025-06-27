@@ -1,51 +1,16 @@
-import React, {useEffect} from 'react'
+import React from 'react'
 import './App.css'
 import './index.css'
-import {useNavigationHandler} from "./components/NavigationHandlerContext.jsx";
-import {useAuth} from "./contexts/AuthContext.jsx";
-import {setNavigationCallback} from "./utils/api.js";
-import HomePage from "./pages/HomePage/HomePage.jsx";
-import AuthPage from "./pages/Auth/Login/Login.jsx";
-import RegisterPage from "./pages/Auth/Register/Register.jsx";
-import VerifyEmailPage from "./components/VerifyEmailPage.jsx";
-import ForgotPasswordPage from "./pages/Auth/ForgotPassword/ForgotPassword.jsx";
-import PasswordResetPage from "./components/PasswordResetPage.jsx";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import ProfilePage from "./components/ProfilePage.jsx";
-import PaymentRedirect from "./components/PaymentRedirect.jsx";
-import {Route, Routes} from "react-router-dom";
-import './styles/global.css'
-
-import LK from "./pages/LK/LK.jsx"
-import WhereMoney from "./pages/LK/WhereMoney.jsx";
+import AppRouter from "./app/routes/AppRouter.jsx";
+import {Provider} from "react-redux";
+import {store} from "./app/store";
 
 function App() {
-    const handleNavigation = useNavigationHandler();
-    const { isAuthenticated } = useAuth();
-
-    // Устанавливаем callback для навигации в API
-    useEffect(() => {
-        setNavigationCallback(handleNavigation);
-    }, [handleNavigation]);
 
     return (
-            <Routes>
-                {/* Публичные маршруты */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<AuthPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/verify_email" element={<VerifyEmailPage />} />
-                <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
-                <Route path="/password_reset" element={<PasswordResetPage />} />
-                <Route path="/lk" element={<LK />} />
-                <Route path="/payment" element={<WhereMoney />} />
-
-                {/* Защищенные маршруты */}
-                <Route element={<ProtectedRoute />}>
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/profile/payment" element={<PaymentRedirect />} />
-                </Route>
-            </Routes>
+        <Provider store={store}>
+            <AppRouter />
+        </Provider>
     );
 };
 

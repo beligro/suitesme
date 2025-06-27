@@ -1,143 +1,146 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {useNavigate} from "react-router-dom";
-import {publicApi} from "../../../utils/api.js";
-import useForm from "../../../hooks/useForm.js";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { $host } from "../../../app/indexAPI.js";
 
 const ForgotPassword = () => {
+    const nav = useNavigate();
 
+    /** ----- Шаги -----
+     * 0 – ввод email
+     * 1 – ввод кода
+     * 2 – ввод нового пароля
+     * 3 – успех
+     */
     const [step, setStep] = useState(0);
-    const [code, setCode] = useState(['', '', '', '']);
+
+    /* ───────────   step 0 ─────────── */
+    const [values, setValues] = useState({ email: "" });
+    const [errors, setErrors] = useState({});
+    const [isSendingMail, setIsSendingMail] = useState(false);
+
+    /* ───────────   step 1 ─────────── */
+    const [code, setCode] = useState(["", "", "", "", "", ""]);
     const inputRefs = useRef([]);
-    const nav = useNavigate()
+    const [timer, setTimer] = useState(40);
+    const timerRef = useRef(null);
+    const [resetToken, setResetToken] = useState(""); // сохраним код сюда
 
+    /* ───────────   step 2 ─────────── */
+    const [pwd, setPwd] = useState({ password: "", password_confirm: "" });
+    const [pwdErr, setPwdErr] = useState({});
+    const [pwdLoading, setPwdLoading] = useState(false);
 
-    const handleCodeChange = (value, index) => {
-        if (!/^\d?$/.test(value)) return;
-
-        const newCode = [...code];
-        newCode[index] = value;
-        setCode(newCode);
-
-        if (value && index < code.length - 1) {
-            inputRefs.current[index + 1]?.focus();
-        }
+    /* ────────────────────────────────────────────────── */
+    /* ----------------–– helpers ––--------------------  */
+    const validateEmail = () => {
+        const errs = {};
+        if (!values.email) errs.email = "Email обязателен";
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email))
+            errs.email = "Некорректный email";
+        return errs;
     };
 
-    const handleKeyDown = (e, index) => {
-        if (e.key === 'Backspace' && !code[index] && index > 0) {
-            inputRefs.current[index - 1]?.focus();
-        }
-    };
-
-    const [time, setTime] = useState(40);
-    const [intervalId, setIntervalId] = useState(null);
-
-    useEffect(() => {
-        startTimer();
-        return () => clearInterval(intervalId);
-    }, []);
-
-    const startTimer = () => {
-        const id = setInterval(() => {
-            setTime(prev => {
-                if (prev <= 1) {
-                    clearInterval(id);
+    const startTimer = (sec = 40) => {
+        clearInterval(timerRef.current);
+        setTimer(sec);
+        timerRef.current = setInterval(() => {
+            setTimer((t) => {
+                if (t <= 1) {
+                    clearInterval(timerRef.current);
                     return 0;
                 }
-                return prev - 1;
+                return t - 1;
             });
         }, 1000);
-        setIntervalId(id);
     };
 
-    const handleResend = () => {
-        setTime(30);
-        startTimer();
-    };
+    useEffect(() => {
+        if (step === 1) startTimer(40);
+        return () => clearInterval(timerRef.current);
+    }, [step]);
 
+    /* ────────────────────────────────────────────────── */
+    /* ----------------–  step 0  –---------------------- */
+    const sendMail = async () => {
+        const vErr = validateEmail();
+        setErrors(vErr);
+        if (Object.keys(vErr).length) return;
 
-
-    const onSubmit = async (formValues) => {
-        setStep(1);
-        await handleForgotPasswordSubmit(formValues);
-    };
-
-    const validationRules = {
-        email: [
-            { type: 'required', message: 'Email обязателен' },
-            { type: 'email', message: 'Некорректный формат email' }
-        ]
-    };
-
-    // Обработчик отправки формы
-    const handleForgotPasswordSubmit = async (values) => {
         try {
-            await publicApi.post('/api/v1/auth/forgot_password', { email: values.email });
-            return true;
-        } catch (error) {
-            console.error('Ошибка при отправке письма для восстановления пароля:', error);
-            throw new Error('Не удалось отправить письмо. Пожалуйста, проверьте email и попробуйте снова.');
+            setIsSendingMail(true);
+            await $host.post("/auth/forgot_password", { email: values.email });
+            setStep(1);
+        } catch (e) {
+            alert(e.response?.data?.message ?? "Ошибка отправки письма");
+        } finally {
+            setIsSendingMail(false);
         }
     };
 
-    // Инициализируем хук формы
-    const {
-        values,
-        errors,
-        handleChange,
-    } = useForm(
-        { email: '' },
-        validationRules,
-        handleForgotPasswordSubmit
-    );
-
-    const passwordValidationRules = {
-        password: [
-            { type: 'required', message: 'Пароль обязателен' },
-            { type: 'minLength', value: 6, message: 'Пароль должен содержать минимум 6 символов' }
-        ],
-        password_confirm: [
-            { type: 'required', message: 'Подтверждение пароля обязательно' },
-            { type: 'match', field: 'password', message: 'Пароли не совпадают' }
-        ]
+    /* ────────────────────────────────────────────────── */
+    /* ----------------–  step 1  –---------------------- */
+    const handleCodeChange = (val, idx) => {
+        if (!/^\d?$/.test(val)) return;
+        const next = [...code];
+        next[idx] = val;
+        setCode(next);
+        if (val && idx < 5) inputRefs.current[idx + 1]?.focus();
+    };
+    const handleKey = (e, idx) => {
+        if (e.key === "Backspace" && !code[idx] && idx > 0)
+            inputRefs.current[idx - 1]?.focus();
     };
 
-    const handlePasswordResetSubmit = async (values) => {
-        const resetToken = code.join('');
-        if (resetToken.length < 4) {
-            throw new Error('Неверный код подтверждения');
-        }
+    const handleCodeSubmit = () => {
+        const token = code.join("");
+        if (token.length !== 4) return alert("Введите 4-значный код");
+        setResetToken(token);
+        setStep(2);
+    };
+
+    /* ────────────────────────────────────────────────── */
+    /* ----------------–  step 2  –---------------------- */
+    const validatePwd = () => {
+        const pe = {};
+        if (!pwd.password) pe.password = "Пароль обязателен";
+        if (!pwd.password_confirm) pe.password_confirm = "Подтвердите пароль";
+        if (pwd.password && pwd.password !== pwd.password_confirm)
+            pe.password_confirm = "Пароли не совпадают";
+        return pe;
+    };
+
+    const sendNewPassword = async () => {
+        const pe = validatePwd();
+        setPwdErr(pe);
+        if (Object.keys(pe).length) return;
 
         try {
-            await publicApi.post('/api/v1/auth/password/reset', {
-                reset_token: resetToken,
-                password: values.password,
-                password_confirm: values.password_confirm,
+            setPwdLoading(true);
+            await $host.post("/auth/password/reset", {
+                password:pwd.password,
+                password_confirm:pwd.password_confirm,
+                reset_token:resetToken,
             });
-            setStep(3); // успех
-            return true;
-        } catch (error) {
-            console.error('Ошибка при сбросе пароля:', error);
-            throw new Error(error.response?.data?.message || 'Ошибка при сбросе пароля. Попробуйте снова.');
+            setStep(3);
+        } catch (e) {
+            alert(e.response?.data?.message ?? "Ошибка смены пароля");
+        } finally {
+            setPwdLoading(false);
         }
     };
 
-    const {
-        values: passwordValues,
-        errors: passwordErrors,
-        handleChange: handlePasswordChange,
-        handleSubmit: handlePasswordSubmit,
-        isSubmitting: isPasswordSubmitting
-    } = useForm(
-        { password: '', password_confirm: '' },
-        passwordValidationRules,
-        handlePasswordResetSubmit
-    );
+
 
     return (
         <div>
             {step === 0 && (
-                <div className="w-full min-h-screen flex justify-center items-center">
+                <form
+                    onSubmit={async (e) => {
+                        e.preventDefault();
+                        await sendMail();
+                    }}
+                    className="w-full min-h-screen flex justify-center items-center"
+                >
                     <div className="sm:w-[400px] w-full sm:p-0 p-5 h-[780px]">
                         <div className="w-full h-full flex flex-col justify-between gap-10">
                             <div className="w-full flex flex-col gap-10 relative">
@@ -155,7 +158,7 @@ const ForgotPassword = () => {
                                     <input
                                         name="email"
                                         value={values.email}
-                                        onChange={handleChange}
+                                        onChange={(e) => setValues({ ...values, [e.target.name]: e.target.value })}
                                         className="border-b px-3 py-2 rounded-2xl"
                                     />
                                     {errors.email && (
@@ -166,7 +169,7 @@ const ForgotPassword = () => {
                             <div className="w-full flex flex-col gap-10">
                                 <button
                                     className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32"
-                                    onClick={() => {onSubmit()}}
+                                    disabled={isSendingMail}
                                 >
                                     <p className="uppercase font-unbounded font-light text-white">отправить</p>
                                 </button>
@@ -177,7 +180,7 @@ const ForgotPassword = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </form>
             )}
             {step === 1 && (
                 <div className="w-full min-h-screen flex justify-center items-center">
@@ -204,7 +207,7 @@ const ForgotPassword = () => {
                                             maxLength={1}
                                             value={digit}
                                             onChange={(e) => handleCodeChange(e.target.value, index)}
-                                            onKeyDown={(e) => handleKeyDown(e, index)}
+                                            onKeyDown={(e) => handleKey(e, index)}
                                             className="w-full aspect-square text-center text-2xl font-bold rounded-2xl border border-gray-300 focus:border-black outline-none transition-all"
                                         />
                                     ))}
@@ -214,15 +217,24 @@ const ForgotPassword = () => {
                             <div className="w-full flex flex-col gap-10">
 
                                 <p
-                                    className={`text-center mb-5 font-montserrat ${time === 0 ? 'cursor-pointer text-blue-500' : 'text-gray-400 cursor-not-allowed'}`}
-                                    onClick={time === 0 ? handleResend : undefined}
+                                    className={`text-center mb-5 font-montserrat ${
+                                        timer === 0 ? 'cursor-pointer text-blue-500' : 'text-gray-400 cursor-not-allowed'
+                                    }`}
+                                    onClick={async () => {
+                                        if (timer === 0) {
+                                            await sendMail();
+                                            startTimer(40);
+                                        }
+                                    }}
                                 >
-                                    {time === 0 ? "отправить код повторно" : time > 9 ? `отправить код повторно через 00:${time}` : `отправить код повторно через 00:0${time}`}
+                                    {timer === 0
+                                        ? 'отправить код повторно'
+                                        : `отправить код повторно через 00:${timer < 10 ? `0${timer}` : timer}`}
                                 </p>
 
                                 <button
                                     className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32"
-                                    onClick={() => {setStep(2)}}
+                                    onClick={handleCodeSubmit}
                                 >
                                     <p className="uppercase font-unbounded font-light text-white">отправить</p>
                                 </button>
@@ -254,29 +266,30 @@ const ForgotPassword = () => {
                                     <input
                                         name="password"
                                         type="password"
-                                        value={passwordValues.password}
-                                        onChange={handlePasswordChange}
+                                        value={pwd.password}
+                                        onChange={(e) => setPwd({ ...pwd, [e.target.name]: e.target.value })}
                                         className="border-b px-3 py-2 rounded-2xl"
                                     />
-                                    {passwordErrors.password && <p className="text-red-500 text-xs">{passwordErrors.password}</p>}
+                                    {pwdErr.password && <p className="text-red-500 text-xs">{pwdErr.password}</p>}
                                 </div>
+
                                 <div className="w-full flex flex-col gap-2">
                                     <p className="uppercase font-montserrat text-[12px] font-medium text-[#1B3C4D]">подтвердить пароль</p>
                                     <input
                                         name="password_confirm"
                                         type="password"
-                                        value={passwordValues.password_confirm}
-                                        onChange={handlePasswordChange}
+                                        value={pwd.password_confirm}
+                                        onChange={(e) => setPwd({ ...pwd, [e.target.name]: e.target.value })}
                                         className="border-b px-3 py-2 rounded-2xl"
                                     />
-                                    {passwordErrors.password_confirm && <p className="text-red-500 text-xs">{passwordErrors.password_confirm}</p>}
+                                    {pwdErr.password_confirm && <p className="text-red-500 text-xs">{pwdErr.password_confirm}</p>}
                                 </div>
                             </div>
                             <div className="w-full flex flex-col gap-10">
                                 <button
                                     className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32"
-                                    onClick={handlePasswordSubmit}
-                                    disabled={isPasswordSubmitting}
+                                    onClick={sendNewPassword}
+                                    disabled={pwdLoading}
                                 >
                                     <p className="uppercase font-unbounded font-light text-white">отправить</p>
                                 </button>
@@ -299,8 +312,8 @@ const ForgotPassword = () => {
                                 <p className="text-[#607E96] text-[10px] uppercase">ваш пароль был успешно изменен</p>
                             </div>
                             <div className="w-full flex flex-col gap-10">
-                                <button className="w-full bg-[#1B3C4D] py-5 rounded-2xl" onClick={() => {nav("/")}}>
-                                    <p className="uppercase font-unbounded font-light text-white mb-32">Вернуться ко входу</p>
+                                <button className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32" onClick={() => {nav("/")}}>
+                                    <p className="uppercase font-unbounded font-light text-white">Вернуться ко входу</p>
                                 </button>
                                 <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">ЕЩЕ НЕТ аккаунтА? <span className="cursor-pointer text-black" onClick={() => {nav("/register")}}> ЗАРЕГИСТРИРОВАТЬСЯ</span> </div>
                                 <div className="w-full hidden justify-center sm:flex">
