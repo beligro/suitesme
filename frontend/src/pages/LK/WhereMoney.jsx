@@ -1,100 +1,12 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
-import api from '../../utils/api';
-import { useAuth } from '../../contexts/AuthContext';
 
 const WhereMoney = () => {
     const [step, setStep] = React.useState(0);
     const [isActive, setIsActive] = React.useState(false);
     const nav = useNavigate();
-    const { isAuthenticated } = useAuth(); // Получаем статус авторизации
     const [isLoading, setIsLoading] = React.useState(true);
-    const [paymentStatus, setPaymentStatus] = React.useState(null); // 'paid', 'unpaid', 'checking'
 
-    // Проверяем авторизацию и статус платежа при монтировании
-    React.useEffect(() => {
-        const checkAuthAndPayment = async () => {
-            setIsLoading(true);
-
-            if (isAuthenticated) {
-                try {
-                    // Проверяем статус платежа
-                    const paymentResponse = await api.get('/api/v1/payment/info');
-
-                    if (paymentResponse.data.payment_status === 'paid') {
-                        setPaymentStatus('paid');
-                        nav("/LK"); // Если оплачено, редирект на /LK
-                        return;
-                    } else {
-                        setPaymentStatus('unpaid');
-                        setStep(1); // Если не оплачено, показываем шаг оплаты
-                    }
-                } catch (error) {
-                    console.error('Ошибка проверки платежа:', error);
-                    setPaymentStatus('unpaid');
-                    setStep(1); // В случае ошибки показываем шаг оплаты
-                }
-            } else {
-                setPaymentStatus('unpaid');
-                setStep(0); // Показываем шаг входа/регистрации
-            }
-
-            setIsLoading(false);
-        };
-
-        checkAuthAndPayment();
-    }, [isAuthenticated, nav]);
-
-    const handleContinue = async () => {
-        if (!isActive) return; // Если чекбокс не отмечен
-
-        try {
-            setIsLoading(true);
-            // Получаем ссылку на оплату
-            const paymentResponse = await api.get('/api/v1/payment/link');
-            const paymentLink = paymentResponse.data.link;
-
-            // Открываем платежную страницу в новом окне
-            const paymentWindow = window.open(paymentLink, '_blank');
-
-            // Проверяем статус платежа каждые 5 секунд
-            const interval = setInterval(async () => {
-                try {
-                    const statusResponse = await api.get('/api/v1/payment/info');
-
-                    if (statusResponse.data.payment_status === 'paid') {
-                        clearInterval(interval);
-                        nav("/LK"); // После успешной оплаты редирект на /LK
-                    } else if (statusResponse.data.payment_status === 'failed') {
-                        clearInterval(interval);
-                        alert('Оплата не прошла. Пожалуйста, попробуйте снова.');
-                    }
-                } catch (error) {
-                    console.error('Ошибка проверки статуса платежа:', error);
-                }
-            }, 5000);
-
-            // Очищаем интервал при закрытии компонента
-            return () => clearInterval(interval);
-        } catch (error) {
-            console.error('Ошибка при получении ссылки на оплату:', error);
-            alert('Не удалось получить ссылку на оплату. Пожалуйста, попробуйте позже.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Если проверка еще не завершена, показываем загрузку
-    if (isLoading) {
-        return (
-            <div className="w-full h-screen flex items-center justify-center bg-[#C2CED8]">
-                <div className="text-center">
-                    <p className="text-[#1B3C4D] font-montserrat">Проверка статуса...</p>
-                    {/* Можно добавить спиннер загрузки */}
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="w-full h-screen relative">
@@ -191,7 +103,6 @@ const WhereMoney = () => {
                         <button
                             className="w-full bg-[#1B3C4D] py-5 rounded-2xl disabled:opacity-50"
                             disabled={!isActive || isLoading}
-                            onClick={handleContinue}
                         >
                             <p className="uppercase font-unbounded font-light text-[14px] text-white">
                                 {isLoading ? 'Обработка...' : 'продолжить'}

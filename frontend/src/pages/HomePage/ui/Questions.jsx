@@ -35,7 +35,7 @@ const Questions = () => {
 
                 <div className="w-full">
                     {faqItems.map((item, index) => (
-                        <div key={index} className="border-b-[1px] w-full lg:border-gray-300 border-gray-400 py-8">
+                        <div key={index} className="border-b-[1px] w-full lg:border-gray-300 border-gray-400 lg:py-8 py-10">
                             <button
                                 onClick={() => toggle(index)}
                                 className="flex justify-between items-center w-full text-left text-[#1B3C4D] lg:font-medium font-light text-[16px]"
@@ -44,11 +44,13 @@ const Questions = () => {
                                 {openIndex === index ? <ChevronUp size={26} /> : <ChevronDown size={26} />}
                             </button>
                             {openIndex === index && (
-                                <div className="mt-6 text-[#1B3C4D] text-[15px] font-montserrat font-light">{item.answer}</div>
+                                <div className="mt-6 text-[#1B3C4D] text-[15px] font-montserrat font-light ">{item.answer}</div>
                             )}
+
                         </div>
                     ))}
                 </div>
+                <div className="lg:hidden block h-12 bg-[#C2CED8]"></div>
             </div>
         </div>
     );

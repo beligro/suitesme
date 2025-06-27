@@ -29,8 +29,8 @@ const Flower = () => {
                     <p className="font-unbounded text-[30px] line-through">7980 ₽</p>
                 </div>
                 <div className="w-full flex justify-center mt-32 pb-5">
-                    <div className="w-[240px] h-[50px] text-[14px] font-light flex items-center justify-center rounded-full bg-[#1B3C4D] text-white uppercase cursor-pointer hover:shadow-xl transition duration-200"
-                         onClick={() => nav("/LK")}
+                    <div className="w-[240px] h-[50px] text-[12px] font-light font-unbounded flex items-center justify-center rounded-full bg-[#1B3C4D] text-white uppercase cursor-pointer hover:shadow-xl transition duration-200"
+                         onClick={() => nav("/Lk")}
                     >
                         начать анализ
                     </div>

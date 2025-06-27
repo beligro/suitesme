@@ -1,101 +1,87 @@
 import {useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
-import api from "../../../utils/api.js";
-import {useAuth} from "../../../contexts/AuthContext.jsx";
-import useForm from "../../../hooks/useForm.js";
+import { useNavigate } from "react-router-dom";
+import { $host } from "../../../app/indexAPI.js";
+import {LK, VERIFY} from "../../../app/routes/constans.js";
+import {useSelector} from "react-redux";
+import {selectIsAuthenticated} from "../../../features/Auth/model/selector.js";
 
 const Register = () => {
+    const isAuth = useSelector(selectIsAuthenticated);
     const [showPassword, setShowPassword] = useState(false);
     const [showRepeatPassword, setShowRepeatPassword] = useState(false);
     const [isActive, setIsActive] = useState(false);
-    const nav = useNavigate()
-
-    const { isAuthenticated } = useAuth();
-
-    // Начальные значения формы
-    const initialValues = {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [values, setValues] = useState({
         first_name: '',
         last_name: '',
         birth_date: '',
         email: '',
         password: '',
         password_confirm: ''
+    });
+
+    const nav = useNavigate();
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setValues(prev => ({ ...prev, [name]: value }));
     };
 
-    // Правила валидации для формы регистрации
-    const validationRules = {
-        first_name: [
-            { type: 'required', message: 'Имя обязательно' }
-        ],
-        last_name: [
-            { type: 'required', message: 'Фамилия обязательна' }
-        ],
-        birth_date: [
-            { type: 'required', message: 'Дата рождения обязательна' },
-            { type: 'date', message: 'Некорректная дата рождения' }
-        ],
-        email: [
-            { type: 'required', message: 'Email обязателен' },
-            { type: 'email', message: 'Некорректный формат email' }
-        ],
-        password: [
-            { type: 'required', message: 'Пароль обязателен' },
-            { type: 'minLength', value: 6, message: 'Пароль должен содержать минимум 6 символов' }
-        ],
-        password_confirm: [
-            { type: 'required', message: 'Подтверждение пароля обязательно' },
-            { type: 'match', field: 'password', message: 'Пароли не совпадают' }
-        ]
+    const validate = () => {
+        const newErrors = {};
+
+        if (!values.first_name) newErrors.first_name = "Имя обязательно";
+        if (!values.last_name) newErrors.last_name = "Фамилия обязательна";
+        if (!values.birth_date) newErrors.birth_date = "Дата рождения обязательна";
+        if (!values.email) {
+            newErrors.email = "Email обязателен";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+            newErrors.email = "Некорректный формат email";
+        }
+        if (!values.password) newErrors.password = "Пароль обязателен";
+        if (values.password !== values.password_confirm)
+            newErrors.password_confirm = "Пароли не совпадают";
+
+        return newErrors;
     };
 
-    // Обработчик отправки формы
-    const handleRegisterSubmit = async (values) => {
+    const fetchRegister = async (data) => {
+        const response = await $host.post(`/auth/register`, data);
+        return response.data;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const validationErrors = validate();
+        setErrors(validationErrors);
+
+        if (Object.keys(validationErrors).length > 0) return;
+
+        setIsSubmitting(true);
+
         try {
-            const response = await api.post('/api/v1/auth/register', values);
+            const data = await fetchRegister(values);
 
-            // Сохраняем ID пользователя для верификации email
-            localStorage.setItem('userId', response.data.user_id);
-
-            // Перенаправляем на страницу верификации email с передачей данных
-            nav('/verify_email', {
-                state: {
-                    email: values.email,
-                    password: values.password
-                }
-            });
-
-            return response.data;
+            localStorage.setItem('userId' , String(data.user_id))
+            localStorage.setItem('infoToResent', JSON.stringify(values))
+            nav(VERIFY);
         } catch (error) {
-            console.error('Ошибка регистрации:', error);
-
-            // Обрабатываем ошибку конфликта (пользователь уже существует)
-            if (error.response?.status === 409) {
-                throw new Error('Пользователь с таким email уже существует');
+            console.error("Ошибка регистрации:", error);
+            if (error?.response?.data?.message) {
+                alert(error.response.data.message);
             }
-
-            throw new Error(error.response?.data?.message || 'Ошибка при регистрации. Пожалуйста, попробуйте снова.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
-    // Инициализируем хук формы
-    const {
-        values,
-        errors,
-        isSubmitting,
-        handleChange,
-        handleSubmit
-    } = useForm(
-        initialValues,
-        validationRules,
-        handleRegisterSubmit
-    );
-
-    // Если пользователь уже авторизован, перенаправляем на страницу профиля
     useEffect(() => {
-        if (isAuthenticated) {
-            nav('/profile');
+        if (isAuth) {
+            nav(LK, { replace: true });
         }
-    }, [isAuthenticated, nav]);
+    }, [isAuth]);
+
 
 
     return (

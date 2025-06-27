@@ -211,7 +211,7 @@ html,body { height:100%; background:#fff; }
   gap: 6px;
   background-color: white;
   width: max-content;
-  min-width: 120px;
+  min-width: 90px;
   max-width: 200px;
   white-space: nowrap;
 }
@@ -226,4 +226,12 @@ html,body { height:100%; background:#fff; }
 
 .custom-swiper-pagination .swiper-pagination-bullet-active {
   background-color: #1B3C4D;
+}
+
+@media (max-width: 1023px) {
+  .custom-swiper-pagination {
+    border: none;
+    max-width: 100px;
+    gap: 1px;
+  }
 }

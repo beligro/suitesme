@@ -1,81 +1,86 @@
 import {useEffect, useState} from "react";
-import {useLocation, useNavigate} from "react-router-dom";
-import {useAuth} from "../../../contexts/AuthContext.jsx";
-import api from "../../../utils/api.js";
-import useForm from "../../../hooks/useForm.js";
+import { useNavigate } from "react-router-dom";
+import {$host} from "../../../app/indexAPI.js";
+import {LK} from "../../../app/routes/constans.js";
+import { login } from "../../../features/Auth/model/slice.js";
+import {useDispatch, useSelector} from "react-redux";
+import {selectIsAuthenticated} from "../../../features/Auth/model/selector.js";
 
 const Login = () => {
+    const isAuth = useSelector(selectIsAuthenticated);
     const [showPassword, setShowPassword] = useState(false);
-    const nav = useNavigate()
+    const [values, setValues] = useState({ email: '', password: '' });
+    const [errors, setErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const dispatch = useDispatch();
+    const [isModalErrorOpen, setIsModalErrorOpen] = useState(false);
 
+    const nav = useNavigate();
 
-    const location = useLocation();
-    const { isAuthenticated, login } = useAuth();
-
-    const validationRules = {
-        email: [
-            { type: 'required', message: 'Email обязателен' },
-            { type: 'email', message: 'Некорректный формат email' }
-        ],
-        password: [
-            { type: 'required', message: 'Пароль обязателен' }
-        ]
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setValues((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Обработчик отправки формы
-    const handleLoginSubmit = async (values) => {
+    const validate = () => {
+        const newErrors = {};
+
+        if (!values.email) {
+            newErrors.email = 'Email обязателен';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+            newErrors.email = 'Некорректный формат email';
+        }
+
+        if (!values.password) {
+            newErrors.password = 'Пароль обязателен';
+        }
+
+        return newErrors;
+    };
+
+    const fetchLogin = async ({ email, password }) => {
         try {
-            const response = await api.post('/api/v1/auth/login', {
-                email: values.email,
-                password: values.password
-            });
-
-            const { access_token, refresh_token } = response.data;
-
-            // Используем функцию login из контекста аутентификации
-            login(access_token, refresh_token);
-
-            // Перенаправляем на страницу профиля
-            nav('/profile');
-
+            const response = await $host.post(`/auth/login`, { email, password });
             return response.data;
         } catch (error) {
-            console.error('Ошибка авторизации:', error);
-            throw new Error(error.response?.data?.message || 'Ошибка авторизации. Проверьте введенные данные.');
+            console.error(error);
+            throw error;
         }
     };
 
-    const {
-        values,
-        errors,
-        isSubmitting,
-        handleChange,
-        handleSubmit,
-        setAllValues
-    } = useForm(
-        { email: '', password: '' },
-        validationRules,
-        handleLoginSubmit
-    );
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const validationErrors = validate();
+        setErrors(validationErrors);
 
-    // Если пользователь уже авторизован, перенаправляем на страницу профиля
-    useEffect(() => {
-        if (isAuthenticated) {
-            nav('/profile');
+        if (Object.keys(validationErrors).length > 0) return;
+
+        setIsSubmitting(true);
+
+        try {
+            const data = await fetchLogin(values);
+
+            dispatch(login(data));
+
+            nav(LK);
+        } catch (error) {
+            console.error("Ошибка при входе:", error);
+            setIsModalErrorOpen(true);
+        } finally {
+            setIsSubmitting(false);
         }
-    }, [isAuthenticated, nav]);
+    };
 
-    // Если есть данные в location.state, используем их для автоматического входа
     useEffect(() => {
-        if (location.state) {
-            const { email, password } = location.state;
-            if (email && password) {
-                setAllValues({ email, password });
-                handleSubmit();
-            }
-        }
-    }, [location.state, setAllValues, handleSubmit]);
+        setTimeout(() => setIsModalErrorOpen(false), 10000);
+    }, [handleSubmit])
 
+
+    useEffect(() => {
+        if (isAuth) {
+            nav(LK, { replace: true });
+        }
+    }, [isAuth]);
 
     return (
         <form onSubmit={handleSubmit} className="w-full min-h-screen flex justify-center items-center">
@@ -136,6 +141,11 @@ const Login = () => {
                         <div className="w-full flex flex-row justify-end gap-3">
                             <p className="uppercase font-montserrat text-right font-thin cursor-pointer text-[14px]" onClick={() => {nav("/forgotpassword")}}>забыли пароль?</p>
                         </div>
+                        {isModalErrorOpen && (
+                            <div className="w-full absolute lg:-bottom-20 -bottom-8">
+                                <p className="text-red-500 font-montserrat uppercase text-center whitespace-nowrap sm:text-[16px] text-[12px]"> неправильный логин или пароль</p>
+                            </div>
+                        )}
                     </div>
                     <div className="w-full flex flex-col gap-10">
                         <button
