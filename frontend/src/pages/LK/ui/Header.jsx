@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
-import {LK, MAIN} from "../../../app/routes/constans.js";
-import {useDispatch} from "react-redux";
-import { $host} from "../../../app/indexAPI.js";
+import {MAIN} from "../../../app/routes/constans.js";
+import {useDispatch, useSelector} from "react-redux";
+import {$authHost, $host} from "../../../app/indexAPI.js";
 import {logout} from "../../../features/Auth/model/slice.js";
+import {selectIsAuthenticated} from "../../../features/Auth/model/selector.js";
 
 const Header = () => {
     const dispatch = useDispatch();
@@ -19,6 +20,7 @@ const Header = () => {
     const [styleId, setStyleId] = React.useState(null);
     const [error, setError] = React.useState('');
     const [paymentStatus, setPaymentStatus] = React.useState(null);
+    const isAuth = useSelector(selectIsAuthenticated);
 
     const handleLogout = async () => {
         const refreshToken = localStorage.getItem('refresh_token')
@@ -32,6 +34,7 @@ const Header = () => {
             localStorage.removeItem("refresh_token");
             dispatch(logout());
         }catch (error) {
+            console.log(error);
             throw error;
         }
     }
@@ -60,10 +63,10 @@ const Header = () => {
     }, [isOpen]);
 
     const handlePhotoUpload = async (file) => {
-        // if (!isAuthenticated || paymentStatus !== 'paid') {
-        //     nav('/payment');
-        //     return;
-        // }
+        if (!isAuth || paymentStatus !== 'paid') {
+            nav('/payment');
+            return;
+        }
 
         if (!file) return;
         setStep(3);
@@ -71,8 +74,15 @@ const Header = () => {
         const formData = new FormData();
         formData.append('photo', file);
 
-
-        //ЗАПРОС????
+        try{
+            const {data} = await $authHost.post("/style/build", formData);
+            return data
+        } catch(error){
+            console.log(error);
+            throw error;
+        } finally {
+            setStep(1)
+        }
     };
 
 
@@ -153,7 +163,7 @@ const Header = () => {
                             <p className="text-center font-montserrat font-normal text-[14px] cursor-pointer">Имя</p>
                         </div>
 
-                        <img src="/photos/LK/Step1.png" className="lg:w-[17%] w-[70%] max-w-[150px] cursor-pointer hover:scale-95 transition ease-in-out duration-200" alt="" onClick={() => setStep(2)}/>
+                        <img src="/photos/LK/Step2.png" className="lg:w-[17%] w-[70%] max-w-[150px] cursor-pointer hover:scale-95 transition ease-in-out duration-200" alt="" onClick={() => setStep(2)}/>
                         <p className="text-center font-montserrat font-light text-[12px] uppercase">
                             нажмите на иконку,  чтобы НАЧАТЬ <br className="lg:block hidden"/> ТИПИРОВАНИЕ
                         </p>
@@ -178,7 +188,7 @@ const Header = () => {
                             <p className="text-center font-montserrat font-normal text-[14px] cursor-pointer">Имя</p>
                         </div>
                         <p className="text-center font-montserrat font-light lg:text-[12px] text-[10px]  uppercase">ВАШ ТИПАЖ</p>
-                        <img src="/photos/LK/Step2.png" className="lg:w-[17%] w-[70%] max-w-[150px] cursor-pointer hover:scale-95 transition ease-in-out duration-200" alt="" onClick={() => setStep(0)}/>
+                        <img src="/photos/LK/Step1.png" className="lg:w-[17%] w-[70%] max-w-[150px] cursor-pointer hover:scale-95 transition ease-in-out duration-200" alt="" onClick={() => setStep(0)}/>
                         <p className="text-center font-montserrat font-light text-[12px] uppercase">
                             нажмите на иконку, чтобы посмотреть <br className="lg:block hidden"/> результат
                         </p>

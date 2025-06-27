@@ -139,7 +139,7 @@ const Login = () => {
                             </div>
                         </div>
                         <div className="w-full flex flex-row justify-end gap-3">
-                            <p className="uppercase font-montserrat text-right font-thin cursor-pointer text-[14px]" onClick={() => {nav("/forgotpassword")}}>забыли пароль?</p>
+                            <p className="uppercase font-montserrat text-right font-thin cursor-pointer text-[14px]" onClick={() => {nav("/password_reset")}}>забыли пароль?</p>
                         </div>
                         {isModalErrorOpen && (
                             <div className="w-full absolute lg:-bottom-20 -bottom-8">
