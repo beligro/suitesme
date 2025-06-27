@@ -10,5 +10,5 @@ export const LK = '/lk'
 //АВТОРИЗАЦИЯ И ПРИЧАСТНОЕ
 export const LOGIN = '/login'
 export const REGISTER = '/register'
-export const FORGOTT_PASSWORD = '/forgotpassword'
+export const FORGOTT_PASSWORD = '/password_reset'
 export const VERIFY = '/verify'

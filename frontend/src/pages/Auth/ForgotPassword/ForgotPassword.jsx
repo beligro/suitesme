@@ -5,12 +5,6 @@ import { $host } from "../../../app/indexAPI.js";
 const ForgotPassword = () => {
     const nav = useNavigate();
 
-    /** ----- Шаги -----
-     * 0 – ввод email
-     * 1 – ввод кода
-     * 2 – ввод нового пароля
-     * 3 – успех
-     */
     const [step, setStep] = useState(0);
 
     /* ───────────   step 0 ─────────── */
@@ -19,13 +13,9 @@ const ForgotPassword = () => {
     const [isSendingMail, setIsSendingMail] = useState(false);
 
     /* ───────────   step 1 ─────────── */
-    const [code, setCode] = useState(["", "", "", "", "", ""]);
-    const inputRefs = useRef([]);
     const [timer, setTimer] = useState(40);
     const timerRef = useRef(null);
-    const [resetToken, setResetToken] = useState(""); // сохраним код сюда
-
-    /* ───────────   step 2 ─────────── */
+    const [resetToken, setResetToken] = useState("");
     const [pwd, setPwd] = useState({ password: "", password_confirm: "" });
     const [pwdErr, setPwdErr] = useState({});
     const [pwdLoading, setPwdLoading] = useState(false);
@@ -59,6 +49,15 @@ const ForgotPassword = () => {
         return () => clearInterval(timerRef.current);
     }, [step]);
 
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const token = searchParams.get("token");
+        if (token) {
+            setResetToken(token);
+            setStep(2)
+        }
+    }, []);
+
     /* ────────────────────────────────────────────────── */
     /* ----------------–  step 0  –---------------------- */
     const sendMail = async () => {
@@ -69,7 +68,7 @@ const ForgotPassword = () => {
         try {
             setIsSendingMail(true);
             await $host.post("/auth/forgot_password", { email: values.email });
-            setStep(1);
+            setStep(1)
         } catch (e) {
             alert(e.response?.data?.message ?? "Ошибка отправки письма");
         } finally {
@@ -78,28 +77,8 @@ const ForgotPassword = () => {
     };
 
     /* ────────────────────────────────────────────────── */
-    /* ----------------–  step 1  –---------------------- */
-    const handleCodeChange = (val, idx) => {
-        if (!/^\d?$/.test(val)) return;
-        const next = [...code];
-        next[idx] = val;
-        setCode(next);
-        if (val && idx < 5) inputRefs.current[idx + 1]?.focus();
-    };
-    const handleKey = (e, idx) => {
-        if (e.key === "Backspace" && !code[idx] && idx > 0)
-            inputRefs.current[idx - 1]?.focus();
-    };
-
-    const handleCodeSubmit = () => {
-        const token = code.join("");
-        if (token.length !== 4) return alert("Введите 4-значный код");
-        setResetToken(token);
-        setStep(2);
-    };
-
-    /* ────────────────────────────────────────────────── */
     /* ----------------–  step 2  –---------------------- */
+
     const validatePwd = () => {
         const pe = {};
         if (!pwd.password) pe.password = "Пароль обязателен";
@@ -128,7 +107,6 @@ const ForgotPassword = () => {
             setPwdLoading(false);
         }
     };
-
 
 
     return (
@@ -186,38 +164,15 @@ const ForgotPassword = () => {
                 <div className="w-full min-h-screen flex justify-center items-center">
                     <div className="sm:w-[400px] w-full sm:p-0 p-5 h-[780px]">
                         <div className="w-full h-full flex flex-col justify-between gap-10">
-                            <div className="w-full flex flex-col gap-10 relative">
-                                <div className="md:hidden flex flex-row items-center justify-between w-full">
-                                    <img src="/photos/Auth/Back.svg" alt="" className="cursor-pointer w-10" onClick={() => {nav(-1)}}/>
-                                    <img src="/photos/Auth/Star.svg" alt="" className="w-10" />
-                                </div>
-
-                                <img className="md:block hidden absolute -left-20 cursor-pointer" src="/photos/Auth/Back.svg" alt="" onClick={() => {nav(-1)}}/>
-
-                                <p className="font-unbounded text-left md:uppercase font-medium text-[20px]">пожалуйста, проверьте свою электронную почту</p>
-                                <p className="uppercase text-[10px] font-medium font-montserrat w-full text-[#607E96]">мы отправили код по адресу {values.email}</p>
-
-                                <div className="w-full flex justify-between gap-4">
-                                    {code.map((digit, index) => (
-                                        <input
-                                            key={index}
-                                            ref={(el) => (inputRefs.current[index] = el)}
-                                            type="text"
-                                            inputMode="numeric"
-                                            maxLength={1}
-                                            value={digit}
-                                            onChange={(e) => handleCodeChange(e.target.value, index)}
-                                            onKeyDown={(e) => handleKey(e, index)}
-                                            className="w-full aspect-square text-center text-2xl font-bold rounded-2xl border border-gray-300 focus:border-black outline-none transition-all"
-                                        />
-                                    ))}
-                                </div>
+                            <div className="w-full flex flex-col gap-5 justify-center items-center mt-14">
+                                <img src="/photos/Auth/Star.svg" alt="" className="w-10 mb-5"/>
+                                <p className="uppercase font-medium font-unbounded text-[#1B3C4D]">код отправлен на почту</p>
+                                <p className="text-[#607E96] text-[10px] uppercase">проверьте спам, если кода нет</p>
                             </div>
-
                             <div className="w-full flex flex-col gap-10">
 
                                 <p
-                                    className={`text-center mb-5 font-montserrat ${
+                                    className={`text-center mb-20 font-montserrat ${
                                         timer === 0 ? 'cursor-pointer text-blue-500' : 'text-gray-400 cursor-not-allowed'
                                     }`}
                                     onClick={async () => {
@@ -232,12 +187,7 @@ const ForgotPassword = () => {
                                         : `отправить код повторно через 00:${timer < 10 ? `0${timer}` : timer}`}
                                 </p>
 
-                                <button
-                                    className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32"
-                                    onClick={handleCodeSubmit}
-                                >
-                                    <p className="uppercase font-unbounded font-light text-white">отправить</p>
-                                </button>
+
                                 <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">ЕЩЕ НЕТ аккаунтА? <span className="cursor-pointer text-black" onClick={() => {nav("/register")}}> ЗАРЕГИСТРИРОВАТЬСЯ</span> </div>
                                 <div className="w-full hidden justify-center sm:flex">
                                     <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt="" onClick={() => {nav("/")}}/>
