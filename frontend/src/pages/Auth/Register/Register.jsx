@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { $host } from "../../../app/indexAPI.js";
-import {LK, VERIFY} from "../../../app/routes/constans.js";
+import { PAYMENT, VERIFY} from "../../../app/routes/constans.js";
 import {useSelector} from "react-redux";
 import {selectIsAuthenticated} from "../../../features/Auth/model/selector.js";
 
@@ -78,7 +78,7 @@ const Register = () => {
 
     useEffect(() => {
         if (isAuth) {
-            nav(LK, { replace: true });
+            nav(PAYMENT, { replace: true });
         }
     }, [isAuth]);
 

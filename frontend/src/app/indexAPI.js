@@ -22,8 +22,9 @@ $authHost.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+        const isPaymentPage = window.location.pathname === "/payment";
 
-        if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
+        if ((error.response?.status === 401 || (!isPaymentPage && error.response?.status === 403)) && !originalRequest._retry) {
             originalRequest._retry = true;
 
             const refreshToken = localStorage.getItem("refresh_token");
@@ -46,8 +47,6 @@ $authHost.interceptors.response.use(
                 console.error("Ошибка обновления токена:", refreshError);
                 localStorage.removeItem("access_token");
                 localStorage.removeItem("refresh_token");
-                // window.location.href = "/login";
-
                 return Promise.reject(refreshError);
             }
         }

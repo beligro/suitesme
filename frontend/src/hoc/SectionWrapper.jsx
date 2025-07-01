@@ -5,7 +5,8 @@ import { staggerContainer } from "../utils/motion";
 const SectionWrapper = (Component , idName)=>
     function HOC(){
         return(
-            <motion.section
+
+            < motion.section
                 variants={staggerContainer()}
                 initial="hidden"
                 whileInView='show'
