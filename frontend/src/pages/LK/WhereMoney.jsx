@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
-import {$authHost} from "../../app/indexAPI.js";
+import {$authHost, $host} from "../../app/indexAPI.js";
 import {LK} from "../../app/routes/constans.js";
 
 const WhereMoney = () => {
