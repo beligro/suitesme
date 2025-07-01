@@ -1,9 +1,10 @@
 import React, {useEffect} from 'react';
 import { useNavigate } from "react-router-dom";
 import {MAIN} from "../../../app/routes/constans.js";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {$authHost, $host} from "../../../app/indexAPI.js";
 import {logout} from "../../../features/Auth/model/slice.js";
+import {selectUser} from "../../../features/Auth/model/selector.js";
 
 const Header = () => {
     const dispatch = useDispatch();
@@ -13,7 +14,9 @@ const Header = () => {
     const [isOpen, setIsOpen] = React.useState(false);
     const nav = useNavigate();
     const [step, setStep] = React.useState(0); // 0 1 2 - функциональные, 3 - загрузка
-    const [photoFile, setPhotoFile] = React.useState(null);
+    const [style, setStyle] = React.useState("");
+    const user = useSelector(selectUser);
+
 
     const handleLogout = async () => {
         const refreshToken = localStorage.getItem('refresh_token')
@@ -85,13 +88,13 @@ const Header = () => {
     const verfication = async () => {
         setStep(3)
         const response = await getInfo()
-        console.log(response);
+        //console.log(response);
         if (response.status === 200) {
             setStep(1)
         } else if (response.status === 404) {
             setStep(0)
         } else {
-            // nav(PAYMENT)
+            //nav(PAYMENT)
         }
     }
 
@@ -109,10 +112,11 @@ const Header = () => {
             const data = await styleBuild(formData);
 
             if (data?.style_id) {
-                console.log('✅ style_id получен:', data.style_id);
-                // window.location.href = response.style_id; // или nav() если SPA
+                console.log('style_id получен:', data.style_id);
+                setStyle(data.style_id)
+                setStep(2)
             } else {
-                console.warn('❌ style_id отсутствует в ответе:', data);
+                console.warn('style_id отсутствует в ответе:', data);
                 setStep(0);
             }
         } catch (err) {
@@ -161,7 +165,6 @@ const Header = () => {
                                 accept="image/*"
                                 onChange={ (e) => {
                                     if (e.target.files[0]) {
-                                        setPhotoFile(e.target.files[0]);
                                         handlePhotoUpload(e.target.files[0]);
                                     }
                                 }}
@@ -171,7 +174,7 @@ const Header = () => {
                             <p className="uppercase text-[#1B3C4D] text-[14px] font-unbounded font-light text-center">Загрузите<br/> своё<br/> селфи</p>
                         </div>
 
-                        <p className="text-center font-montserrat font-light text-[12px] uppercase">
+                        <p className="text-center font-montserrat font-light text-[12px] uppercase text-[#1B3C4D]">
                             наш <span className="">AI</span> проанализирует черты лица <br className="lg:block hidden" />
                             и определит типаж
                         </p>
@@ -205,6 +208,23 @@ const Header = () => {
                     <div className="uppercase font-light text-center text-[13px] lg:hidden block font-montserrat">
                         Здесь может быть размещен
                         какой-то текст
+                    </div>
+                </div>
+            )}
+
+            {step === 2 && (
+                <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 lg:h-[80%] h-[70%] lg:block flex flex-col items-center justify-between text-[#1B3C4D]">
+                    <div className="flex flex-col items-center lg:justify-around justify-start h-full gap-4">
+                        <p className="lg:text-[30px] text-[23px] font-unbounded font-extralight text-center uppercase" >Готово! <br className="lg:hidden" /> Ваш типаж <br className="lg:block hidden" /> SUITSME.AI</p>
+                        <div className="flex flex-col items-center justify-center gap-2 mb-8">
+                            <div
+                                className="w-10 h-10 border rounded-full border-white flex items-center justify-center cursor-pointer">
+                                <img src="/photos/main/Profile.svg" className="w-4" alt="" />
+                            </div>
+                            <p className="text-center font-montserrat font-normal text-[14px] cursor-pointer">{user.first_name}</p>
+                        </div>
+                        <p className="text-center font-montserrat text-[25px]">Ваш стиль - <span className="font-semibold ">{style}</span></p>
+                        <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>
                     </div>
                 </div>
             )}

@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import {useNavigate} from "react-router-dom";
 import {MAIN, PAYMENT} from "../../../app/routes/constans.js";
 import {useSelector} from "react-redux";
-import {selectIsAuthenticated} from "../../../features/Auth/model/selector.js";
+import {selectIsAuthenticated, selectUser} from "../../../features/Auth/model/selector.js";
 import {$host} from "../../../app/indexAPI.js";
 
 const TopMain = () => {
@@ -17,6 +17,8 @@ const TopMain = () => {
         first_name: "",
         last_name: "",
     });
+
+    const user = useSelector(selectUser);
 
     const fetchInfo = async () => {
         try {
@@ -96,7 +98,7 @@ const TopMain = () => {
                     <a className="font-montserrat font-medium text-[14px] text-white whitespace-nowrap cursor-pointer" href='#about'>О сервисе</a>
                     <a className="font-montserrat font-medium text-[14px] text-white whitespace-nowrap cursor-pointer" href='#questions'>Ответы на вопросы</a>
                     <a className="font-montserrat font-medium text-[14px] text-white whitespace-nowrap cursor-pointer" href='#examples'>Примеры результатов</a>
-                    <a className="px-7 h-12 flex items-center justify-center rounded-full !border text-[13px] !border-white font-light uppercase text-white font-unbounded cursor-pointer" onClick={() => nav("/login")}>войти</a>
+                    <a className="px-7 h-12 flex items-center justify-center rounded-full !border text-[13px] !border-white font-light uppercase text-white font-unbounded cursor-pointer" onClick={() => nav("/login")}>{isAuth ? user.first_name : "Войти"}</a>
                 </div>
             </div>
             <div className="absolute z-40 lg:top-36 top-[400px] lg:left-[20%] lg:w-[250px] w-full lg:text-left text-center lg:p-0 p-8">
@@ -146,7 +148,7 @@ const TopMain = () => {
                         <div className="w-12 h-12 border rounded-full border-white flex items-center justify-center cursor-pointer" onClick={() => nav("/login")}>
                             <img src="/photos/main/Profile.svg" className="w-6" alt="" onClick={() => nav(PAYMENT)}/>
                         </div>
-                        <p className="text-center font-montserrat font-light text-[16px] text-white cursor-pointer" onClick={() => nav(PAYMENT)}>{length.info > 0 ? info.first_name : "Войти"}</p>
+                        <p className="text-center font-montserrat font-light text-[16px] text-white cursor-pointer" onClick={() => nav(PAYMENT)}>{isAuth ? user.first_name : "Войти"}</p>
                     </div>
                 </div>
             </div>
