@@ -60,7 +60,7 @@ const CenterFirst = () => {
                     />
                     <img className="absolute w-[500px] lg:top-[500px] top-[660px] lg:left-20 -left-20" src="/photos/main/MiddleWoman.png" alt=""/>
                     <div className="absolute left-1/2 lg:flex hidden transform text-[12px] font-light -translate-x-1/2 top-[850px] w-[240px] h-[50px] items-center justify-center rounded-full bg-[#1B3C4D] font-unbounded text-white uppercase cursor-pointer hover:shadow-xl transition duration-200"
-                         onClick={() => nav("/Lk")}
+                         onClick={() => nav("/payment")}
                     >
                         начать сейчас
                     </div>

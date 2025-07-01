@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import {$host} from "../../../app/indexAPI.js";
-import {LK} from "../../../app/routes/constans.js";
+import {FORGOTT_PASSWORD, PAYMENT, REGISTER} from "../../../app/routes/constans.js";
 import { login } from "../../../features/Auth/model/slice.js";
 import {useDispatch, useSelector} from "react-redux";
 import {selectIsAuthenticated} from "../../../features/Auth/model/selector.js";
@@ -62,7 +62,7 @@ const Login = () => {
 
             dispatch(login(data));
 
-            nav(LK);
+            nav(PAYMENT);
         } catch (error) {
             console.error("Ошибка при входе:", error);
             setIsModalErrorOpen(true);
@@ -78,7 +78,7 @@ const Login = () => {
 
     useEffect(() => {
         if (isAuth) {
-            nav(LK, { replace: true });
+            nav(PAYMENT, { replace: true });
         }
     }, [isAuth]);
 
@@ -139,7 +139,7 @@ const Login = () => {
                             </div>
                         </div>
                         <div className="w-full flex flex-row justify-end gap-3">
-                            <p className="uppercase font-montserrat text-right font-thin cursor-pointer text-[14px]" onClick={() => {nav("/password_reset")}}>забыли пароль?</p>
+                            <p className="uppercase font-montserrat text-right font-thin cursor-pointer text-[14px]" onClick={() => nav(FORGOTT_PASSWORD)}>забыли пароль?</p>
                         </div>
                         {isModalErrorOpen && (
                             <div className="w-full absolute lg:-bottom-20 -bottom-8">
@@ -155,7 +155,7 @@ const Login = () => {
                         >
                             <p className="uppercase font-unbounded font-light text-white">войти</p>
                         </button>
-                        <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">ЕЩЕ НЕТ аккаунтА? <span className="cursor-pointer text-black" onClick={() => {nav("/register")}}> ЗАРЕГИСТРИРОВАТЬСЯ</span> </div>
+                        <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">ЕЩЕ НЕТ аккаунтА? <span className="cursor-pointer text-black" onClick={() => nav(REGISTER)}> ЗАРЕГИСТРИРОВАТЬСЯ</span> </div>
                         <div className="w-full hidden justify-center sm:flex">
                             <img src="/photos/Auth/Register/cross-svgrepo-com.svg" className="w-8 cursor-pointer" alt="" onClick={() => {nav("/")}} />
                         </div>

@@ -30,10 +30,7 @@ const Carusel = () => {
         <div className="w-full flex justify-center lg:mt-32 mt-10 pl-4 relative">
             <img src="/photos/main/Lines.png" alt="" className="w-full absolute bottom-0 z-0 lg:block hidden" />
             <div className="w-full lg:w-[1000px] z-10 ">
-                <p className="lg:hidden text-[23px] text-center font-unbounded font-extrabold text-[#1B3C4D] pb-10">
-                    Как это работает?
-                </p>
-                <p className="text-[30px] lg:text-[53px] text-center font-unbounded lg:text-left text-balance w-full font-extralight uppercase text-[#1B3C4D] leading-tight">
+                <p className="text-[30px] lg:text-[53px] font-unbounded lg:text-left text-left text-balance w-full font-extralight uppercase text-[#1B3C4D] leading-tight">
                     Клиенты, которые уже работают по системе{" "}
                     <span className="text-[#8296A6] font-extralight">MNE IDET</span>
                 </p>
@@ -91,7 +88,7 @@ const Carusel = () => {
 
                 <div className="w-full flex justify-center lg:mt-32 mt-10 pb-5">
                     <div className="w-[240px] h-[50px] text-[12px] font-light flex items-center justify-center font-unbounded rounded-full bg-[#1B3C4D] text-white uppercase cursor-pointer hover:shadow-xl transition duration-200"
-                         onClick={() => nav("/Lk")}
+                         onClick={() => nav("/payment")}
                     >
                         узнать свой типаж
                     </div>

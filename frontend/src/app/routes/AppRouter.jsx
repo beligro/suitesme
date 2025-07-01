@@ -28,49 +28,42 @@ const AppRouter = () => {
 
     useEffect(() => {
         if (specialRoutesSet.has(location.pathname)) {
-            setLoading(false);
-            return;
+            const timeout = setTimeout(() => setLoading(false), 300);
+            return () => clearTimeout(timeout);
         }
 
         (async () => {
             try {
                 const data = await getUsersStyle();
                 dispatch(setIsAuthenticated(true));
-                dispatch(setUser(data))
+                dispatch(setUser(data));
             } catch {
                 dispatch(logout());
-                dispatch(resetUser())
+                dispatch(resetUser());
             } finally {
-                setLoading(false)
+                setTimeout(() => setLoading(false), 1000);
             }
         })();
     }, []);
-
-    const PrivateRoute = ({ isAuth, loading, children }) => {
-        if (loading) return null;
-        return isAuth ? children : <Navigate to={MAIN} replace />;
-    };
 
     if (loading) return <Loading />;
 
     return (
         <Suspense fallback={<Loading />}>
             <Routes>
-                {authorise.map(({ path, Component }) => (
+                {isAuth && authorise.map(({ path, Component }) => (
                     <Route
                         key={path}
                         path={path}
                         element={
-                            <PrivateRoute isAuth={isAuth} loading={loading}>
-                                <Component />
-                            </PrivateRoute>
+                        <Component />
                         }
                     />
                 ))}
                 {nonAuthorise.map(({ path, Component }) => (
                     <Route key={path} path={path} element={<Component />} />
                 ))}
-                {authRoutes.map(({ path, Component }) => (
+                { authRoutes.map(({ path, Component }) => (
                     <Route key={path} path={path} element={<Component />} />
                 ))}
 
