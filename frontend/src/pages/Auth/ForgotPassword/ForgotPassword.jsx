@@ -166,7 +166,7 @@ const ForgotPassword = () => {
                         <div className="w-full h-full flex flex-col justify-between gap-10">
                             <div className="w-full flex flex-col gap-5 justify-center items-center mt-14">
                                 <img src="/photos/Auth/Star.svg" alt="" className="w-10 mb-5"/>
-                                <p className="uppercase font-medium font-unbounded text-[#1B3C4D]">код отправлен на почту</p>
+                                <p className="uppercase font-medium font-unbounded text-center text-[#1B3C4D]">ссылка для восстановления пароля отправлена на почту</p>
                                 <p className="text-[#607E96] text-[10px] uppercase">проверьте спам, если кода нет</p>
                             </div>
                             <div className="w-full flex flex-col gap-10">

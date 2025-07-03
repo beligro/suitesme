@@ -7,7 +7,7 @@ const Flower = () => {
 
     return (
         <div
-            className="w-full h-[700px] relative"
+            className="w-full h-[700px] relative overflow-hidden"
             style={{
                 backgroundImage: `radial-gradient(ellipse at bottom center, #C2CED8 0%, transparent 70%)`,
                 backgroundRepeat: 'no-repeat',

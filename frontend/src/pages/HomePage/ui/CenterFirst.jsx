@@ -17,8 +17,8 @@ const CenterFirst = () => {
 
 
     return (
-        <div className="w-full z-30 relative flex justify-center mb-[900px]">
-            <div className="absolute -top-[24px] left-0 w-full h-full bg-white"/>
+        <div className="w-full z-30 relative flex justify-center pb-[900px]">
+            <div className="absolute  -top-[0px] left-0 w-full h-full bg-white"/>
 
             <div className="lg:w-[1000px] w-full lg:p-0 p-5 relative flex flex-col gap-5">
                 <p className="lg:text-[30px] text-[23px] lg:text-left text-center font-unbounded font-extrabold text-[#1B3C4D] lg:pt-32 pt-5">
