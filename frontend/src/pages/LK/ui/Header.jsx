@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {MAIN} from "../../../app/routes/constans.js";
 import {useDispatch, useSelector} from "react-redux";
 import {$authHost, $host} from "../../../app/indexAPI.js";
-import {logout} from "../../../features/Auth/model/slice.js";
+import {logout, setUser} from "../../../features/Auth/model/slice.js";
 import {selectUser} from "../../../features/Auth/model/selector.js";
 
 const Header = () => {
@@ -16,6 +16,7 @@ const Header = () => {
     const [step, setStep] = React.useState(0); // 0 1 2 - функциональные, 3 - загрузка
     const [style, setStyle] = React.useState("");
     const user = useSelector(selectUser);
+    const [canUpload, setCanUpload] = React.useState(false);
 
 
     const handleLogout = async () => {
@@ -88,11 +89,12 @@ const Header = () => {
     const verfication = async () => {
         setStep(3)
         const response = await getInfo()
-        //console.log(response);
         if (response.status === 200) {
             setStep(1)
+            setCanUpload(response.can_upload_photos)
         } else if (response.status === 404) {
             setStep(0)
+            setCanUpload(response.can_upload_photos)
         } else {
             //nav(PAYMENT)
         }
@@ -124,6 +126,33 @@ const Header = () => {
             setStep(0);
         }
     };
+
+    const reloadInfo = async () => {
+        try {
+            const {data} = await getInfo()
+            setCanUpload(data.can_upload_photos)
+            setStyle(data.style_id)
+            setStep(2);
+        } catch (error) {
+            console.log(error);
+            setStep(0);
+        }
+    }
+
+    useEffect(() => {
+        if (!user.first_name) {
+            setStep(3);
+            $authHost.get("profile/info")
+                .then(({data}) => {
+                    dispatch(setUser(data));
+                    setStep(1);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    setStep(0);
+                });
+        }
+    }, [user]);
 
     useEffect(() => {verfication()}, [])
 
@@ -196,10 +225,10 @@ const Header = () => {
                                 className="w-10 h-10 border rounded-full border-white flex items-center justify-center cursor-pointer">
                                 <img src="/photos/main/Profile.svg" className="w-4" alt="" />
                             </div>
-                            <p className="text-center font-montserrat font-normal text-[14px] cursor-pointer">Имя</p>
+                            <p className="text-center font-montserrat font-normal text-[14px] cursor-pointer">{user.first_name}</p>
                         </div>
 
-                        <img src="/photos/LK/Step1.png" className="lg:w-[17%] w-[70%] max-w-[150px] cursor-pointer hover:scale-95 transition ease-in-out duration-200" alt="" onClick={() => setStep(2)}/>
+                        <img src="/photos/LK/Step1.png" className="lg:w-[17%] w-[70%] max-w-[150px] cursor-pointer hover:scale-95 transition ease-in-out duration-200" alt="" onClick={() => reloadInfo()}/>
                         <p className="text-center font-montserrat font-light text-[12px] uppercase">
                             нажмите на иконку,  чтобы НАЧАТЬ <br className="lg:block hidden"/> ТИПИРОВАНИЕ
                         </p>
@@ -223,6 +252,7 @@ const Header = () => {
                             </div>
                             <p className="text-center font-montserrat font-normal text-[14px] cursor-pointer">{user.first_name}</p>
                         </div>
+                        {canUpload && (<button className="w-32 h-10 border border-white rounded-xl hover:bg-white/50 transition duration-200" onClick={() => setStep(0)}>Повторить</button>)}
                         <p className="text-center font-montserrat text-[25px]">Ваш стиль - <span className="font-semibold ">{style}</span></p>
                         <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>
                     </div>

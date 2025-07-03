@@ -1,9 +1,10 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useLayoutEffect} from 'react';
 import {useNavigate} from "react-router-dom";
 import {MAIN, PAYMENT} from "../../../app/routes/constans.js";
 import {useSelector} from "react-redux";
 import {selectIsAuthenticated, selectUser} from "../../../features/Auth/model/selector.js";
 import {$host} from "../../../app/indexAPI.js";
+
 
 const TopMain = () => {
 
@@ -49,20 +50,31 @@ const TopMain = () => {
         return () => clearInterval(interval);
     }, []);
 
-    React.useEffect(() => {
+    const [scrollY, setScrollY] = React.useState(0);
+
+    useLayoutEffect(() => {
         if (isOpen) {
-            document.body.style.overflow = 'hidden';
+            const currentScrollY = window.scrollY;
+            setScrollY(currentScrollY);
+            document.body.classList.add('body-no-scroll');
+            document.body.style.top = `-${currentScrollY}px`;
         } else {
-            document.body.style.overflow = 'auto';
+            document.body.classList.remove('body-no-scroll');
+            requestAnimationFrame(() => {
+                window.scrollTo(0, scrollY);
+                document.body.style.top = '';
+            });
         }
 
         return () => {
-            document.body.style.overflow = 'auto';
+            document.body.classList.remove('body-no-scroll');
+            document.body.style.top = '';
         };
     }, [isOpen]);
 
+
     return (
-        <div className="w-full lg:h-auto min-h-screen relative bg-white">
+        <div className="w-full h-screen relative bg-white overflow-hidden">
             <img className="lg:w-full h-screen object-cover lg:ml-[10%] z-0 top-0 lg:block hidden scale-125" src="/photos/main/main-top.webp" alt="" />
             <img className="w-full h-[500px] object-cover z-0 top-0 lg:hidden" src="/photos/main/top-main2.png" alt="" />
 
@@ -132,7 +144,11 @@ const TopMain = () => {
                 alt=""
             />
             <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[580px] z-10 lg:right-0 md:-right-[20%] -right-[50%] transform ease-in-out lg:rotate-0 rotate-45 ${isBouncing ? "lg:top-[0%] top-[31%]" : "lg:-top-[5%] top-[26%]" }`} src="/photos/main/Soplya3.png" alt=""/>
-            <div className={`${isOpen ? "flex" : "hidden"} w-full z-50 absolute top-0 left-0 flex-col bg-[rgb(130,148,155)] h-full`}>
+            <div
+                id="mobile-menu"
+                className={`${isOpen ? "flex" : "hidden"} w-full z-50 fixed top-0 left-0 flex-col bg-[rgb(130,148,155)] h-screen overflow-y-auto`}
+                style={{ overscrollBehavior: 'contain' }}
+            >
                 <div className="w-full flex mt-5">
                     <img src="/photos/main/MNEIDET.svg" alt="" className="mx-auto h-[20px] cursor-pointer" onClick={() => nav(MAIN)}/>
                     <img src="/photos/main/cross-svgrepo-com.svg" alt="" className="absolute right-5 top-3 w-[36px] cursor-pointer" onClick={() => setIsOpen(!isOpen)}/>
