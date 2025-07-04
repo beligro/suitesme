@@ -27,12 +27,13 @@ const AppRouter = () => {
     ]);
 
     useEffect(() => {
-        if (specialRoutesSet.has(location.pathname)) {
-            const timeout = setTimeout(() => setLoading(false), 300);
-            return () => clearTimeout(timeout);
-        }
+        const tryRestoreSession = async () => {
+            const accessToken = localStorage.getItem("access_token");
+            if (!accessToken) {
+                setLoading(false);
+                return;
+            }
 
-        (async () => {
             try {
                 const data = await getUsersStyle();
                 dispatch(setIsAuthenticated(true));
@@ -41,9 +42,11 @@ const AppRouter = () => {
                 dispatch(logout());
                 dispatch(resetUser());
             } finally {
-                setTimeout(() => setLoading(false), 1000);
+                setLoading(false);
             }
-        })();
+        };
+
+        tryRestoreSession();
     }, []);
 
     if (loading) return <Loading />;

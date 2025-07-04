@@ -167,7 +167,7 @@ const ForgotPassword = () => {
                             <div className="w-full flex flex-col gap-5 justify-center items-center mt-14">
                                 <img src="/photos/Auth/Star.svg" alt="" className="w-10 mb-5"/>
                                 <p className="uppercase font-medium font-unbounded text-center text-[#1B3C4D]">ссылка для восстановления пароля отправлена на почту</p>
-                                <p className="text-[#607E96] text-[10px] uppercase">проверьте спам, если кода нет</p>
+                                <p className="text-[#607E96] text-[10px] uppercase">проверьте спам, если ссылки нет</p>
                             </div>
                             <div className="w-full flex flex-col gap-10">
 
@@ -183,8 +183,8 @@ const ForgotPassword = () => {
                                     }}
                                 >
                                     {timer === 0
-                                        ? 'отправить код повторно'
-                                        : `отправить код повторно через 00:${timer < 10 ? `0${timer}` : timer}`}
+                                        ? 'отправить ссылку повторно'
+                                        : `отправить ссылку повторно через 00:${timer < 10 ? `0${timer}` : timer}`}
                                 </p>
 
 

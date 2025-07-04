@@ -5,6 +5,7 @@ export const  getUsersStyle = async () => {
         const {data} =await  $authHost(`/profile/info`)
         return data
     }catch (error) {
+        console.log(error)
         throw error;
     }
 }

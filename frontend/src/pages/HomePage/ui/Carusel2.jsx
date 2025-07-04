@@ -24,7 +24,7 @@ const Carusel2 = () => {
                             <img
                                 key={`img-${n}`}
                                 className="h-80 w-auto object-cover"
-                                src="/photos/main/Circulation.png"
+                                src="/photos/main/Circulation.webp"
                                 alt="Fashion style"
                                 loading="lazy"
                             />
@@ -40,7 +40,7 @@ const Carusel2 = () => {
                             <img
                                 key={`img-clone-${n}`}
                                 className="h-80 w-auto object-cover"
-                                src="/photos/main/Circulation.png"
+                                src="/photos/main/Circulation.webp"
                                 alt="Fashion style"
                                 loading="lazy"
                             />
