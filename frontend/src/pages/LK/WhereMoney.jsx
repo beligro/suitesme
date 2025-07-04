@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
-import {$authHost, $host} from "../../app/indexAPI.js";
+import {$authHost} from "../../app/indexAPI.js";
 import {LK} from "../../app/routes/constans.js";
 
 const WhereMoney = () => {
@@ -68,7 +68,6 @@ const WhereMoney = () => {
     const getPaymentStatus = async () => {
         setIsLoading(true);
         const response = await getInfo();
-        // if (!response) return setIsLoading(false);
 
         if (response.status === 403) {
             setStep(1);
@@ -168,7 +167,7 @@ const WhereMoney = () => {
                                 Зарегистрироваться
                             </p>
                         </button>
-                        <div className="w-full hidden lg:flex justify-center mt-7">
+                        <div className="w-full flex justify-center mt-7">
                             <img
                                 src="/photos/Auth/Register/cross-svgrepo-com.svg"
                                 className="w-8 cursor-pointer"

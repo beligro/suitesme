@@ -90,8 +90,9 @@ const Header = () => {
         setStep(3)
         const response = await getInfo()
         if (response.status === 200) {
-            setStep(1)
-            setCanUpload(response.can_upload_photos)
+            setStyle(response.data.style_id);
+            setCanUpload(response.data.can_upload_photos)
+            setStep(2)
         } else if (response.status === 404) {
             setStep(0)
             setCanUpload(response.can_upload_photos)
@@ -253,7 +254,7 @@ const Header = () => {
                             <p className="text-center font-montserrat font-normal text-[14px] cursor-pointer">{user.first_name}</p>
                         </div>
                         {canUpload && (<button className="w-32 h-10 border border-white rounded-xl hover:bg-white/50 transition duration-200" onClick={() => setStep(0)}>Повторить</button>)}
-                        <p className="text-center font-montserrat text-[25px]">Ваш стиль - <span className="font-semibold ">{style}</span></p>
+                        <p className="text-center font-montserrat text-[25px]">Ваш типаж - <span className="font-semibold ">{style}</span></p>
                         <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>
                     </div>
                 </div>
