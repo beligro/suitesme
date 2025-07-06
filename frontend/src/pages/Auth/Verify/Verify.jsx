@@ -42,9 +42,6 @@ const Verify = () => {
             localStorage.setItem('userId' , String(data.user_id))
         } catch (error) {
             console.error("Ошибка регистрации:", error);
-            if (error?.response?.data?.message) {
-                alert(error.response.data.message);
-            }
         }
     };
 
@@ -114,12 +111,13 @@ const Verify = () => {
     const sendCode = async () => {
         const token = code.join("");
         if (token.length !== 6) return alert("Введите 6-значный код");
-        setResetToken(token);
+
         try {
             await $host.post("/auth/verify_email", {
                 user_id: userId,
-                verification_code:    resetToken
+                verification_code: token,
             });
+            setResetToken(token);
             setStep(3);
         } catch (e) {
             alert(e.response?.data?.message ?? "Ошибка верфикации");
