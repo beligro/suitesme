@@ -14,6 +14,5 @@ type DbUserStyle struct {
 	CreatedAt time.Time `pg:"created_at" gorm:"autoCreateTime;not null"`
 	UpdatedAt time.Time `pg:"updated_at" gorm:"autoUpdateTime;not null"`
 
-	UserAuthInfo DbUser  `gorm:"foreignKey:user_id;references:id;constraint:OnDelete:CASCADE;"`
-	Style        DbStyle `gorm:"foreignKey:style_id;references:id;constraint:OnDelete:CASCADE;"`
+	UserAuthInfo DbUser `gorm:"foreignKey:user_id;references:id;constraint:OnDelete:CASCADE;"`
 }

@@ -120,8 +120,6 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 
 	photoURL := fmt.Sprintf("%s/%s/%s/%s", ctr.config.MinioFilePathEndpoint, ctr.config.StylePhotoBucket, parsedUserId.String(), fileKey)
 
-	ctr.logger.Info(photoURL)
-
 	styleId, err = external.GetStyle(photoData)
 	if err != nil {
 		ctr.logger.Error("Failed to get style from ML service:", err)

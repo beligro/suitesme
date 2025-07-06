@@ -38,6 +38,8 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        - VITE_API_URL=${VITE_API_URL}
     networks:
       - suitesme
 
