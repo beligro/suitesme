@@ -45,22 +45,26 @@ const Carusel2 = () => {
             {/* GPU-friendly keyframes */}
             <style>
                 {`
-          @keyframes scrollLeft {
-            from {
-              transform: translate3d(0, 0, 0);
-            }
-            to {
-              transform: translate3d(-50%, 0, 0);
-            }
-          }
-
-          /* Respect user preference for reduced motion */
-          @media (prefers-reduced-motion: reduce) {
-            [style*='scrollLeft'] {
+  @-webkit-keyframes scrollLeft {
+    from { -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0); }
+    to   { -webkit-transform: translate3d(-50%,0,0); transform: translate3d(-50%,0,0); }
+  }
+  @keyframes scrollLeft {
+    from { -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0); }
+    to   { -webkit-transform: translate3d(-50%,0,0); transform: translate3d(-50%,0,0); }
+  }
+  .carousel-group {
+    -webkit-animation: scrollLeft 30s linear infinite;
+            animation: scrollLeft 30s linear infinite;
+    will-change: transform;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .carousel-group {
+      -webkit-animation: none !important;
               animation: none !important;
-            }
-          }
-        `}
+    }
+  }
+`}
             </style>
         </div>
     );

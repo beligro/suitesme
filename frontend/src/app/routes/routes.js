@@ -19,17 +19,7 @@ export const nonAuthorise = [
     {
         path: PAYMENT,
         Component: WhereMoney,
-    }
-]
-
-export const authorise = [
-    {
-        path: LK,
-        Component: Lk,
     },
-]
-
-export const authRoutes = [
     {
         path: LOGIN,
         Component: Login,
@@ -46,4 +36,11 @@ export const authRoutes = [
         path:VERIFY,
         Component: Verify,
     }
+]
+
+export const authorise = [
+    {
+        path: LK,
+        Component: Lk,
+    },
 ]

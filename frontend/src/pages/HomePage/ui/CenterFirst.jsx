@@ -47,8 +47,8 @@ const CenterFirst = () => {
                             3990 Р
                         </p>
                     </div>
-                    <img style={{ transitionDuration: '2000ms' }} className={`absolute transform lg:max-w-[100%] max-w-[500px] ease-in-out ${isBouncing === true ? "-rotate-10 lg:-top-[180px] top-[200px]" : "-rotate-7 lg:-top-[170px] top-[210px]"}`} src="/photos/main/Soplya2.png" alt="" />
-                    <img className="absolute w-80 top-[130px]" src="/photos/main/Mobilka.png" alt="" />
+                    <img style={{ transitionDuration: '2000ms' }} className={`absolute transform lg:max-w-[100%] max-w-[500px] ease-in-out ${isBouncing === true ? "-rotate-10 lg:-top-[180px] top-[200px]" : "-rotate-7 lg:-top-[170px] top-[210px]"}`} src="/photos/main/Soplya2.webp" alt="" />
+                    <img className="absolute w-80 top-[130px]" src="/photos/main/Mobilka.webp" alt="" />
                     <iframe
                         width="190"
                         height="220"
@@ -58,7 +58,7 @@ const CenterFirst = () => {
                         allowFullScreen
                         className="absolute top-[235px] z-30 rounded-2xl border-none"
                     />
-                    <img className="absolute w-[500px] lg:top-[500px] top-[660px] lg:left-20 -left-20" src="/photos/main/MiddleWoman.png" alt=""/>
+                    <img className="absolute w-[500px] lg:top-[500px] top-[660px] lg:left-20 -left-20" src="/photos/main/MiddleWoman.webp" alt=""/>
                     <div className="absolute left-1/2 lg:flex hidden transform text-[12px] font-light -translate-x-1/2 top-[850px] w-[240px] h-[50px] items-center justify-center rounded-full bg-[#1B3C4D] font-unbounded text-white uppercase cursor-pointer hover:shadow-xl transition duration-200"
                          onClick={() => nav("/payment")}
                     >

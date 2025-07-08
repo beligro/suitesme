@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import { useNavigate } from "react-router-dom";
-import {MAIN} from "../../../app/routes/constans.js";
+import {MAIN, PAYMENT} from "../../../app/routes/constans.js";
 import {useDispatch, useSelector} from "react-redux";
 import {$authHost, $host} from "../../../app/indexAPI.js";
 import {logout, setUser} from "../../../features/Auth/model/slice.js";
@@ -66,40 +66,37 @@ const Header = () => {
 
     //----------------------------
 
-    React.useEffect(() => {
-        const interval = setInterval(() => {
-            setIsBouncing(prev => !prev);
-        }, 2000);
 
-        return () => clearInterval(interval);
-    }, []);
-
-    React.useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
-        }
-
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
-    }, [isOpen]);
 
     const verfication = async () => {
-        setStep(3)
-        const response = await getInfo()
-        if (response.status === 200) {
-            setStyle(response.data.style_id);
-            setCanUpload(response.data.can_upload_photos)
-            setStep(2)
-        } else if (response.status === 404) {
-            setStep(0)
-            setCanUpload(response.can_upload_photos)
-        } else {
-            //nav(PAYMENT)
+        setStep(3);
+
+        try {
+            const response = await getInfo();
+            if (response.status === 200) {
+                setStyle(response.data.style_id);
+                setCanUpload(response.data.can_upload_photos);
+                setStep(2);
+            } else if (response.status === 404) {
+                setStep(0);
+                setCanUpload(response?.can_upload_photos);
+            } else if (response.status === 402) {
+                nav(PAYMENT);
+            } else {
+                dispatch(logout());
+                nav(PAYMENT);
+            }
+        } catch (error) {
+            if (error.response?.status === 401) {
+                setTimeout(() => {
+                    verfication();
+                }, 200);
+            } else {
+                dispatch(logout());
+                nav(PAYMENT);
+            }
         }
-    }
+    };
 
     //ФОТО----------------
 
@@ -155,6 +152,26 @@ const Header = () => {
         }
     }, [user]);
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setIsBouncing(prev => !prev);
+        }, 2000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [isOpen]);
+
     useEffect(() => {verfication()}, [])
 
     return (
@@ -208,7 +225,7 @@ const Header = () => {
                             наш <span className="">AI</span> проанализирует черты лица <br className="lg:block hidden" />
                             и определит типаж
                         </p>
-                        <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt="" />
+                        <img src="/photos/main/MiddleWoman.webp" className="lg:block hidden w-[65%]" alt="" />
                     </div>
                     {/*<div className="uppercase font-light text-center text-[13px] lg:hidden block">*/}
                     {/*    Здесь может быть размещен*/}
@@ -233,7 +250,7 @@ const Header = () => {
                         <p className="text-center font-montserrat font-light text-[12px] uppercase">
                             нажмите на иконку,  чтобы НАЧАТЬ <br className="lg:block hidden"/> ТИПИРОВАНИЕ
                         </p>
-                        <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>
+                        <img src="/photos/main/MiddleWoman.webp" className="lg:block hidden w-[65%]" alt=""/>
                     </div>
                     <div className="uppercase font-light text-center text-[13px] lg:hidden block font-montserrat">
                         Здесь может быть размещен
@@ -255,7 +272,7 @@ const Header = () => {
                         </div>
                         {canUpload && (<button className="w-32 h-10 border border-white rounded-xl hover:bg-white/50 transition duration-200" onClick={() => setStep(0)}>Повторить</button>)}
                         <p className="text-center font-montserrat text-[25px]">Ваш типаж - <span className="font-semibold ">{style}</span></p>
-                        <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>
+                        <img src="/photos/main/MiddleWoman.webp" className="lg:block hidden w-[65%]" alt=""/>
                     </div>
                 </div>
             )}
@@ -295,13 +312,13 @@ const Header = () => {
                         <img src="/photos/LK/Krutilcka.svg" className="lg:mt-10" alt=""/>
 
                     </div>
-                    <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%] mx-auto" alt=""/>
+                    <img src="/photos/main/MiddleWoman.webp" className="lg:block hidden w-[65%] mx-auto" alt=""/>
 
                 </div>
             )}
 
-            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[750px] lg:block hidden w-auto z-20 transform ease-in-out lg:left-0 md:-left-[50%] -left-[40%] ${isBouncing ? "lg:top-[10%] -top-[20%]" : "lg:top-[5%] -top-[25%]"}`} src="/photos/main/Soplya.png" alt="" />
-            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[580px] lg:block hidden z-20 lg:right-0 md:-right-[20%] -right-[50%] transform ease-in-out ${isBouncing ? "top-[0%]" : "-top-[5%]"}`} src="/photos/main/Soplya3.png" alt="" />
+            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[750px] lg:block hidden w-auto z-20 transform ease-in-out lg:left-0 md:-left-[50%] -left-[40%] ${isBouncing ? "lg:top-[10%] -top-[20%]" : "lg:top-[5%] -top-[25%]"}`} src="/photos/main/Soplya.webp" alt="" />
+            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[580px] lg:block hidden z-20 lg:right-0 md:-right-[20%] -right-[50%] transform ease-in-out ${isBouncing ? "top-[0%]" : "-top-[5%]"}`} src="/photos/main/Soplya3.webp" alt="" />
             <div className={`${isOpen ? "flex" : "hidden"} w-full z-50 absolute top-0 left-0 flex-col bg-[rgb(130,148,155)] h-full`}>
                 <div className="w-full flex mt-5">
                     <img src="/photos/main/MNEIDET.svg" alt="" className="mx-auto h-[20px] cursor-pointer" onClick={() => nav(MAIN)}/>

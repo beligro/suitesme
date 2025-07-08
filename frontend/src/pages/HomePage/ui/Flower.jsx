@@ -14,7 +14,7 @@ const Flower = () => {
                 backgroundSize: '100% 100%',
             }}
         >
-            <img src="/photos/main/Flower.png" alt="" className="absolute z-10 top-[14%] h-[150%] left-[10%] object-contain sm:scale-100 scale-[2.5]" />
+            <img src="/photos/main/Flower.webp" alt="" className="absolute z-10 top-[14%] h-[150%] left-[10%] object-contain sm:scale-100 scale-[2.5]" />
 
             <div className="z-20 relative w-full flex flex-col items-center justify-center lg:px-0 px-3">
                 <p className="font-unbounded font-semibold text-center lg:text-[30px] text-[25px] mt-20 text-[#1B3C4D]">

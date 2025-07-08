@@ -1,9 +1,8 @@
-import React, {useEffect, useLayoutEffect} from 'react';
+import React, {useLayoutEffect} from 'react';
 import {useNavigate} from "react-router-dom";
 import {MAIN, PAYMENT} from "../../../app/routes/constans.js";
 import {useSelector} from "react-redux";
 import {selectIsAuthenticated, selectUser} from "../../../features/Auth/model/selector.js";
-import {$host} from "../../../app/indexAPI.js";
 
 
 const TopMain = () => {
@@ -12,35 +11,8 @@ const TopMain = () => {
     const [isOpen, setIsOpen] = React.useState(false);
     const nav = useNavigate();
     const isAuth = useSelector(selectIsAuthenticated);
-    const [info, setInfo] = React.useState({
-        birth_date: "",
-        email: "",
-        first_name: "",
-        last_name: "",
-    });
 
     const user = useSelector(selectUser);
-
-    const fetchInfo = async () => {
-        try {
-            const { data } = await $host.get("/profile/info");
-            return data;
-        } catch (error) {
-            console.log(error);
-            return null;
-        }
-    };
-
-    useEffect(() => {
-        if (isAuth) {
-            const fetchData = async () => {
-                const data = await fetchInfo();
-                if (data) setInfo(data);
-            };
-            fetchData();
-        }
-    }, [isAuth]);
-
 
     React.useEffect(() => {
         const interval = setInterval(() => {
@@ -76,7 +48,7 @@ const TopMain = () => {
     return (
         <div className="w-full h-screen relative bg-white overflow-hidden">
             <img className="lg:w-full h-screen object-cover lg:ml-[10%] z-0 top-0 lg:block hidden scale-125" src="/photos/main/main-top.webp" alt="" />
-            <img className="w-full h-[500px] object-cover z-0 top-0 lg:hidden" src="/photos/main/top-main2.png" alt="" />
+            <img className="w-full h-[500px] object-cover z-0 top-0 lg:hidden" src="/photos/main/top-main2.webp" alt="" />
 
 
             <img
@@ -94,13 +66,13 @@ const TopMain = () => {
             />
             <img
                 className="lg:hidden absolute z-20 md:top-[790px] sm:top-[720px] top-[630px] w-full h-[140px] object-cover"
-                src="/photos/main/BottomBlur.png"
+                src="/photos/main/BottomBlur.webp"
                 alt=""
             />
             <div className="absolute md:top-[920px] sm:top-[820px] top-[760px] h-[20px] bg-gray-50/80 backdrop-blur-xl w-full lg:hidden"></div>
 
-            <img className="h-full w-[30%]  z-10 absolute top-0 left-0 lg:block hidden" src="/photos/main/LeftBlur.png" alt="" />
-            <img className="h-full w-[30%]  z-10 absolute top-0 right-0 lg:block hidden" src="/photos/main/Rectangle.png" alt="" />
+            <img className="h-full w-[30%]  z-10 absolute top-0 left-0 lg:block hidden" src="/photos/main/LeftBlur.webp" alt="" />
+            <img className="h-full w-[30%]  z-10 absolute top-0 right-0 lg:block hidden" src="/photos/main/Rectangle.webp" alt="" />
             <div className="backdrop-blur-sm bg-black/15 z-30 w-full lg:h-[130px] h-[60px] absolute top-0 left-0 flex flex-row items-center justify-between lg:px-20 px-5">
                 <img src="/photos/main/Profile.svg" className="h-[20px] lg:hidden block cursor-pointer" alt="" onClick={() => nav(PAYMENT)}/>
                 <img className="w-[110px] cursor-pointer" src="/photos/main/MNEIDET.svg" alt="" onClick={() => nav(MAIN)}/>
@@ -133,17 +105,17 @@ const TopMain = () => {
             >
                 Узнай свой типаж
             </div>
-            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[750px] lg:block hidden w-auto z-20 transform ease-in-out lg:left-0 md:-left-[50%] -left-[40%] ${isBouncing ? "top-[10%]" : "top-[5%]" }`} src="/photos/main/Soplya.png" alt=""/>
+            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[750px] lg:block hidden w-auto z-20 transform ease-in-out lg:left-0 md:-left-[50%] -left-[40%] ${isBouncing ? "top-[10%]" : "top-[5%]" }`} src="/photos/main/Soplya.webp" alt=""/>
             <img
                 style={{
                     transitionDuration: '2000ms',
                     transform: window.innerWidth >= 768 ? 'scale(-1, 1)' : 'scale(-2, 2)',
                 }}
                 className={`absolute lg:hidden z-20 ease-in-out lg:left-0 md:-left-[75%] -left-[80%] ${isBouncing ? "-top-[5%]" : "top-[0%]" }`}
-                src="/photos/main/Soplya2.png"
+                src="/photos/main/Soplya2.webp"
                 alt=""
             />
-            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[580px] z-10 lg:right-0 md:-right-[20%] -right-[50%] transform ease-in-out lg:rotate-0 rotate-45 ${isBouncing ? "lg:top-[0%] top-[31%]" : "lg:-top-[5%] top-[26%]" }`} src="/photos/main/Soplya3.png" alt=""/>
+            <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[580px] z-10 lg:right-0 md:-right-[20%] -right-[50%] transform ease-in-out lg:rotate-0 rotate-45 ${isBouncing ? "lg:top-[0%] top-[31%]" : "lg:-top-[5%] top-[26%]" }`} src="/photos/main/Soplya3.webp" alt=""/>
             <div
                 id="mobile-menu"
                 className={`${isOpen ? "flex" : "hidden"} w-full z-50 fixed top-0 left-0 flex-col bg-[rgb(130,148,155)] h-screen overflow-y-auto`}
@@ -155,10 +127,57 @@ const TopMain = () => {
                 </div>
                 <div className="w-full flex flex-col items-center justify-center h-full gap-14">
                     <div className="flex flex-col gap-5 text-center">
-                        <a className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer" href='#why-main'>Преимущества</a>
-                        <a className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer" href='#about'>О сервисе</a>
-                        <a className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer"  href='#questions'>Ответы на вопросы</a>
-                        <a className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer" href='#examples'>Результаты</a>
+                        <a
+                            className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer"
+                            onClick={() => {
+                                setIsOpen(false);
+                                setTimeout(() => {
+                                    const el = document.getElementById("why-main");
+                                    if (el) {
+                                        el.scrollIntoView({ behavior: "smooth" });
+                                    } else {
+                                        console.warn("Anchor not found: #why-main");
+                                    }
+                                }, 100);
+                            }}
+                        >
+                            Преимущества
+                        </a>
+                        <a
+                            className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer"
+                            onClick={() => {
+                                setIsOpen(false);
+                                setTimeout(() => {
+                                    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                                }, 100);
+                            }}
+                        >
+                            О сервисе
+                        </a>
+
+                        <a
+                            className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer"
+                            onClick={() => {
+                                setIsOpen(false);
+                                setTimeout(() => {
+                                    document.getElementById('questions')?.scrollIntoView({ behavior: 'smooth' });
+                                }, 100);
+                            }}
+                        >
+                            Ответы на вопросы
+                        </a>
+
+                        <a
+                            className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer"
+                            onClick={() => {
+                                setIsOpen(false);
+                                setTimeout(() => {
+                                    document.getElementById('examples')?.scrollIntoView({ behavior: 'smooth' });
+                                }, 100);
+                            }}
+                        >
+                            Результаты
+                        </a>
                     </div>
                     <div className="flex w-full flex-col gap-3 items-center justify-center">
                         <div className="w-12 h-12 border rounded-full border-white flex items-center justify-center cursor-pointer" onClick={() => nav("/login")}>

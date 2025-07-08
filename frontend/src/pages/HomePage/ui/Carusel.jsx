@@ -8,10 +8,10 @@ import "../../../index.css";
 import {useNavigate} from "react-router-dom";
 
 const clients = [
-    "photos/main/womans/Woman1.png",
-    "photos/main/womans/Woman2.png",
-    "photos/main/womans/Woman3.png",
-    "photos/main/womans/Woman4.png",
+    "photos/main/womans/Woman1.webp",
+    "photos/main/womans/Woman2.webp",
+    "photos/main/womans/Woman3.webp",
+    "photos/main/womans/Woman4.webp",
 ];
 
 const Carusel = () => {
@@ -28,7 +28,7 @@ const Carusel = () => {
 
     return (
         <div className="w-full flex justify-center lg:mt-32 mt-10 pl-4 relative overflow-x-hidden">
-            <img src="/photos/main/Lines.png" alt="" className="w-full absolute bottom-0 z-0 lg:block hidden" />
+            <img src="/photos/main/Lines.webp" alt="" className="w-full absolute bottom-0 z-0 lg:block hidden" />
             <div className="w-full lg:w-[1000px] z-10 ">
                 <p className="text-[30px] lg:text-[53px] font-unbounded lg:text-left text-left text-balance w-full font-extralight uppercase text-[#1B3C4D] leading-tight">
                     Клиенты, которые уже работают по системе{" "}
@@ -79,7 +79,7 @@ const Carusel = () => {
                     </Swiper>
 
                     <div className="swiper-next absolute lg:-right-20 right-6 -top-20 lg:top-[45%] lg:-translate-y-1/2 z-10 lg:w-16 w-10 lg:h-16 h-10 flex items-center justify-center cursor-pointer bg-white">
-                        <img className="w-full" src="/photos/main/NextButton.png" alt="" />
+                        <img className="w-full" src="/photos/main/NextButton.webp" alt="" />
                     </div>
 
                     <div className="custom-swiper-pagination swiper-pagination lg:ml-[40%] md:ml-[45%] sm:ml-[42%] ml-[39%]" />

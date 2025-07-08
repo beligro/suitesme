@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     isAuthenticated: false,
+    isInitialized: false,
     user:{
         email:null,
         first_name:null,
@@ -35,8 +36,9 @@ const authSlice = createSlice({
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
         },
+        setInitialized(state) { state.isInitialized = true },
     },
 });
 
-export const { login, logout , setIsAuthenticated,setUser, resetUser } = authSlice.actions;
+export const { login, logout , setIsAuthenticated,setUser, resetUser, setInitialized } = authSlice.actions;
 export default authSlice.reducer;
