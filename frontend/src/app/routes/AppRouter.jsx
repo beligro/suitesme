@@ -1,4 +1,4 @@
-import React, { useEffect} from 'react';
+import React, { useLayoutEffect} from 'react';
 import {Routes, Route, Navigate} from 'react-router-dom';
 import { MAIN} from './constans.js';
 import { nonAuthorise, authorise } from './routes.js';
@@ -13,7 +13,7 @@ const AppRouter = () => {
     const isInitialized = useSelector(selectIsInitialized);
 
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const tryRestoreSession = async () => {
             const accessToken = localStorage.getItem("access_token");
             if (!accessToken) {
@@ -43,22 +43,22 @@ const AppRouter = () => {
 
 
     return (
-            <Routes>
-                {isAuth && authorise.map(({ path, Component }) => (
-                    <Route
-                        key={path}
-                        path={path}
-                        element={
+        <Routes>
+            {isAuth && authorise.map(({ path, Component }) => (
+                <Route
+                    key={path}
+                    path={path}
+                    element={
                         <Component />
-                        }
-                    />
-                ))}
-                {nonAuthorise.map(({ path, Component }) => (
-                    <Route key={path} path={path} element={<Component />} />
-                ))}
+                    }
+                />
+            ))}
+            {nonAuthorise.map(({ path, Component }) => (
+                <Route key={path} path={path} element={<Component />} />
+            ))}
 
-                <Route path="*" element={<Navigate to={MAIN} replace />} />
-            </Routes>
+            <Route path="*" element={<Navigate to={MAIN} replace />} />
+        </Routes>
     );
 };
 

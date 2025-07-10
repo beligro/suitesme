@@ -9,7 +9,7 @@ const WhereMoney = () => {
     const nav = useNavigate();
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState(false);
-
+    const [isReady,   setIsReady]   = React.useState(false);
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const status = queryParams.get("status");
@@ -42,8 +42,8 @@ const WhereMoney = () => {
 
     const payNotify = async () => {
         try {
-            const {response} = await $authHost.post("payment/notify");
-            return response;
+            const {data} = await $authHost.post("payment/notify");
+            return data;
         } catch (error) {
             console.log(error);
         }
@@ -72,10 +72,11 @@ const WhereMoney = () => {
         if (response.status === 403) {
             setStep(1);
         } else if (response.status === 404 || response.status === 200) {
-            nav(LK);
+            nav(LK , { replace: true });
         } else {
             setStep(0);
         }
+        setIsReady(true);
 
         setIsLoading(false);
     };
@@ -90,46 +91,80 @@ const WhereMoney = () => {
     };
 
     const paymentCheck = async () => {
-        if (status === "ok") {
-            setIsLoading(true);
-
-            const response = await payNotify();
-            if (!response || response.status !== 200) {
-                setIsLoading(false);
-                setStep(1);
-                setError(true);
-                return;
-            }
-
-            let attempts = 0;
-            const maxAttempts = 100;
-
-            const intervalId = setInterval(async () => {
-                const info = await payInfo();
-                if (info.status === 200) {
-                    clearInterval(intervalId);
-                    nav(LK);
-                }
-
-                if (++attempts > maxAttempts) {
-                    clearInterval(intervalId);
-                    setIsLoading(false);
-                    setError(true);
-                }
-            }, 5000);
-        } else {
+        if (status !== "ok") {
             setIsLoading(false);
-            setStep(1);
             setError(true);
+            setStep(1);
+            return;
         }
+
+        setIsLoading(true);
+        setIsReady(true);
+
+        try {
+            const response = await payNotify();
+
+            if (!response || (response.status !== 200 && response.status !== 204)) {
+                console.warn("payNotify вернул неожиданный статус:", response?.status);
+            }
+        } catch (error) {
+            console.warn("payNotify упал, продолжаем polling:", error?.response?.status || error);
+        }
+
+        const maxAttempts = 20;
+        let attempts = 0;
+
+        const poll = async () => {
+            try {
+                const info = await payInfo();
+
+                setIsLoading(true);
+
+                if (info.status === 200 && info.data.payment_status	=== "paid") {
+                    nav(LK);
+                    return;
+                }
+
+                if (info.status === 200 && info.data.payment_status	=== "failed") {
+                    setIsLoading(false);
+                    setStep(1);
+                    setError(true);
+                    return;
+                }
+
+                if (++attempts >= maxAttempts) {
+                    setError(true);
+                    setIsLoading(false);
+                    return;
+                }
+
+                setTimeout(poll, 1000);
+            } catch (error) {
+                console.error("Polling error:", error);
+                if (++attempts >= maxAttempts) {
+                    setError(true);
+                    setIsLoading(false);
+                } else {
+                    setTimeout(poll, 1000);
+                }
+            }
+        };
+
+        poll();
     };
 
-    useEffect(() => { getPaymentStatus() }, [])
-
     useEffect(() => {
-        if (status === "ok" || status === "fail") paymentCheck()
-    }, [])
+        if (status === "ok") {
+            paymentCheck();
+        } else if (status === "fail") {
+            setError(true);
+            getPaymentStatus();
+        } else {
+            getPaymentStatus();
+        }
+    }, []);
 
+    if (!isReady) return null;
 
     return (
         <div className="w-full h-screen relative">
