@@ -138,14 +138,14 @@ const WhereMoney = () => {
                     return;
                 }
 
-                setTimeout(poll, 1000);
+                setTimeout(poll, 2000);
             } catch (error) {
                 console.error("Polling error:", error);
                 if (++attempts >= maxAttempts) {
                     setError(true);
                     setIsLoading(false);
                 } else {
-                    setTimeout(poll, 1000);
+                    setTimeout(poll, 2000);
                 }
             }
         };
