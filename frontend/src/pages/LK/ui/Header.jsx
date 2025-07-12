@@ -13,7 +13,7 @@ const Header = () => {
     const [isBouncing, setIsBouncing] = React.useState(false);
     const [isOpen, setIsOpen] = React.useState(false);
     const nav = useNavigate();
-    const [step, setStep] = React.useState(0); // 0 1 2 - функциональные, 3 - загрузка
+    const [step, setStep] = React.useState(4); // 0 1 2 - функциональные, 3 - загрузка
     const [style, setStyle] = React.useState("");
     const user = useSelector(selectUser);
     const [canUpload, setCanUpload] = React.useState(false);
@@ -337,6 +337,12 @@ const Header = () => {
 
                     </div>
                     <img src="/photos/main/MiddleWoman.webp" className="lg:block hidden w-[65%] mx-auto" alt=""/>
+
+                </div>
+            )}
+
+            {step === 4 && (
+                <div className="absolute lg:top-[40%] top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 lg:h-[40%] h-[70%] lg:block flex flex-col items-center justify-between text-[#1B3C4D]">
 
                 </div>
             )}
