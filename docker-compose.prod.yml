@@ -1,0 +1,108 @@
+version: "3.8"
+
+networks:
+  suitesme:
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - './nginx.conf:/etc/nginx/nginx.conf'
+      - '/etc/letsencrypt:/etc/letsencrypt'
+    depends_on:
+      - backend
+      - frontend
+      - admin
+    networks:
+      - suitesme
+
+  backend:
+    image: ghcr.io/${GITHUB_REPOSITORY}/backend:${GITHUB_SHA}
+    ports:
+      - 8080:8080
+    volumes:
+      - logs_data:/backend/suitesme/cmd/app/logs
+    depends_on:
+      - postgres
+      - minio
+    networks:
+      - suitesme
+    env_file:
+      - .env
+    restart: always
+
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY}/frontend:${GITHUB_SHA}
+    networks:
+      - suitesme
+
+  admin:
+    image: ghcr.io/${GITHUB_REPOSITORY}/admin:${GITHUB_SHA}
+    networks:
+      - suitesme
+
+  ml:
+    image: ghcr.io/${GITHUB_REPOSITORY}/ml:${GITHUB_SHA}
+    ports:
+      - "8000:8000"
+    networks:
+      - suitesme
+    restart: always
+
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_HOST=${DB_HOST}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - suitesme
+    restart: always
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    networks:
+      - suitesme
+    volumes:
+      - minio_data:/data
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  minio-init:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - STYLE_PHOTO_BUCKET=${STYLE_PHOTO_BUCKET}
+      - STYLE_PDF_BUCKET=${STYLE_PDF_BUCKET}
+    volumes:
+      - ./minio-init.sh:/minio-init.sh
+    entrypoint: ["/bin/sh", "/minio-init.sh"]
+    networks:
+      - suitesme
+
+volumes:
+  db_data:
+  minio_data:
+  logs_data:

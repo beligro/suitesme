@@ -18,20 +18,6 @@ type EmailMessage struct {
 	HTMLContent string
 }
 
-// SendEmail sends an email with proper formatting to avoid spam filters
-func SendEmail(emailTo string, msg []byte, cfg *config.Config) error {
-	// Create a basic email message with the provided content
-	emailMsg := EmailMessage{
-		From:      cfg.EmailSendFrom,
-		To:        emailTo,
-		Subject:   "Message from SuitesMe",
-		PlainText: string(msg),
-	}
-
-	// Send the properly formatted email
-	return SendFormattedEmail(emailTo, emailMsg, cfg)
-}
-
 // SendFormattedEmail sends a properly formatted email with headers to avoid spam filters
 func SendFormattedEmail(emailTo string, msg EmailMessage, cfg *config.Config) error {
 	// Set up headers

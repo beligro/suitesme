@@ -1,0 +1,269 @@
+name: Deploy Application
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}/backend
+            ghcr.io/${{ github.repository }}/frontend
+            ghcr.io/${{ github.repository }}/admin
+            ghcr.io/${{ github.repository }}/ml
+          tags: |
+            type=sha,format=short
+            type=ref,event=branch
+            latest
+      
+      - name: Build and push Backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          push: true
+          tags: ghcr.io/${{ github.repository }}/backend:latest,ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: ghcr.io/${{ github.repository }}/frontend:latest,ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
+      
+      - name: Build and push Admin image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./admin
+          push: true
+          tags: ghcr.io/${{ github.repository }}/admin:latest,ghcr.io/${{ github.repository }}/admin:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build and push ML image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./ml
+          push: true
+          tags: ghcr.io/${{ github.repository }}/ml:latest,ghcr.io/${{ github.repository }}/ml:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to Server
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+      
+      - name: Create docker-compose.prod.yml
+        run: |
+          cat > docker-compose.prod.yml << 'EOL'
+          version: "3.8"
+
+          networks:
+            suitesme:
+
+          services:
+            nginx:
+              image: nginx:stable-alpine
+              ports:
+                - "80:80"
+                - "443:443"
+              volumes:
+                - './nginx.conf:/etc/nginx/nginx.conf'
+                - '/etc/letsencrypt:/etc/letsencrypt'
+              depends_on:
+                - backend
+                - frontend
+                - admin
+              networks:
+                - suitesme
+
+            backend:
+              image: ghcr.io/${GITHUB_REPOSITORY}/backend:${GITHUB_SHA}
+              ports:
+                - 8080:8080
+              volumes:
+                - logs_data:/backend/suitesme/cmd/app/logs
+              depends_on:
+                - postgres
+                - minio
+              networks:
+                - suitesme
+              env_file:
+                - .env
+              restart: always
+
+            frontend:
+              image: ghcr.io/${GITHUB_REPOSITORY}/frontend:${GITHUB_SHA}
+              networks:
+                - suitesme
+
+            admin:
+              image: ghcr.io/${GITHUB_REPOSITORY}/admin:${GITHUB_SHA}
+              networks:
+                - suitesme
+
+            ml:
+              image: ghcr.io/${GITHUB_REPOSITORY}/ml:${GITHUB_SHA}
+              ports:
+                - "8000:8000"
+              networks:
+                - suitesme
+              restart: always
+
+            postgres:
+              image: postgres:latest
+              environment:
+                - POSTGRES_HOST=${DB_HOST}
+                - POSTGRES_USER=${DB_USER}
+                - POSTGRES_PASSWORD=${DB_PASSWORD}
+                - POSTGRES_DB=${DB_NAME}
+              volumes:
+                - db_data:/var/lib/postgresql/data
+              networks:
+                - suitesme
+              restart: always
+
+            minio:
+              image: minio/minio
+              container_name: minio
+              environment:
+                - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+                - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+              ports:
+                - "9000:9000"
+                - "9001:9001"
+              command: server /data --console-address ":9001"
+              networks:
+                - suitesme
+              volumes:
+                - minio_data:/data
+              restart: always
+              healthcheck:
+                test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+                interval: 5s
+                timeout: 5s
+                retries: 3
+
+            minio-init:
+              image: minio/mc
+              depends_on:
+                minio:
+                  condition: service_healthy
+              environment:
+                - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+                - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+                - STYLE_PHOTO_BUCKET=${STYLE_PHOTO_BUCKET}
+                - STYLE_PDF_BUCKET=${STYLE_PDF_BUCKET}
+              volumes:
+                - ./minio-init.sh:/minio-init.sh
+              entrypoint: ["/bin/sh", "/minio-init.sh"]
+              networks:
+                - suitesme
+
+          volumes:
+            db_data:
+            minio_data:
+            logs_data:
+          EOL
+      
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            # Create app directory if it doesn't exist
+            mkdir -p ~/suitesme
+            
+            # Copy files to server
+            echo "Copying files to server..."
+            
+            # Clean up deployment directory
+            cd ~/suitesme
+            rm -f docker-compose.prod.yml .env nginx.conf minio-init.sh
+            
+            # Create deployment script
+            cat > deploy.sh << 'EOL'
+            #!/bin/bash
+            
+            # Login to GitHub Container Registry
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+            
+            # Pull the latest images
+            docker-compose -f docker-compose.prod.yml pull
+            
+            # Stop and remove existing containers
+            docker-compose -f docker-compose.prod.yml down
+            
+            # Start new containers
+            docker-compose -f docker-compose.prod.yml up -d
+            
+            # Clean up unused images
+            docker image prune -af
+            EOL
+            
+            # Make the script executable
+            chmod +x deploy.sh
+            
+            # Create .env file
+            echo "${{ secrets.ENV_FILE }}" > .env
+            
+            # Create docker-compose.prod.yml
+            echo "${{ github.workspace }}/docker-compose.prod.yml" > docker-compose.prod.yml
+            
+            # Copy nginx.conf and minio-init.sh
+            echo "${{ github.workspace }}/nginx.conf" > nginx.conf
+            echo "${{ github.workspace }}/minio-init.sh" > minio-init.sh
+            
+            # Run deployment script
+            ./deploy.sh

@@ -66,31 +66,27 @@ func (ctr AuthController) ForgotPassword(ctx echo.Context) error {
 
 	ctr.storage.User.Save(user)
 
-	// Create a better formatted email with HTML content
-	resetLink := "http://51.250.84.195:3000/password_reset?token=" + urlToken
+	resetLink := "http://51.250.84.195/password_reset?token=" + urlToken
 	plainText := "You requested a password reset for your SuitesMe account.\n\n" +
 		"Please use the following link to reset your password: " + resetLink + "\n\n" +
 		"If you didn't request a password reset, please ignore this email."
 
 	htmlContent := "<html><body>" +
-		"<h2>SuitesMe Password Reset</h2>" +
-		"<p>You requested a password reset for your SuitesMe account.</p>" +
-		"<p>Please click the button below to reset your password:</p>" +
-		"<div style='text-align: center; margin: 30px 0;'>" +
-		"<a href='" + resetLink + "' style='background-color: #4CAF50; color: white; padding: 12px 20px; " +
-		"text-decoration: none; border-radius: 4px; font-weight: bold;'>Reset Password</a>" +
-		"</div>" +
-		"<p>Or copy and paste this link into your browser:</p>" +
+		"<h2>Здравствуйте, " + user.FirstName + "!</h2>" +
 		"<p style='background-color: #f5f5f5; padding: 10px; word-break: break-all;'>" + resetLink + "</p>" +
-		"<p>If you didn't request a password reset, please ignore this email.</p>" +
-		"<p>This link will expire in 15 minutes.</p>" +
+		"<p>Если вы не запрашивали смену пароля, пожалуйста, проигнорируйте данное письмо.</p>" +
+		"<p>Время действия ссылки - 15 минут</p>" +
+		"<p></p>" +
+		"<p></p>" +
+		"<p>С уважением,</p>" +
+		"<p>команда MNE IDET</p>" +
 		"</body></html>"
 
 	// Create email message
 	emailMsg := sender.EmailMessage{
 		From:        ctr.config.EmailSendFrom,
 		To:          request.Email,
-		Subject:     "SuitesMe Password Reset Request",
+		Subject:     "Восстановление пароля",
 		PlainText:   plainText,
 		HTMLContent: htmlContent,
 	}
