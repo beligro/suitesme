@@ -13,7 +13,7 @@ const Header = () => {
     const [isBouncing, setIsBouncing] = React.useState(false);
     const [isOpen, setIsOpen] = React.useState(false);
     const nav = useNavigate();
-    const [step, setStep] = React.useState(3); // 0 1 2 - функциональные, 3 - загрузка
+    const [step, setStep] = React.useState(0); // 0 1 2 - функциональные, 3 - загрузка
     const [style, setStyle] = React.useState("");
     const user = useSelector(selectUser);
     const [canUpload, setCanUpload] = React.useState(false);
@@ -69,7 +69,6 @@ const Header = () => {
 
 
     const verfication = async () => {
-        setStep(3);
 
         try {
             const response = await getInfo();
@@ -91,7 +90,6 @@ const Header = () => {
                     verfication();
                 }, 200);
             } else {
-                dispatch(logout());
                 nav(PAYMENT);
             }
         }
@@ -172,18 +170,14 @@ const Header = () => {
     }, [isOpen]);
 
     const init = async () => {
-        setStep(3);
 
         try {
             const [profileRes, styleRes] = await Promise.all([
                 user.first_name ? null : $authHost.get('profile/info'),
                 getInfo(),
             ]);
-
-            /* если профиль был пуст – кладём его в стор */
             if (profileRes) dispatch(setUser(profileRes.data));
 
-            /* теперь решаем, какой step нужен */
             if (styleRes.status === 200) {
                 setStyle(styleRes.data.style_id);
                 setCanUpload(styleRes.data.can_upload_photos);
@@ -195,17 +189,15 @@ const Header = () => {
             }    else if (styleRes.status === 403) {
                 setStep(1);
             } else {
-                dispatch(logout());
                 nav(PAYMENT);
             }
         } catch (err) {
             console.log(err);
-            dispatch(logout());
             nav(PAYMENT);
         }
     };
 
-    useEffect(() => { init(); }, []);                 // ← один-единственный эффект
+    useEffect(() => { init(); }, []);
 
     useEffect(() => {verfication()}, [])
 
