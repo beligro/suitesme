@@ -8,8 +8,11 @@ const Carusel2 = () => {
     return (
         <div className="w-full z-30 flex flex-col justify-center items-center lg:mt-32 -mt-7 bg-black relative overflow-x-hidden">
             <div className="w-full max-w-[1000px] z-10 lg:py-32 py-16">
-                <p className="text-[25px] lg:p-0 p-5 font-unbounded font-medium text-[#C2CED8] leading-tight lg:w-2/3 w-full">
-                    Присоединяйтесь к тысячам людей, которые уже нашли <span className="text-white">свой уникальный стиль</span> с SuitesMe
+                <p className={` text-[25px] lg:p-0 p-5 font-unbounded font-medium text-[#C2CED8] leading-tight lg:w-2/3 w-full lg:hidden `}>
+                    Присоединяйтесь к тысячам людей, которые уже <span className="text-white">нашли свой уникальный стиль</span> с SuitesMe
+                </p>
+                <p className={` text-[25px] lg:p-0 p-5 font-unbounded font-medium text-[#E6E6E6] leading-tight lg:w-2/3 w-full lg:block hidden `}>
+                    Присоединяйтесь к <span className="text-white"> тысячам людей, </span> которые уже нашли <span className="text-[#C2CED8]">свой уникальный стиль</span> с SuitesMe
                 </p>
             </div>
 

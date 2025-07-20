@@ -6,6 +6,7 @@ export default {
             fontFamily: {
                 unbounded: ['Unbounded', 'sans-serif'],
                 montserrat: ['Montserrat', 'sans-serif'],
+                headingnowtrial: ['Headingnowtrial', 'sans-serif'],
             },
         },
     },

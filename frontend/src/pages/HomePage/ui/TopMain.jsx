@@ -47,9 +47,10 @@ const TopMain = () => {
 
     return (
         <div className="w-full h-screen relative bg-white overflow-hidden">
-            <img className="lg:w-full h-screen object-cover lg:ml-[10%] z-0 top-0 lg:block hidden scale-125" src="/photos/main/main-top.webp" alt="" />
-            <img className="w-full h-[500px] object-cover z-0 top-0 lg:hidden" src="/photos/main/top-main2.webp" alt="" />
 
+            <img className=" w-full h-screen object-cover z-0 left-[10%] top-0 lg:block hidden " src="/photos/main/main-top.png" alt="" />
+
+            <img className="w-full h-[500px] object-cover z-0 top-0 lg:hidden" src="/photos/main/top-main2.webp" alt="" />
 
             <img
                 className="absolute sm:top-[400px] top-[350px] w-full md:h-[500px] sm:h-[460px] h-[400px] lg:hidden object-cover"
@@ -64,18 +65,22 @@ const TopMain = () => {
                     maskSize: '100% 100%',
                 }}
             />
+
             <img
                 className="lg:hidden absolute z-20 md:top-[790px] sm:top-[720px] top-[630px] w-full h-[140px] object-cover"
                 src="/photos/main/BottomBlur.webp"
                 alt=""
             />
+
             <div className="absolute md:top-[920px] sm:top-[820px] top-[760px] h-[20px] bg-gray-50/80 backdrop-blur-xl w-full lg:hidden"></div>
 
             <img className="h-full w-[30%]  z-10 absolute top-0 left-0 lg:block hidden" src="/photos/main/LeftBlur.webp" alt="" />
             <img className="h-full w-[30%]  z-10 absolute top-0 right-0 lg:block hidden" src="/photos/main/Rectangle.webp" alt="" />
-            <div className="backdrop-blur-sm bg-black/15 z-30 w-full lg:h-[130px] h-[60px] absolute top-0 left-0 flex flex-row items-center justify-between lg:px-20 px-5">
+            <div className="backdrop-blur-sm md:bg-black/0 bg-black/10 z-30 w-full lg:h-[100px] h-[60px] absolute top-0 left-0 flex flex-row items-center justify-between lg:px-20 px-5">
                 <img src="/photos/main/Profile.svg" className="h-[20px] lg:hidden block cursor-pointer" alt="" onClick={() => nav(PAYMENT)}/>
-                <img className="w-[110px] cursor-pointer" src="/photos/main/MNEIDET.svg" alt="" onClick={() => nav(MAIN)}/>
+
+                <p className="font-headingnowtrial text-[#FFFFFF] cursor-pointer" onClick={() => nav(MAIN)}>MNEIDET</p>
+
                 <img src="/photos/main/Burger.svg" className="h-[20px] lg:hidden block cursor-pointer" alt="" onClick={() => setIsOpen(!isOpen)}/>
                 <div className="lg:flex flex-row xl:gap-[45px] gap-[25px] items-center justify-end hidden">
                     <a className="font-montserrat font-medium text-[14px] text-white whitespace-nowrap cursor-pointer" href='#why-main'>Преимущества</a>
@@ -85,14 +90,14 @@ const TopMain = () => {
                     <a className="px-7 h-12 flex items-center justify-center rounded-full !border text-[13px] !border-white font-light uppercase text-white font-unbounded cursor-pointer" onClick={() => nav("/login")}>{isAuth ? user.first_name : "Войти"}</a>
                 </div>
             </div>
-            <div className="absolute z-40 lg:top-36 top-[400px] lg:left-[20%] lg:w-[250px] w-full lg:text-left text-center lg:p-0 p-8">
-                <p className="lg:font-extralight lg:block hidden font-light font-unbounded xl:text-[50px] lg:text-[30px] text-[23px] uppercase text-white">
-                    Узнай, что тебе&nbsp;действи&shy;тельно идёт
+            <div className="absolute z-40 lg:top-36 top-[400px] lg:left-[20%] lg:w-[350px] w-full lg:text-left text-center lg:p-0 p-8">
+                <p className="lg:block hidden font-light font-unbounded xl:text-[50px] lg:text-[40px] text-[23px] uppercase text-white">
+                    Узнай, что тебе действи- тельно идёт
                 </p>
                 <p className="lg:font-extralight lg:hidden font-light font-unbounded text-[22px] uppercase text-white">
                     Узнай, что тебе <br className="sm:hidden"/> действительно <br className="sm:hidden"/> идёт
                 </p>
-                <p className="font-normal mt-5 text-[10px] lg:w-[230px] text-center uppercase text-white lg:border-x lg:border-white lg:px-3 lg:py-2 lg:rounded-2xl">
+                <p className="font-normal mt-5 text-[12px] lg:w-[230px] text-center uppercase text-white lg:border-x lg:border-white lg:px-3 lg:py-2 lg:rounded-2xl">
                     Наш искусственный интеллект анализирует черты лица и определяет типаж по системе
                     <span className="block font-semibold">MNE IDET</span>
                 </p>
@@ -122,7 +127,7 @@ const TopMain = () => {
                 style={{ overscrollBehavior: 'contain' }}
             >
                 <div className="w-full flex mt-5">
-                    <img src="/photos/main/MNEIDET.svg" alt="" className="mx-auto h-[20px] cursor-pointer" onClick={() => nav(MAIN)}/>
+                    <p className="font-headingnowtrial text-[#FFFFFF] cursor-pointer mx-auto" onClick={() => nav(MAIN)}>MNEIDET</p>
                     <img src="/photos/main/cross-svgrepo-com.svg" alt="" className="absolute right-5 top-3 w-[36px] cursor-pointer" onClick={() => setIsOpen(!isOpen)}/>
                 </div>
                 <div className="w-full flex flex-col items-center justify-center h-full gap-14">

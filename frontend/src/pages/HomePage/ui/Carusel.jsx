@@ -8,10 +8,15 @@ import "../../../index.css";
 import {useNavigate} from "react-router-dom";
 
 const clients = [
-    "photos/main/womans/Woman1.webp",
+    "photos/main/womans/Woman1.jpg",
     "photos/main/womans/Woman2.webp",
     "photos/main/womans/Woman3.webp",
-    "photos/main/womans/Woman4.webp",
+    "photos/main/womans/Woman4.JPG",
+    "photos/main/womans/Woman5.jpg",
+    "photos/main/womans/Woman6.jpeg",
+    "photos/main/womans/Woman7.JPG",
+    "photos/main/womans/Woman8.jpg",
+    "photos/main/womans/Woman9.jpg",
 ];
 
 const Carusel = () => {
@@ -27,12 +32,12 @@ const Carusel = () => {
     }, [modalOpen]);
 
     return (
-        <div className="w-full flex justify-center lg:mt-32 mt-10 pl-4 relative overflow-x-hidden">
+        <div className="w-full flex justify-center lg:mt-32 mt-10 pl-4 relative overflow-x-hidden bg-[#F7F7F7]">
             <img src="/photos/main/Lines.webp" alt="" className="w-full absolute bottom-0 z-0 lg:block hidden" />
             <div className="w-full lg:w-[1000px] z-10 ">
-                <p className="text-[30px] lg:text-[53px] font-unbounded lg:text-left text-left text-balance w-full font-extralight uppercase text-[#1B3C4D] leading-tight">
+                <p className="text-[30px] lg:text-[53px] font-unbounded text-justify break-words w-full font-extralight uppercase text-[#1B3C4D] leading-tight pr-6">
                     Клиенты, которые уже работают по системе{" "}
-                    <span className="text-[#8296A6] font-extralight">MNE IDET</span>
+                    <span className="text-[#8296A6] font-extralight whitespace-nowrap">MNE IDET</span>
                 </p>
 
                 <p className="lg:text-[16px] text-[12px] text-center text-[#1B3C4D] font-normal uppercase pt-10 lg:w-auto w-[60%] lg:text-left ">
@@ -70,19 +75,21 @@ const Carusel = () => {
                                     alt={`client-${index}`}
                                     className="rounded-3xl w-full h-[400px] object-cover hover:scale-95 transition duration-200 cursor-pointer"
                                     onClick={() => {
-                                        setModalOpen(true);
-                                        setActiveClientIndex(index);
+                                        if (index === 0) {
+                                            setModalOpen(true);
+                                            setActiveClientIndex(index);
+                                        }
                                     }}
                                 />
                             </SwiperSlide>
                         ))}
                     </Swiper>
 
-                    <div className="swiper-next absolute lg:-right-20 right-6 -top-20 lg:top-[45%] lg:-translate-y-1/2 z-10 lg:w-16 w-10 lg:h-16 h-10 flex items-center justify-center cursor-pointer bg-white">
+                    <div className="swiper-next absolute lg:-right-20 right-6 -top-20 lg:top-[45%] lg:-translate-y-1/2 z-10 lg:w-16 w-10 lg:h-16 h-10 flex items-center justify-center cursor-pointer rounded-full bg-white">
                         <img className="w-full" src="/photos/main/NextButton.webp" alt="" />
                     </div>
 
-                    <div className="custom-swiper-pagination swiper-pagination lg:ml-[40%] md:ml-[45%] sm:ml-[42%] ml-[39%]" />
+                    <div className="custom-swiper-pagination swiper-pagination lg:ml-[40%] md:ml-[41%] sm:ml-[39%] ml-[30%]" />
 
                 </div>
 
@@ -95,7 +102,7 @@ const Carusel = () => {
                 </div>
             </div>
 
-            {modalOpen && activeClientIndex !== null && (
+            {modalOpen && activeClientIndex === 0 && ( // Заглушка! Как докините фоток в public меняй "=== 0" на "!== null"
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center">
                     <div className="relative w-full h-full flex items-center justify-center">
                         <Swiper

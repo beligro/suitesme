@@ -29,8 +29,8 @@ const Questions = () => {
     };
 
     return (
-        <div className="w-full flex justify-center mt-32">
-            <div className="lg:w-[1000px] w-full lg:bg-white bg-[#C2CED8] lg:rounded-none rounded-t-2xl lg:p-0 px-5 py-7 flex flex-col gap-5">
+        <div className="w-full flex justify-center mt-32 ">
+            <div className="lg:w-[1000px] w-full lg:bg-[#F7F7F7] bg-[#C2CED8] lg:rounded-none rounded-t-2xl lg:p-0 px-5 py-7 flex flex-col gap-5">
                 <p className="lg:text-[25px] text-[20px] font-unbounded lg:text-left text-center font-medium text-[#1B3C4D] lg:pt-0 pt-12">Ответы на вопросы</p>
 
                 <div className="w-full">

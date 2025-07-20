@@ -1,206 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@font-face {
+  font-family: 'Headingnowtrial';
+  src: url('/fonts/headingnowtrial-96bold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: bold;
+  font-display: swap;
+}
+
 
 * {
   scroll-behavior: smooth;
 }
 
-/* ================= Unbounded ================= */
-@font-face {
-  font-family: 'Unbounded';
-  src: url('/assets/Unbounded/Unbounded-ExtraLight.ttf') format('truetype');
-  font-weight: 200;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Unbounded';
-  src: url('/assets/Unbounded/Unbounded-Light.ttf') format('truetype');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Unbounded';
-  src: url('/assets/Unbounded/Unbounded-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Unbounded';
-  src: url('/assets/Unbounded/Unbounded-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Unbounded';
-  src: url('/assets/Unbounded/Unbounded-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Unbounded';
-  src: url('/assets/Unbounded/Unbounded-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Unbounded';
-  src: url('/assets/Unbounded/Unbounded-ExtraBold.ttf') format('truetype');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Unbounded';
-  src: url('/assets/Unbounded/Unbounded-Black.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* ================= Montserrat ================= */
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-ExtraLight.ttf') format('truetype');
-  font-weight: 200;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-ExtraLightItalic.ttf') format('truetype');
-  font-weight: 200;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-Light.ttf') format('truetype');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-LightItalic.ttf') format('truetype');
-  font-weight: 300;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-Italic.ttf') format('truetype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-MediumItalic.ttf') format('truetype');
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-SemiBoldItalic.ttf') format('truetype');
-  font-weight: 600;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-BoldItalic.ttf') format('truetype');
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/assets/Montserrat/Montserrat-ExtraBold.ttf') format('truetype');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-ExtraBoldItalic.ttf') format('truetype');
-  font-weight: 800;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-Black.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-BlackItalic.ttf') format('truetype');
-  font-weight: 900;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-Thin.ttf') format('truetype');
-  font-weight: 100;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/Montserrat/Montserrat-ThinItalic.ttf') format('truetype');
-  font-weight: 100;
-  font-style: italic;
-  font-display: swap;
-}
-
-
 * { margin:0; padding:0; box-sizing:border-box; }
-html,body { height:100%; background:#fff; }
+html,body { height:100%; background:#F7F7F7; }
 
 .custom-swiper-pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 6px 16px;
+  padding: 6px 6px;
   border: 2px solid #1B3C4D;
   border-radius: 9999px;
   position: absolute;
@@ -208,11 +35,11 @@ html,body { height:100%; background:#fff; }
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  gap: 6px;
-  background-color: white;
+  gap: 2px;
+  background-color: #F7F7F7;
   width: max-content;
-  min-width: 90px;
-  max-width: 200px;
+  min-width: 110px;
+  max-width: 230px;
   white-space: nowrap;
 }
 
@@ -231,7 +58,7 @@ html,body { height:100%; background:#fff; }
 @media (max-width: 1023px) {
   .custom-swiper-pagination {
     border: none;
-    max-width: 100px;
+    max-width: 160px;
     gap: 1px;
   }
 }

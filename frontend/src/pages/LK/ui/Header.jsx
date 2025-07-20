@@ -221,7 +221,7 @@ const Header = () => {
                     : "bg-gradient-to-t lg:to-[#00000060] to-[#00000060] from-[#C2CED8]"
             }`}>
                 <img src="/photos/main/Profile.svg" className="h-[20px] lg:hidden block cursor-pointer" alt=""/>
-                <img className="w-[110px] cursor-pointer" src="/photos/main/MNEIDET.svg" alt="" onClick={() => nav(MAIN)}/>
+                <p className="font-headingnowtrial text-[#FFFFFF] cursor-pointer" onClick={() => nav(MAIN)}>MNEIDET</p>
                 <img src="/photos/main/Burger.svg" className="h-[20px] lg:hidden block cursor-pointer" alt="" onClick={() => setIsOpen(!isOpen)} />
                 <div className="lg:flex flex-row xl:gap-[45px] gap-[25px] items-center justify-end hidden">
                     <button className="px-7 h-12 flex items-center justify-center rounded-full !border text-[11px] !border-white font-light uppercase text-white font-unbounded cursor-pointer" onClick={() => handleLogout()}>Выйти</button>
@@ -252,7 +252,7 @@ const Header = () => {
                             наш <span className="">AI</span> проанализирует черты лица <br className="lg:block hidden" />
                             и определит типаж
                         </p>
-                        <img src="/photos/main/MiddleWoman.webp" className="lg:block hidden w-[65%]" alt="" />
+                        <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt="" />
                     </div>
                     {/*<div className="uppercase font-light text-center text-[13px] lg:hidden block">*/}
                     {/*    Здесь может быть размещен*/}
@@ -277,7 +277,7 @@ const Header = () => {
                         <p className="text-center font-montserrat font-light text-[12px] uppercase">
                             нажмите на иконку,  чтобы НАЧАТЬ <br className="lg:block hidden"/> ТИПИРОВАНИЕ
                         </p>
-                        <img src="/photos/main/MiddleWoman.webp" className="lg:block hidden w-[65%]" alt=""/>
+                        <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>
                     </div>
 
                 </div>
@@ -296,7 +296,7 @@ const Header = () => {
                         </div>
                         {canUpload && (<button className="w-32 h-10 border border-white rounded-xl hover:bg-white/50 transition duration-200" onClick={() => setStep(0)}>Повторить</button>)}
                         <p className="text-center font-montserrat text-[25px]">Ваш типаж - <span className="font-semibold ">{style}</span></p>
-                        <img src="/photos/main/MiddleWoman.webp" className="lg:block hidden w-[65%]" alt=""/>
+                        <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>
                     </div>
                 </div>
             )}
@@ -336,7 +336,7 @@ const Header = () => {
                         <img src="/photos/LK/Krutilcka.svg" className="lg:mt-10" alt=""/>
 
                     </div>
-                    <img src="/photos/main/MiddleWoman.webp" className="lg:block hidden w-[65%] mx-auto" alt=""/>
+                    <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%] mx-auto" alt=""/>
 
                 </div>
             )}
@@ -351,7 +351,7 @@ const Header = () => {
             <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[580px] lg:block hidden z-20 lg:right-0 md:-right-[20%] -right-[50%] transform ease-in-out ${isBouncing ? "top-[0%]" : "-top-[5%]"}`} src="/photos/main/Soplya3.webp" alt="" />
             <div className={`${isOpen ? "flex" : "hidden"} w-full z-50 absolute top-0 left-0 flex-col bg-[rgb(130,148,155)] h-full`}>
                 <div className="w-full flex mt-5">
-                    <img src="/photos/main/MNEIDET.svg" alt="" className="mx-auto h-[20px] cursor-pointer" onClick={() => nav(MAIN)}/>
+                    <p className="font-headingnowtrial text-[#FFFFFF] cursor-pointer" onClick={() => nav(MAIN)}>MNEIDET</p>
                     <img src="/photos/main/cross-svgrepo-com.svg" alt="" className="absolute right-5 top-3 w-[36px] cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
                 </div>
                 <div className="w-full flex flex-col items-center justify-center h-full gap-14">

@@ -8,16 +8,11 @@ const Footer = () => {
 
     return (
         <div className="relative w-full h-auto z-30 text-[#1B3C4D]">
-            <div className="absolute top-0 left-0 w-full h-full bg-white" />
+            <div className="absolute top-0 left-0 w-full h-full bg-[#FBFBFB]" />
             <div className="w-full lg:px-60 px-5 lg:py-20 pt-20 pb-5 flex lg:flex-row lg:justify-between flex-col gap-5 relative">
                 <div className="flex flex-col lg:justify-between gap-5 lg:min-h-[200px]">
                     <div className="flex flex-col lg:gap-10 gap-5 lg:items-start items-center">
-                        <img
-                            src="/photos/main/MNEIDET_BLUE.svg"
-                            alt=""
-                            className="w-[150px] cursor-pointer"
-                            onClick={() => nav(MAIN)}
-                        />
+                        <p className="font-headingnowtrial text-[#1B3C4D] cursor-pointer" onClick={() => nav(MAIN)}>MNEIDET</p>
                         <p
                             onClick={() => {
                                 navigator.clipboard.writeText("support@mne-idet.ru");
