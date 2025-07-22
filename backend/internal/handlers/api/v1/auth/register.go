@@ -76,21 +76,27 @@ func (ctr AuthController) Register(ctx echo.Context) error {
 	userId := ctr.storage.User.Create(newUser)
 
 	// Create a better formatted email with HTML content
-	plainText := "Your verification code is: " + verificationCode + "\n\nThank you for registering with SuitesMe!"
+	plainText := "Ваш код подтверждения: " + verificationCode
 	htmlContent := "<html><body>" +
-		"<h2>Welcome to SuitesMe!</h2>" +
-		"<p>Thank you for registering. Please use the verification code below to complete your registration:</p>" +
+		"<h2>Здравствуйте, " + request.FirstName + "!</h2>" +
+		"<p>Поздравляем вас с успешной регистрацией</p>" +
+		"<p>Ваш код подтверждения:</p>" +
 		"<div style='background-color: #f5f5f5; padding: 10px; margin: 20px 0; font-size: 18px; font-weight: bold; text-align: center;'>" +
 		verificationCode +
 		"</div>" +
-		"<p>If you didn't request this verification code, please ignore this email.</p>" +
+		"<p>Войдите в свой личный кабинет по адресу: " + request.Email + "</p>" +
+		"<p>И узнайте свой типаж!</p>" +
+		"<p></p>" +
+		"<p></p>" +
+		"<p>С уважением,</p>" +
+		"<p>команда MNE IDET</p>" +
 		"</body></html>"
 
 	// Create email message
 	emailMsg := sender.EmailMessage{
 		From:        ctr.config.EmailSendFrom,
 		To:          request.Email,
-		Subject:     "Welcome to SuitesMe - Verify Your Account",
+		Subject:     "Подтвердите адрес электронной почты",
 		PlainText:   plainText,
 		HTMLContent: htmlContent,
 	}

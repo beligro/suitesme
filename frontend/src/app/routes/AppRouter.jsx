@@ -5,7 +5,7 @@ import { nonAuthorise, authorise } from './routes.js';
 import {useDispatch, useSelector} from "react-redux";
 import {selectIsAuthenticated , selectIsInitialized} from "../../features/Auth/model/selector.js";
 import {logout, resetUser, setInitialized, setIsAuthenticated, setUser} from "../../features/Auth/model/slice.js";
-import {getUsersStyle} from "../../pages/Lk/api/lkAPI.js";
+import {getUsersStyle} from "../../pages/LK/api/lkAPI.js";
 
 const AppRouter = () => {
     const dispatch = useDispatch();
