@@ -48,9 +48,19 @@ const TopMain = () => {
     return (
         <div className="w-full h-screen relative bg-white overflow-hidden">
 
-            <img className=" w-full h-screen object-cover z-0 left-[10%] top-0 lg:block hidden " src="/photos/main/main-top.png" alt="" />
+            <img 
+                className="w-full h-screen object-cover z-0 left-[20%] top-0 lg:block hidden" 
+                style={{ marginLeft: '80px' }}
+                src="/photos/main/main-top.png" 
+                alt="" 
+            />
 
-            <img className="w-full h-[500px] object-cover z-0 top-0 lg:hidden" src="/photos/main/top-main2.webp" alt="" />
+            <img 
+                className="w-full h-[500px] object-cover z-0 top-0 lg:hidden" 
+                style={{ marginLeft: '20px' }}
+                src="/photos/main/top-main-mobile.png" 
+                alt="" 
+            />
 
             <img
                 className="absolute sm:top-[400px] top-[350px] w-full md:h-[500px] sm:h-[460px] h-[400px] lg:hidden object-cover"
@@ -76,32 +86,36 @@ const TopMain = () => {
 
             <img className="h-full w-[30%]  z-10 absolute top-0 left-0 lg:block hidden" src="/photos/main/LeftBlur.webp" alt="" />
             <img className="h-full w-[30%]  z-10 absolute top-0 right-0 lg:block hidden" src="/photos/main/Rectangle.webp" alt="" />
-            <div className="backdrop-blur-sm md:bg-black/0 bg-black/10 z-30 w-full lg:h-[100px] h-[60px] absolute top-0 left-0 flex flex-row items-center justify-between lg:px-20 px-5">
+            <div className="backdrop-blur-sm z-50 w-full lg:h-[100px] h-[60px] fixed top-0 left-0 flex flex-row items-center justify-between lg:px-20 px-5" style={{ background: 'linear-gradient(180deg, rgba(3, 28, 45, 0.55) 0%, rgba(141, 141, 141, 0) 100%)' }}>
                 <img src="/photos/main/Profile.svg" className="h-[20px] lg:hidden block cursor-pointer" alt="" onClick={() => nav(PAYMENT)}/>
 
-                <p className="font-headingnowtrial text-[#FFFFFF] cursor-pointer" onClick={() => nav(MAIN)}>MNEIDET</p>
+                <p className="font-headingnowtrial font-bold text-[20px] leading-[22px] text-[#FFFFFF] cursor-pointer" onClick={() => nav(MAIN)}>MNEIDET</p>
 
                 <img src="/photos/main/Burger.svg" className="h-[20px] lg:hidden block cursor-pointer" alt="" onClick={() => setIsOpen(!isOpen)}/>
                 <div className="lg:flex flex-row xl:gap-[45px] gap-[25px] items-center justify-end hidden">
-                    <a className="font-montserrat font-medium text-[14px] text-white whitespace-nowrap cursor-pointer" href='#why-main'>Преимущества</a>
-                    <a className="font-montserrat font-medium text-[14px] text-white whitespace-nowrap cursor-pointer" href='#about'>О сервисе</a>
-                    <a className="font-montserrat font-medium text-[14px] text-white whitespace-nowrap cursor-pointer" href='#questions'>Ответы на вопросы</a>
-                    <a className="font-montserrat font-medium text-[14px] text-white whitespace-nowrap cursor-pointer" href='#examples'>Примеры результатов</a>
-                    <a className="px-7 h-12 flex items-center justify-center rounded-full !border text-[13px] !border-white font-light uppercase text-white font-unbounded cursor-pointer" onClick={() => nav("/login")}>{isAuth ? user.first_name : "Войти"}</a>
+                    <a className="font-montserrat font-medium text-[14px] leading-[28px] text-white whitespace-nowrap cursor-pointer" href='#why-main'>Преимущества</a>
+                    <a className="font-montserrat font-medium text-[14px] leading-[28px] text-white whitespace-nowrap cursor-pointer" href='#about'>О сервисе</a>
+                    <a className="font-montserrat font-medium text-[14px] leading-[28px] text-white whitespace-nowrap cursor-pointer" href='#questions'>Ответы на вопросы</a>
+                    <a className="font-montserrat font-medium text-[14px] leading-[28px] text-white whitespace-nowrap cursor-pointer" href='#examples'>Примеры результатов</a>
+                    <a className="px-7 h-12 flex items-center justify-center rounded-full !border text-[16px] !border-white font-light uppercase text-white font-unbounded cursor-pointer" onClick={() => nav("/login")}>{isAuth ? user.first_name : "Войти"}</a>
                 </div>
             </div>
             <div className="absolute z-40 lg:top-36 top-[400px] lg:left-[20%] lg:w-[350px] w-full lg:text-left text-center lg:p-0 p-8">
                 <p className="lg:block hidden font-light font-unbounded xl:text-[50px] lg:text-[40px] text-[23px] uppercase text-white">
-                    Узнай, что тебе действи- тельно идёт
+                    Узнай,<br/>
+                    что тебе<br/>
+                    действи-<br/>
+                    тельно<br/>
+                    идёт
                 </p>
-                <p className="lg:font-extralight lg:hidden font-light font-unbounded text-[22px] uppercase text-white">
+                <p className="lg:hidden font-light font-unbounded text-[26px] leading-[28px] text-center uppercase text-white">
                     Узнай, что тебе <br className="sm:hidden"/> действительно <br className="sm:hidden"/> идёт
                 </p>
-                <p className="font-normal mt-5 text-[12px] lg:w-[230px] text-center uppercase text-white lg:border-x lg:border-white lg:px-3 lg:py-2 lg:rounded-2xl">
+                <p className="font-montserrat font-normal lg:text-[16px] text-[10px] leading-[1.2] mt-5 lg:w-[230px] text-center uppercase text-white lg:border-x lg:border-white lg:px-3 lg:py-2 lg:rounded-2xl">
                     Наш искусственный интеллект анализирует черты лица и определяет типаж по системе
                     <span className="block font-semibold">MNE IDET</span>
                 </p>
-                <div className="lg:hidden mx-auto mt-10 md:mt-10 top-[85%] font-unbounded w-[240px] h-[50px] flex items-center justify-center rounded-full border border-[#ffffff] backdrop-blur-xl text-[#1B3C4D] bg-white/40 uppercase text-[12px] font-light cursor-pointer hover:shadow-xl transition duration-200" onClick={() => nav("/payment")}>
+                <div className="lg:hidden mx-auto mt-10 md:mt-10 top-[85%] font-unbounded w-[240px] h-[50px] flex items-center justify-center rounded-full border border-[#ffffff] backdrop-blur-xl text-[#1B3C4D] bg-white/40 uppercase lg:text-[16px] text-[11px] font-light cursor-pointer hover:shadow-xl transition duration-200" onClick={() => nav("/payment")}>
                     Узнай свой типаж
                 </div>
             </div>
@@ -127,13 +141,13 @@ const TopMain = () => {
                 style={{ overscrollBehavior: 'contain' }}
             >
                 <div className="w-full flex mt-5">
-                    <p className="font-headingnowtrial text-[#FFFFFF] cursor-pointer mx-auto" onClick={() => nav(MAIN)}>MNEIDET</p>
+                    <p className="font-headingnowtrial font-bold text-[20px] leading-[22px] text-[#FFFFFF] cursor-pointer mx-auto" onClick={() => nav(MAIN)}>MNEIDET</p>
                     <img src="/photos/main/cross-svgrepo-com.svg" alt="" className="absolute right-5 top-3 w-[36px] cursor-pointer" onClick={() => setIsOpen(!isOpen)}/>
                 </div>
                 <div className="w-full flex flex-col items-center justify-center h-full gap-14">
                     <div className="flex flex-col gap-5 text-center">
                         <a
-                            className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer"
+                            className="font-montserrat font-light text-[16px] leading-[1.6] text-white whitespace-nowrap cursor-pointer"
                             onClick={() => {
                                 setIsOpen(false);
                                 setTimeout(() => {
@@ -149,7 +163,7 @@ const TopMain = () => {
                             Преимущества
                         </a>
                         <a
-                            className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer"
+                            className="font-montserrat font-light text-[16px] leading-[1.6] text-white whitespace-nowrap cursor-pointer"
                             onClick={() => {
                                 setIsOpen(false);
                                 setTimeout(() => {
@@ -161,7 +175,7 @@ const TopMain = () => {
                         </a>
 
                         <a
-                            className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer"
+                            className="font-montserrat font-light text-[16px] leading-[1.6] text-white whitespace-nowrap cursor-pointer"
                             onClick={() => {
                                 setIsOpen(false);
                                 setTimeout(() => {
@@ -173,7 +187,7 @@ const TopMain = () => {
                         </a>
 
                         <a
-                            className="font-montserrat font-light text-[16px] text-white whitespace-nowrap cursor-pointer"
+                            className="font-montserrat font-light text-[16px] leading-[1.6] text-white whitespace-nowrap cursor-pointer"
                             onClick={() => {
                                 setIsOpen(false);
                                 setTimeout(() => {

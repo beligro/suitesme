@@ -9,13 +9,11 @@ import {useNavigate} from "react-router-dom";
 
 const clients = [
     "photos/main/womans/Woman1.jpg",
-    "photos/main/womans/Woman2.webp",
-    "photos/main/womans/Woman3.webp",
+    "photos/main/womans/Woman3.jpg",
     "photos/main/womans/Woman4.JPG",
     "photos/main/womans/Woman5.jpg",
     "photos/main/womans/Woman6.jpeg",
     "photos/main/womans/Woman7.JPG",
-    "photos/main/womans/Woman8.jpg",
     "photos/main/womans/Woman9.jpg",
 ];
 
@@ -35,12 +33,13 @@ const Carusel = () => {
         <div className="w-full flex justify-center lg:mt-32 mt-10 pl-4 relative overflow-x-hidden bg-[#F7F7F7]">
             <img src="/photos/main/Lines.webp" alt="" className="w-full absolute bottom-0 z-0 lg:block hidden" />
             <div className="w-full lg:w-[1000px] z-10 ">
-                <p className="text-[30px] lg:text-[53px] font-unbounded text-justify break-words w-full font-extralight uppercase text-[#1B3C4D] leading-tight pr-6">
-                    Клиенты, которые уже работают по системе{" "}
-                    <span className="text-[#8296A6] font-extralight whitespace-nowrap">MNE IDET</span>
+                <p className="text-[26px] lg:text-[53px] font-unbounded text-justify break-words w-full font-extralight uppercase text-[#1B3C4D] leading-tight pr-6">
+                    Клиенты, которые<br/>
+                    уже работают по<br/>
+                    системе <span className="text-[#8296A6] font-extralight whitespace-nowrap">MNE IDET</span>
                 </p>
 
-                <p className="lg:text-[16px] text-[12px] text-center text-[#1B3C4D] font-normal uppercase pt-10 lg:w-auto w-[60%] lg:text-left ">
+                <p className="lg:text-[14px] text-[12px] text-center text-[#1B3C4D] font-regular uppercase pt-10 lg:w-auto w-[60%] lg:text-left ">
                     Нажмите на фото,<br className="lg:hidden" /> чтобы посмотреть кейс
                 </p>
 

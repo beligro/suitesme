@@ -15,7 +15,7 @@ services:
     depends_on:
       - backend
       - frontend
-      - admin
+      #- admin
     networks:
       - suitesme
 
@@ -43,11 +43,11 @@ services:
     networks:
       - suitesme
 
-  admin:
-    build:
-      context: ./admin
-    networks:
-      - suitesme
+  #admin:
+  #  build:
+  #    context: ./admin
+  #  networks:
+  #    - suitesme
 
   ml:
     build:

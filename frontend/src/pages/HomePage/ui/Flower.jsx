@@ -17,12 +17,12 @@ const Flower = () => {
             <img src="/photos/main/Flower.webp" alt="" className="absolute z-10 top-[14%] h-[150%] left-[10%] object-contain sm:scale-100 scale-[2.5]" />
 
             <div className="z-20 relative w-full flex flex-col items-center justify-center lg:px-0 px-3">
-                <p className="font-unbounded font-semibold text-center lg:text-[30px] text-[25px] mt-20 text-[#1B3C4D]">
-                    Готова узнать,<br className="lg:block hidden"/>
+                <p className="font-unbounded font-medium text-center lg:text-[30px] text-[25px] mt-20 text-[#1B3C4D]">
+                    Готова узнать, <br className="lg:block hidden"/>
                     что действительно тебе идет?
                 </p>
 
-                <p className="font-montserrat text-[12px] uppercase font-light text-center lg:mt-20 mt-5 text-[#1B3C4D]">оформи прямо сейчас и получи скидку 50%</p>
+                <p className="font-montserrat text-[10px] uppercase font-regular text-center lg:mt-20 mt-5 text-[#1B3C4D]">оформи прямо сейчас и получи скидку 50%</p>
 
                 <div className="md:w-[500px] backdrop-blur-lg bg-white/20 flex flex-row sm:gap-20 gap-12 sm:p-12 p-12 py-10 items-center justify-center mt-4 rounded-2xl ">
                     <p className="font-unbounded lg:text-[30px] text-[20px] whitespace-nowrap text-[#1B3C4D]">3990 ₽</p>

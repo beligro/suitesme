@@ -19,9 +19,7 @@ const HomePage = () => {
     return (
         <div className={` ${isLoaded ? 'visible' : 'invisible'} bg-[#F7F7F7]`}>
             <TopMain />
-            <div className="overflow-x-hidden">
-                <CenterFirst />
-            </div>
+            <CenterFirst />
             <WhyMain />
             <Carusel />
             <Qwestions />

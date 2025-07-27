@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"net/http"
+	"net/url"
 	"suitesme/internal/models"
 	"suitesme/internal/utils/security"
 	"suitesme/pkg/myerrors"
@@ -66,14 +67,19 @@ func (ctr AuthController) ForgotPassword(ctx echo.Context) error {
 
 	ctr.storage.User.Save(user)
 
-	resetLink := "http://51.250.84.195/password_reset?token=" + urlToken
+	resetLink := "http://51.250.84.195/password_reset?token=" + url.QueryEscape(urlToken)
 	plainText := "You requested a password reset for your SuitesMe account.\n\n" +
 		"Please use the following link to reset your password: " + resetLink + "\n\n" +
 		"If you didn't request a password reset, please ignore this email."
 
 	htmlContent := "<html><body>" +
 		"<h2>Здравствуйте, " + user.FirstName + "!</h2>" +
-		"<p style='background-color: #f5f5f5; padding: 10px; word-break: break-all;'>" + resetLink + "</p>" +
+		"<div style='margin: 30px 0;'>" +
+		"<a href='" + resetLink + "' style='background-color: #007bff; color: white; padding: 12px 20px; " +
+		"text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;'>Сбросить пароль</a>" +
+		"</div>" +
+		"<p style='color: #6c757d; font-size: 14px;'>Если кнопка выше не работает, скопируйте и вставьте следующую ссылку в ваш браузер:</p>" +
+		"<p style='background-color: #f5f5f5; padding: 10px; word-break: break-all; font-size: 14px;'>" + resetLink + "</p>" +
 		"<p>Если вы не запрашивали смену пароля, пожалуйста, проигнорируйте данное письмо.</p>" +
 		"<p>Время действия ссылки - 15 минут</p>" +
 		"<p></p>" +

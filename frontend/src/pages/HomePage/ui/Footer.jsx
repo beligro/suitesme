@@ -24,16 +24,16 @@ const Footer = () => {
                             {copied ? "Почта скопирована" : "support@mne-idet.ru"}
                         </p>
                     </div>
-                    <p className="font-montserrat uppercase text-[12px] font-light lg:block hidden">
+                    <p className="font-montserrat uppercase text-[10px] font-light lg:block hidden">
                         ИП Трофимова Мария Андреевна<br />ИНН 230115188508<br />ОГРНИП 319237500065543
                     </p>
                 </div>
                 <div className="flex flex-col lg:justify-between gap-5 lg:min-h-[250px]">
                     <div className="flex flex-col gap-2">
-                        <a className="font-montserrat text-[16px] font-light cursor-pointer lg:text-left text-center" href="#why-main">Преимущества</a>
-                        <a className="font-montserrat text-[16px] font-light cursor-pointer lg:text-left text-center" href="#about">О сервисе</a>
-                        <a className="font-montserrat text-[16px] font-light cursor-pointer lg:text-left text-center" href="#questions">Ответы на вопросы</a>
-                        <a className="font-montserrat text-[16px] font-light cursor-pointer lg:text-left text-center" href="#examples">Результаты</a>
+                        <a className="font-montserrat lg:text-[12px] text-[14px] font-light cursor-pointer lg:text-left text-center" href="#why-main">Преимущества</a>
+                        <a className="font-montserrat lg:text-[12px] text-[14px] font-light cursor-pointer lg:text-left text-center" href="#about">О сервисе</a>
+                        <a className="font-montserrat lg:text-[12px] text-[14px] font-light cursor-pointer lg:text-left text-center" href="#questions">Ответы на вопросы</a>
+                        <a className="font-montserrat lg:text-[12px] text-[14px] font-light cursor-pointer lg:text-left text-center" href="#examples">Результаты</a>
                     </div>
                     <div className="flex flex-row items-center lg:justify-end justify-center gap-5 lg:my-0 my-5">
                         <a href="https://t.me/mne_idet" target="_blank" rel="noopener noreferrer">
@@ -52,7 +52,7 @@ const Footer = () => {
 
             <div className="w-full lg:px-60 px-5 lg:pt-10 pb-20 flex lg:flex-row flex-col items-center justify-start lg:gap-16 gap-0 relative">
                 <a
-                    className="font-montserrat text-[14px] font-light underline cursor-pointer"
+                    className="font-montserrat text-[12px] font-light underline cursor-pointer"
                     href="https://mneidet.com/privacy/"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -60,7 +60,7 @@ const Footer = () => {
                     Условия использования
                 </a>
                 <a
-                    className="font-montserrat text-[14px] font-light underline cursor-pointer"
+                    className="font-montserrat text-[12px] font-light underline cursor-pointer"
                     href="https://mneidet.com/privacy/"
                     target="_blank"
                     rel="noopener noreferrer"
