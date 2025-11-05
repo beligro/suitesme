@@ -1,5 +1,3 @@
-version: "3.8"
-
 networks:
   suitesme:
 
@@ -40,14 +38,18 @@ services:
       context: ./frontend
       args:
         - VITE_API_URL=${VITE_API_URL}
+    ports:
+      - "3000:3000"
     networks:
       - suitesme
 
-  #admin:
-  #  build:
-  #    context: ./admin
-  #  networks:
-  #    - suitesme
+  admin:
+    build:
+      context: ./admin
+    ports:
+      - "3001:3000"
+    networks:
+      - suitesme
 
   ml:
     build:
@@ -65,8 +67,10 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5433:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql
     networks:
       - suitesme
     restart: always

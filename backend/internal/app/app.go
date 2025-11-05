@@ -25,7 +25,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/patrickmn/go-cache"
@@ -154,7 +153,7 @@ func Run() {
 	adminRoutes := e.Group("/admin")
 	adminV1 := adminRoutes.Group("/v1")
 	adminV1.Use(LoggerMiddleware(&logger))
-	adminV1.Use(echojwt.JWT(cfg.AdminTokenSecret))
+	adminV1.Use(AdminJWTAuthMiddleware(cfg.AdminTokenSecret))
 
 	adminV1.GET("/content", contentController.List)
 	adminV1.GET("/content/:id", contentController.Get)
