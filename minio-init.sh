@@ -12,6 +12,7 @@ echo "MinIO is ready! Creating buckets and setting policies..."
 # Create buckets if they don't exist
 mc mb myminio/${STYLE_PHOTO_BUCKET} --insecure || true
 mc mb myminio/${STYLE_PDF_BUCKET} --insecure || true
+mc mb myminio/${ML_ARTIFACTS_BUCKET} --insecure || true
 
 # Set public read policy for the buckets
 cat > /tmp/public-read-policy.json << EOF
