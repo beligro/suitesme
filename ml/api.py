@@ -5,6 +5,7 @@ FastAPI-based API that receives base64 images and returns face class predictions
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import List
 import base64
 import io
 import os
@@ -34,7 +35,7 @@ ensemble_classifier = None
 
 class ImageRequest(BaseModel):
     """Request model for image classification"""
-    image: str  # base64 encoded image
+    images: List[str]  # base64 encoded images (1-4 images)
     weights: dict = {"hierarchical": 0.6, "centroid": 0.4}  # ensemble weights
     distance_metric: str = "euclidean"  # distance metric for centroid classifier
     return_details: bool = False  # whether to return detailed predictions
@@ -144,22 +145,27 @@ async def get_classes():
 @app.post("/predict", response_model=PredictionResponse)
 async def predict_face_class(request: ImageRequest):
     """
-    Predict face class from base64 encoded image
+    Predict face class from base64 encoded images
     
     Args:
-        request (ImageRequest): Request containing base64 image and parameters
+        request (ImageRequest): Request containing base64 images (1-4) and parameters
         
     Returns:
-        PredictionResponse: Prediction results
+        PredictionResponse: Prediction results (only first image is processed for now)
     """
     if ensemble_classifier is None:
         raise HTTPException(status_code=503, detail="Classifier not initialized")
     
+    # Validate image count
+    if len(request.images) < 1 or len(request.images) > 4:
+        raise HTTPException(status_code=400, detail="Must provide 1-4 images")
+    
     temp_image_path = None
     
     try:
+        # For now, process only the first image
         # Convert base64 to temporary image file
-        temp_image_path = base64_to_image(request.image)
+        temp_image_path = base64_to_image(request.images[0])
         
         # Validate ensemble weights
         if abs(sum(request.weights.values()) - 1.0) > 0.01:
@@ -279,10 +285,10 @@ async def predict_simple(request: ImageRequest):
     Simplified prediction endpoint that returns just the class name
     
     Args:
-        request (ImageRequest): Request containing base64 image
+        request (ImageRequest): Request containing base64 images (1-4)
         
     Returns:
-        dict: Simple response with predicted class
+        dict: Simple response with predicted class (only first image is processed for now)
     """
     response = await predict_face_class(request)
     

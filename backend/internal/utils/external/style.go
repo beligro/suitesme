@@ -10,7 +10,7 @@ import (
 )
 
 type MLRequest struct {
-	Image string `json:"image"`
+	Images []string `json:"images"`
 }
 
 type MLResponse struct {
@@ -18,13 +18,21 @@ type MLResponse struct {
 	Confidence     float64 `json:"confidence"`
 }
 
-func GetStyle(photoData []byte) (string, error) {
-	// Encode photo to base64
-	base64Image := base64.StdEncoding.EncodeToString(photoData)
+func GetStyle(photosData [][]byte) (string, error) {
+	// Validate that we have 1-4 photos
+	if len(photosData) < 1 || len(photosData) > 4 {
+		return "", fmt.Errorf("must provide 1-4 photos, got %d", len(photosData))
+	}
+
+	// Encode all photos to base64
+	base64Images := make([]string, len(photosData))
+	for i, photoData := range photosData {
+		base64Images[i] = base64.StdEncoding.EncodeToString(photoData)
+	}
 
 	// Prepare request
 	mlRequest := MLRequest{
-		Image: base64Image,
+		Images: base64Images,
 	}
 
 	requestBody, err := json.Marshal(mlRequest)

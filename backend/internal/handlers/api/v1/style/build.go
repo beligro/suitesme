@@ -22,13 +22,13 @@ type StyleBuildResult struct {
 }
 
 // Build godoc
-// @Summary Upload user photo and determine style
-// @Description Upload user photo, save it to S3, and determine user's style using ML service
+// @Summary Upload user photos and determine style
+// @Description Upload user photos (1-4), save them to S3, and determine user's style using ML service
 // @Tags style
 // @Accept multipart/form-data
 // @Produce json
 // @Param Authorization header string true "Bearer token"
-// @Param photo formData file true "User photo"
+// @Param photos formData file true "User photos (1-4 images)"
 // @Success 200 {object} StyleBuildResult
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
@@ -75,27 +75,18 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, response)
 	}
 
-	photo, err := ctx.FormFile("photo")
+	// Parse multipart form
+	form, err := ctx.MultipartForm()
 	if err != nil {
 		ctr.logger.Error(err)
 		return myerrors.GetHttpErrorByCode(myerrors.BadPhotoFormat, ctx)
 	}
 
-	src, err := photo.Open()
-	if err != nil {
-		ctr.logger.Error(err)
+	photos := form.File["photos"]
+	if len(photos) < 1 || len(photos) > 4 {
+		ctr.logger.Error(fmt.Sprintf("Invalid number of photos: %d (must be 1-4)", len(photos)))
 		return myerrors.GetHttpErrorByCode(myerrors.BadPhotoFormat, ctx)
 	}
-	defer src.Close()
-
-	// Read photo data for ML service
-	photoData, err := io.ReadAll(src)
-	if err != nil {
-		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(myerrors.BadPhotoFormat, ctx)
-	}
-
-	fileKey := photo.Filename
 
 	// Check if user is admin
 	if !user.IsAdmin {
@@ -107,20 +98,48 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		}
 	}
 
-	_, err = ctr.s3Client.PutObject(&s3.PutObjectInput{
-		Bucket:      aws.String(ctr.config.StylePhotoBucket),
-		Key:         aws.String(fmt.Sprintf("%s/%s", parsedUserId.String(), fileKey)),
-		Body:        bytes.NewReader(photoData),
-		ContentType: aws.String(photo.Header.Get("Content-Type")),
-	})
-	if err != nil {
-		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
+	// Read all photo data and upload to S3
+	photosData := make([][]byte, len(photos))
+	photoURLs := make([]string, len(photos))
+
+	for i, photo := range photos {
+		src, err := photo.Open()
+		if err != nil {
+			ctr.logger.Error(err)
+			return myerrors.GetHttpErrorByCode(myerrors.BadPhotoFormat, ctx)
+		}
+
+		// Read photo data
+		photoData, err := io.ReadAll(src)
+		src.Close()
+		if err != nil {
+			ctr.logger.Error(err)
+			return myerrors.GetHttpErrorByCode(myerrors.BadPhotoFormat, ctx)
+		}
+
+		photosData[i] = photoData
+
+		// Upload to S3
+		fileKey := fmt.Sprintf("%s/%s", parsedUserId.String(), photo.Filename)
+		_, err = ctr.s3Client.PutObject(&s3.PutObjectInput{
+			Bucket:      aws.String(ctr.config.StylePhotoBucket),
+			Key:         aws.String(fileKey),
+			Body:        bytes.NewReader(photoData),
+			ContentType: aws.String(photo.Header.Get("Content-Type")),
+		})
+		if err != nil {
+			ctr.logger.Error(err)
+			return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
+		}
+
+		photoURLs[i] = fmt.Sprintf("%s/%s/%s", ctr.config.MinioFilePathEndpoint, ctr.config.StylePhotoBucket, parsedUserId.String(), photo.Filename)
 	}
 
-	photoURL := fmt.Sprintf("%s/%s/%s/%s", ctr.config.MinioFilePathEndpoint, ctr.config.StylePhotoBucket, parsedUserId.String(), fileKey)
+	// Use first photo URL for user style record (main photo)
+	photoURL := photoURLs[0]
 
-	styleId, err = external.GetStyle(photoData)
+	// Send all photos to ML service
+	styleId, err = external.GetStyle(photosData)
 	if err != nil {
 		ctr.logger.Error("Failed to get style from ML service:", err)
 		// Check if the error is about no face detected
