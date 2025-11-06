@@ -8,8 +8,7 @@ import {
   EditButton,
   Filter,
   BooleanInput,
-  FunctionField,
-  NumberField
+  FunctionField
 } from "react-admin";
 
 // Filter component for predictions
@@ -54,11 +53,6 @@ export const PredictionsList = props => (
       <FunctionField label="Photo" render={record => <PhotoField record={record} />} />
       <TextField source="userId" label="User ID" />
       <TextField source="initialPrediction" label="Initial Prediction" />
-      <NumberField 
-        source="confidence" 
-        label="Confidence" 
-        options={{ style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }}
-      />
       <TextField source="verifiedPrediction" label="Verified As" />
       <BooleanField source="isVerified" label="Verified" />
       <DateField source="createdAt" label="Created" showTime />
