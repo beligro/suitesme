@@ -1,6 +1,6 @@
 const AuthProvider = {
     login: async ({ username, password }) => {
-        const request = new Request('/api/admin/auth/login', {
+        const request = new Request('/admin/auth/login', {
             method: 'POST',
             headers: new Headers({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ username, password }),
@@ -22,6 +22,14 @@ const AuthProvider = {
     },
     checkAuth: () => {
         return localStorage.getItem('auth') ? Promise.resolve() : Promise.reject({ redirectTo: '/login' });
+    },
+    checkError: (error) => {
+        const status = error.status;
+        if (status === 401 || status === 403) {
+            localStorage.removeItem('auth');
+            return Promise.reject({ redirectTo: '/login' });
+        }
+        return Promise.resolve();
     },
     getPermissions: () => Promise.resolve(),
 };

@@ -2,6 +2,7 @@ package style
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -132,14 +133,14 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 			return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 		}
 
-		photoURLs[i] = fmt.Sprintf("%s/%s/%s", ctr.config.MinioFilePathEndpoint, ctr.config.StylePhotoBucket, parsedUserId.String(), photo.Filename)
+		photoURLs[i] = fmt.Sprintf("%s/%s/%s/%s", ctr.config.MinioFilePathEndpoint, ctr.config.StylePhotoBucket, parsedUserId.String(), photo.Filename)
 	}
 
 	// Use first photo URL for user style record (main photo)
 	photoURL := photoURLs[0]
 
 	// Send all photos to ML service
-	styleId, err = external.GetStyle(photosData)
+	styleId, confidence, err := external.GetStyle(photosData)
 	if err != nil {
 		ctr.logger.Error("Failed to get style from ML service:", err)
 		// Check if the error is about no face detected
@@ -149,10 +150,16 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 	}
 
+	// Store all photo URLs
+	photoURLsJSON, _ := json.Marshal(photoURLs)
+	
 	userStyle := &models.DbUserStyle{
-		UserId:   parsedUserId,
-		PhotoUrl: photoURL,
-		StyleId:  styleId,
+		UserId:            parsedUserId,
+		PhotoUrl:          photoURL,
+		PhotoUrls:         photoURLsJSON,
+		StyleId:           styleId,
+		InitialPrediction: styleId,
+		Confidence:        confidence,
 	}
 
 	ctr.storage.UserStyle.Create(userStyle)

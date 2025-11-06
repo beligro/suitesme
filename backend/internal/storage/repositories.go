@@ -2,6 +2,7 @@ package storage
 
 import (
 	"suitesme/internal/models"
+	"suitesme/internal/storage/repository"
 
 	"github.com/google/uuid"
 )
@@ -21,7 +22,11 @@ type StylesRepository interface{}
 
 type UserStyleRepository interface {
 	Get(uuid.UUID) (string, error)
+	GetById(uuid.UUID) (*models.DbUserStyle, error)
 	Create(*models.DbUserStyle)
+	List(params repository.PredictionListParams) ([]models.DbUserStyle, int64, error)
+	Verify(uuid.UUID, string, int) error
+	GetStatistics() (*models.PredictionStatistics, error)
 }
 
 type TokensRepository interface {
@@ -59,4 +64,5 @@ type SettingsRepository interface {
 
 type AdminUserRepository interface {
 	Get(string, string) (*models.DbAdminUser, error)
+	GetByUsername(string) (*models.DbAdminUser, error)
 }
