@@ -44,10 +44,72 @@ services:
     networks:
       - suitesme
 
-  ml:
-    image: ghcr.io/${GITHUB_REPOSITORY}/ml:${GITHUB_SHA}
+  ml-inference:
+    image: ghcr.io/${GITHUB_REPOSITORY}/ml-inference:${GITHUB_SHA}
     ports:
       - "8000:8000"
+    networks:
+      - suitesme
+    restart: always
+
+  ml-automl:
+    image: prefecthq/prefect:2-python3.9
+    depends_on:
+      - postgres
+      - minio
+      - prefect-server
+    networks:
+      - suitesme
+    env_file:
+      - .env
+    environment:
+      - PREFECT_API_URL=http://prefect-server:4200/api
+      - MINIO_ENDPOINT=minio:9000
+    volumes:
+      - ./ml/automl:/app/automl
+    working_dir: /app/automl
+    command: >
+      bash -c "
+      pip install -q -r requirements.txt &&
+      echo 'AutoML service ready' &&
+      tail -f /dev/null
+      "
+    restart: always
+
+  prefect-server:
+    image: prefecthq/prefect:2-python3.9
+    ports:
+      - "4200:4200"
+    command: prefect server start --host 0.0.0.0
+    depends_on:
+      prefect-postgres:
+        condition: service_started
+    networks:
+      - suitesme
+    environment:
+      - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://prefect:prefect@prefect-postgres:5432/prefect
+      - PREFECT_SERVER_API_HOST=0.0.0.0
+      - PREFECT_API_SERVICES_RUN_IN_APP=false
+      - PREFECT_API_SERVICES_SCHEDULER_ENABLED=true
+      - PREFECT_API_SERVICES_LATE_RUNS_ENABLED=true
+      - PREFECT_API_SERVICES_FLOW_RUN_NOTIFICATIONS_ENABLED=false
+      - PREFECT_API_SERVICES_PAUSE_EXPIRATIONS_ENABLED=false
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4200/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 40s
+
+  prefect-postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=prefect
+      - POSTGRES_PASSWORD=prefect
+      - POSTGRES_DB=prefect
+    volumes:
+      - prefect_db_data:/var/lib/postgresql/data
     networks:
       - suitesme
     restart: always
@@ -106,3 +168,4 @@ volumes:
   db_data:
   minio_data:
   logs_data:
+  prefect_db_data:
