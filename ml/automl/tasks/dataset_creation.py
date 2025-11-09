@@ -11,6 +11,7 @@ from io import BytesIO
 from collections import defaultdict
 
 from minio import Minio
+from minio.commonconfig import CopySource
 from minio.error import S3Error
 from prefect import task, get_run_logger
 
@@ -106,14 +107,14 @@ def copy_gold_dataset(
     destination_path: str
 ) -> Dict[str, int]:
     """
-    Copy gold dataset to destination path.
+    Copy gold dataset to destination path, preserving train/val/test structure.
     
     Args:
         minio_client: MinIO client
         destination_path: Destination path prefix (e.g., datasets/verified/2024-11)
     
     Returns:
-        Statistics dict with counts per class
+        Statistics dict with counts per class (train split only)
     """
     logger = get_run_logger()
     logger.info(f"Copying gold dataset to {destination_path}")
@@ -121,8 +122,9 @@ def copy_gold_dataset(
     bucket = settings.minio.ml_artifacts_bucket
     gold_prefix = "datasets/gold/"
     
-    class_counts = defaultdict(int)
+    train_class_counts = defaultdict(int)
     total_copied = 0
+    split_counts = {'train': 0, 'val': 0, 'test': 0}
     
     try:
         # List all objects in gold dataset
@@ -130,37 +132,44 @@ def copy_gold_dataset(
         
         for obj in objects:
             # Skip directories and manifest files
-            if obj.is_dir or obj.object_name.endswith('.json') or obj.object_name.endswith('.md'):
+            if obj.is_dir or obj.object_name.endswith('.json') or obj.object_name.endswith('.md') or obj.object_name.endswith('.txt'):
                 continue
             
-            # Extract class name from path: datasets/gold/{class_name}/image.jpg
+            # Extract split, class name from path: datasets/gold/{split}/{class_name}/image.jpg
             parts = obj.object_name.split('/')
-            if len(parts) < 3:
+            if len(parts) < 4:
                 continue
             
-            class_name = parts[2]
+            split = parts[2]  # train, val, or test
+            class_name = parts[3]
             file_name = parts[-1]
             
-            # New destination path
-            dest_path = f"{destination_path}/{class_name}/{file_name}"
+            # Preserve structure: destination/{split}/{class_name}/image.jpg
+            dest_path = f"{destination_path}/{split}/{class_name}/{file_name}"
             
             # Copy object
             try:
                 minio_client.copy_object(
                     bucket,
                     dest_path,
-                    f"{bucket}/{obj.object_name}"
+                    CopySource(bucket, obj.object_name)
                 )
-                class_counts[class_name] += 1
+                
+                # Track train split class counts only
+                if split == 'train':
+                    train_class_counts[class_name] += 1
+                
+                split_counts[split] = split_counts.get(split, 0) + 1
                 total_copied += 1
                 
             except Exception as e:
                 logger.error(f"Failed to copy {obj.object_name}: {e}")
         
         logger.info(f"✓ Copied {total_copied} images from gold dataset")
-        logger.info(f"  Class distribution: {dict(class_counts)}")
+        logger.info(f"  Split counts: train={split_counts.get('train', 0)}, val={split_counts.get('val', 0)}, test={split_counts.get('test', 0)}")
+        logger.info(f"  Train class distribution: {dict(train_class_counts)}")
         
-        return dict(class_counts)
+        return dict(train_class_counts)
         
     except Exception as e:
         logger.error(f"Failed to copy gold dataset: {e}")
@@ -175,7 +184,7 @@ def copy_candidate_images(
     verified_only: bool = False
 ) -> Dict[str, int]:
     """
-    Copy candidate images to destination dataset.
+    Copy candidate images to destination dataset TRAIN split only.
     
     Args:
         minio_client: MinIO client
@@ -188,6 +197,7 @@ def copy_candidate_images(
     """
     logger = get_run_logger()
     logger.info(f"Copying candidates from {len(collection_dates)} collections (verified_only={verified_only})")
+    logger.info("NOTE: Candidates will be added to TRAIN split only")
     
     bucket = settings.minio.ml_artifacts_bucket
     class_counts = defaultdict(int)
@@ -232,15 +242,15 @@ def copy_candidate_images(
                     total_skipped += 1
                     continue
                 
-                # New destination path
-                dest_path = f"{destination_path}/{class_name}/{file_name}"
+                # Add to TRAIN split only: destination/train/{class_name}/{file_name}
+                dest_path = f"{destination_path}/train/{class_name}/{file_name}"
                 
                 # Copy object
                 try:
                     minio_client.copy_object(
                         bucket,
                         dest_path,
-                        f"{bucket}/{obj.object_name}"
+                        CopySource(bucket, obj.object_name)
                     )
                     class_counts[class_name] += 1
                     total_copied += 1
@@ -251,7 +261,7 @@ def copy_candidate_images(
         except Exception as e:
             logger.error(f"Failed to list candidates for {collection_date}: {e}")
     
-    logger.info(f"✓ Copied {total_copied} candidate images, skipped {total_skipped}")
+    logger.info(f"✓ Copied {total_copied} candidate images to TRAIN split, skipped {total_skipped}")
     logger.info(f"  Class distribution: {dict(class_counts)}")
     
     return dict(class_counts)
@@ -384,28 +394,35 @@ Total: {candidate_images:,} images
     for class_name in sorted(candidate_stats.keys()):
         info_md += f"- {class_name}: {candidate_stats[class_name]}\n"
     
-    info_md += """
-## Usage
+    info_md += f"""
+## Dataset Structure
 
-This dataset can be used for training face classification models. Images are organized by class:
+Images are organized with train/val/test splits:
 
 ```
-datasets/{type}/{year}-{month:02d}/
-├── Aristocratic/
-│   ├── image1.jpg
-│   ├── image2.jpg
-│   └── ...
-├── Business/
-│   └── ...
-└── ...
+datasets/{dataset_type}/{year}-{month:02d}/
+├── train/
+│   ├── aristocratic_lady/
+│   │   ├── face_IMG_1234.jpg
+│   │   └── user_xxx_pred_yyy_img_0.jpg (new candidates)
+│   ├── business_woman/
+│   └── ... (15 classes)
+├── val/
+│   ├── aristocratic_lady/
+│   └── ... (from gold dataset only)
+└── test/
+    ├── aristocratic_lady/
+    └── ... (from gold dataset only)
 ```
 
 ## Notes
 
-- Images are in JPEG format
-- All images have been preprocessed and validated
+- Images are in JPEG/PNG format
+- **New candidates are added to TRAIN split only**
+- **VAL and TEST splits remain unchanged from gold dataset**
 - Verified datasets contain only admin-verified predictions
 - Full datasets include both verified and unverified predictions
+- All splits maintain the same 15 face classification classes
 """
     
     info_path = f"{dataset_path}/dataset_info.md"
