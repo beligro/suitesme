@@ -19,6 +19,7 @@ const Header = () => {
     const [canUpload, setCanUpload] = React.useState(false);
     const [selectedFiles, setSelectedFiles] = React.useState([]);
     const [errorMessage, setErrorMessage] = React.useState("");
+    const [warningMessage, setWarningMessage] = React.useState("");
 
 
     const handleLogout = async () => {
@@ -59,10 +60,12 @@ const Header = () => {
             const {data} = await $authHost.post("style/build", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
-            console.log(data);
+            console.log('styleBuild успешно:', data);
             return data;
         } catch (error) {
-            console.log(error);
+            console.error('styleBuild ошибка:', error);
+            // Re-throw the error to be handled by the caller
+            throw error;
         }
     }
 
@@ -135,8 +138,17 @@ const Header = () => {
             if (data?.style_id) {
                 console.log('style_id получен:', data.style_id);
                 setStyle(data.style_id)
-                setStep(2)
                 setSelectedFiles([]);
+                setErrorMessage(""); // Clear errors on success
+                
+                // Display warning if some photos didn't have faces
+                if (data.warning) {
+                    setWarningMessage(data.warning);
+                } else {
+                    setWarningMessage("");
+                }
+                
+                setStep(2)
             } else {
                 console.warn('style_id отсутствует в ответе:', data);
                 setStep(0);
@@ -147,9 +159,8 @@ const Header = () => {
             
             // Extract error message from response
             const errorMsg = err.response?.data?.message || err.message || 'Произошла ошибка при загрузке фото';
-            setErrorMessage(errorMsg);
-            alert(errorMsg); // Show alert to user
             
+            setErrorMessage(errorMsg);
             setStep(0);
             setSelectedFiles([]);
         }
@@ -266,6 +277,14 @@ const Header = () => {
                     <div className="flex flex-col items-center lg:justify-around justify-start h-full gap-4">
                         <p className="lg:text-[30px] text-[23px] font-unbounded font-extralight text-center uppercase lg:mb-4 mb-4">Добро пожаловать в <br className="lg:block hidden" /> SUITSME.AI</p>
 
+                        {errorMessage && (
+                            <div className="w-full max-w-[600px] mb-4 p-4 bg-red-100 border-2 border-red-400 rounded-lg">
+                                <p className="text-red-700 text-center font-montserrat text-sm">
+                                    {errorMessage}
+                                </p>
+                            </div>
+                        )}
+
                         {selectedFiles.length === 0 ? (
                             <div className="relative w-[35%] min-w-[200px] lg:border-none border border-[#607E96] py-12 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl bg-[#FFFFFF6E] gap-6 cursor-pointer hover:scale-95 transition duration-200 easy-in-out">
                                 <input
@@ -275,6 +294,7 @@ const Header = () => {
                                     onChange={ (e) => {
                                         if (e.target.files && e.target.files.length > 0) {
                                             handleFilesSelect(e.target.files);
+                                            setErrorMessage(""); // Clear error when new files are selected
                                         }
                                     }}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50"
@@ -386,7 +406,16 @@ const Header = () => {
                             </div>
                             <p className="text-center font-montserrat font-normal text-[14px] cursor-pointer">{user.first_name}</p>
                         </div>
-                        {canUpload && (<button className="w-32 h-10 border border-white rounded-xl hover:bg-white/50 transition duration-200" onClick={() => setStep(0)}>Повторить</button>)}
+                        
+                        {warningMessage && (
+                            <div className="w-full max-w-[600px] mb-4 p-4 bg-yellow-100 border-2 border-yellow-500 rounded-lg backdrop-blur-sm">
+                                <p className="text-yellow-800 text-center font-montserrat text-sm">
+                                    ⚠️ {warningMessage}
+                                </p>
+                            </div>
+                        )}
+                        
+                        {canUpload && (<button className="w-32 h-10 border border-white rounded-xl hover:bg-white/50 transition duration-200" onClick={() => { setStep(0); setWarningMessage(""); }}>Повторить</button>)}
                         <p className="text-center font-montserrat text-[25px]">Ваш типаж - <span className="font-semibold ">{style}</span></p>
                         <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>
                     </div>

@@ -20,6 +20,7 @@ import (
 
 type StyleBuildResult struct {
 	StyleId string `json:"style_id" validate:"required"`
+	Warning string `json:"warning,omitempty"`
 }
 
 // Build godoc
@@ -140,7 +141,7 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	photoURL := photoURLs[0]
 
 	// Send all photos to ML service
-	styleId, confidence, err := external.GetStyle(photosData)
+	styleId, confidence, imagesProcessed, imagesTotal, err := external.GetStyle(photosData)
 	if err != nil {
 		ctr.logger.Error("Failed to get style from ML service:", err)
 		// Check if the error is about no face detected
@@ -149,6 +150,10 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		}
 		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 	}
+	
+	// Debug logging
+	ctr.logger.Info(fmt.Sprintf("ML Response - StyleId: %s, Confidence: %.2f, ImagesProcessed: %d, ImagesTotal: %d", 
+		styleId, confidence, imagesProcessed, imagesTotal))
 
 	// Store all photo URLs
 	photoURLsJSON, _ := json.Marshal(photoURLs)
@@ -166,7 +171,44 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 
 	external.UpdateLeadStatus(ctr.config, ctr.logger, user.AmocrmLeadId, external.GotStyle, &styleId)
 
-	return ctx.JSON(http.StatusOK, StyleBuildResult{
+	// Construct warning message if some photos didn't have faces
+	var warningMessage string
+	if imagesProcessed < imagesTotal {
+		failedCount := imagesTotal - imagesProcessed
+		if imagesTotal == 1 {
+			// Single photo with no face (shouldn't reach here, but for safety)
+			warningMessage = "На фотографии нет лица, загрузите другое фото"
+		} else if imagesProcessed == 0 {
+			// All photos failed (shouldn't reach here, but for safety)
+			warningMessage = "На фотографиях нет лиц, загрузите другие фото"
+		} else {
+			// Partial success
+			processedWord := "фотографии"
+			if imagesProcessed == 1 {
+				processedWord = "фотографии"
+			} else if imagesProcessed >= 2 && imagesProcessed <= 4 {
+				processedWord = "фотографий"
+			}
+			
+			failedWord := "не содержит"
+			if failedCount > 1 {
+				failedWord = "не содержат"
+			}
+			
+			failedPhrase := fmt.Sprintf("%d", failedCount)
+			if failedCount == 1 {
+				failedPhrase = "1"
+			}
+			
+			warningMessage = fmt.Sprintf("Предсказание сделано на основе %d %s, %s %s лица", 
+				imagesProcessed, processedWord, failedPhrase, failedWord)
+		}
+	}
+
+	response := StyleBuildResult{
 		StyleId: styleId,
-	})
+		Warning: warningMessage,
+	}
+
+	return ctx.JSON(http.StatusOK, response)
 }

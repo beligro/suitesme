@@ -259,30 +259,56 @@ class EnsembleClassifier:
                 return None, 0.0, None
             return None
         
+        # Track total images and processed images count
+        total_images = len(image_paths)
+        
         # If only one image, use regular predict
         if len(image_paths) == 1:
-            return self.predict(image_paths[0], weights, distance_metric, return_details)
+            result = self.predict(image_paths[0], weights, distance_metric, return_details)
+            if return_details:
+                pred_class, conf, details = result
+                if pred_class is None:
+                    # No face detected in single image
+                    if details is None:
+                        details = {}
+                    details['images_total'] = 1
+                    details['images_processed'] = 0
+                    return None, 0.0, details
+                else:
+                    details['images_total'] = 1
+                    details['images_processed'] = 1
+                    return pred_class, conf, details
+            return result
         
         # Process each image and collect probability distributions
         all_predictions = []
         
-        for img_path in image_paths:
+        for idx, img_path in enumerate(image_paths):
             # Get detailed prediction with full probability distribution
             pred_class, conf, details = self.predict(
                 img_path, weights, distance_metric, return_details=True
             )
             
             if pred_class is not None and details is not None:
+                print(f"Image {idx+1}/{len(image_paths)}: Face detected, class={pred_class}, conf={conf:.3f}")
                 all_predictions.append({
                     'probabilities': details['ensemble']['probabilities'],
                     'confidence': conf,
                     'class': pred_class
                 })
+            else:
+                print(f"Image {idx+1}/{len(image_paths)}: NO FACE DETECTED")
+        
+        # Track how many images were successfully processed
+        images_processed = len(all_predictions)
         
         # If no valid predictions, return None
         if len(all_predictions) == 0:
             if return_details:
-                return None, 0.0, None
+                return None, 0.0, {
+                    'images_total': total_images,
+                    'images_processed': 0
+                }
             return None
         
         # Aggregate probability distributions with confidence-based weighting
@@ -316,7 +342,9 @@ class EnsembleClassifier:
                 'confidence': final_confidence,
                 'probabilities': final_probabilities
             },
-            'num_images_processed': len(all_predictions),
+            'images_total': total_images,
+            'images_processed': images_processed,
+            'num_images_processed': images_processed,  # Keep for backward compatibility
             'per_image_predictions': [
                 {
                     'class': pred['class'],

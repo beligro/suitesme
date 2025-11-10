@@ -52,6 +52,8 @@ class PredictionResponse(BaseModel):
     top_predictions: list = None
     details: dict = None
     error: str = None
+    images_processed: int = None
+    images_total: int = None
 
 @app.on_event("startup")
 async def startup_event():
@@ -248,7 +250,9 @@ async def predict_face_class(request: ImageRequest):
                 success=True,
                 predicted_class=pred_class,
                 confidence=float(confidence),
-                top_predictions=formatted_predictions
+                top_predictions=formatted_predictions,
+                images_processed=details.get('images_processed'),
+                images_total=details.get('images_total')
             )
         
         elif request.return_details:
@@ -300,26 +304,38 @@ async def predict_face_class(request: ImageRequest):
                 success=True,
                 predicted_class=pred_class,
                 confidence=float(confidence),
-                details=formatted_details
+                details=formatted_details,
+                images_processed=details.get('images_processed'),
+                images_total=details.get('images_total')
             )
         
         else:
-            # Simple prediction
-            predicted_class = ensemble_classifier.predict_multi_image(
+            # Simple prediction - need to get details to access metadata
+            pred_class, confidence, details = ensemble_classifier.predict_multi_image(
                 temp_image_paths,
                 weights=request.weights,
-                distance_metric=request.distance_metric
+                distance_metric=request.distance_metric,
+                return_details=True
             )
             
-            if predicted_class is None:
+            if pred_class is None:
                 raise HTTPException(
                     status_code=400,
                     detail="No face detected in any of the images"
                 )
             
+            images_processed = details.get('images_processed') if details else None
+            images_total = details.get('images_total') if details else None
+            
+            logger.info(f"Simple prediction response: class={pred_class}, confidence={confidence}, "
+                       f"images_processed={images_processed}, images_total={images_total}")
+            
             return PredictionResponse(
                 success=True,
-                predicted_class=predicted_class
+                predicted_class=pred_class,
+                confidence=float(confidence) if confidence else None,
+                images_processed=images_processed,
+                images_total=images_total
             )
         
     except ValueError as e:
@@ -361,7 +377,9 @@ async def predict_simple(request: ImageRequest):
     if response.success:
         return {
             "predicted_class": response.predicted_class,
-            "confidence": response.confidence
+            "confidence": response.confidence,
+            "images_processed": response.images_processed,
+            "images_total": response.images_total
         }
     else:
         raise HTTPException(status_code=400, detail=response.error)
