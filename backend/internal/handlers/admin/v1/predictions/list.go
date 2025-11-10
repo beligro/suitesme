@@ -53,10 +53,12 @@ func (ctr PredictionsController) List(ctx echo.Context) error {
 		dbSortBy = "updated_at"
 	case "userId":
 		dbSortBy = "user_id"
+	case "styleId":
+		dbSortBy = "style_id"
 	case "initialPrediction":
 		dbSortBy = "initial_prediction"
 	case "verifiedPrediction":
-		dbSortBy = "verified_prediction"
+		dbSortBy = "style_id" // legacy: verifiedPrediction is stored in style_id
 	case "isVerified":
 		dbSortBy = "is_verified"
 	case "verifiedBy":

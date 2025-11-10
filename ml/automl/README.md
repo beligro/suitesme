@@ -10,20 +10,29 @@ This system provides automated workflows for:
 2. **Monthly Dataset Creation**: Creates two versions of training datasets:
    - **Verified Dataset**: Gold dataset + verified predictions only
    - **Full Dataset**: Gold dataset + all predictions (verified and unverified)
+3. **Dataset Validation**: Validates dataset structure, integrity, and completeness after creation
+4. **Model Training**: Trains models on validated datasets with automatic comparison and deployment
 
 ## Architecture
 
 ```
 ml/automl/
-├── config/          # Configuration settings
-├── tasks/           # Prefect tasks
-│   ├── data_collection.py      # Daily collection tasks
-│   └── dataset_creation.py     # Monthly creation tasks
-├── flows/           # Prefect flows
-│   └── dataset_management.py   # Flow orchestration
-├── deploy_flows.py  # Deployment script
-├── Dockerfile       # Container image
-└── requirements.txt # Python dependencies
+├── config/                      # Configuration settings
+│   ├── settings.py              # Main configuration
+│   └── training_config.py       # Training hyperparameters
+├── tasks/                       # Prefect tasks
+│   ├── data_collection.py       # Daily collection tasks
+│   ├── dataset_creation.py      # Monthly creation tasks
+│   ├── dataset_validation.py    # Validation tasks
+│   └── model_training.py        # Training tasks
+├── flows/                       # Prefect flows
+│   ├── dataset_management.py    # Data collection & dataset creation
+│   ├── dataset_validation.py    # Dataset structure validation
+│   └── model_training.py        # Model training & deployment
+├── deploy_flows.py              # Deployment script
+├── AUTOMATION_SETUP.md          # Prefect automation guide
+├── Dockerfile                   # Container image
+└── requirements.txt             # Python dependencies
 ```
 
 ## Flows
@@ -88,6 +97,87 @@ ML_ARTIFACTS_BUCKET/
             ├── Aristocratic/
             └── ...
 ```
+
+### 3. Dataset Validation Flow
+
+**Schedule**: Triggered automatically after monthly dataset creation  
+**Purpose**: Validate dataset structure and integrity
+
+**Process**:
+1. Validate manifest.json exists and has required fields
+2. Check train/val/test splits exist and are not empty
+3. Validate class distribution (at least 1 image per class in train)
+4. Verify file counts match manifest
+5. Emit Prefect event if validation passes
+
+**Validation Checks**:
+- ✓ Manifest exists and is valid JSON
+- ✓ Required fields present (dataset_type, version, total_images, etc.)
+- ✓ Train/val/test splits exist
+- ✓ Each class has at least 1 image in train split
+- ✓ File counts match manifest statistics
+
+**Events Emitted**:
+- `dataset.validated.verified` - When verified dataset passes validation
+- `dataset.validated.full` - When full dataset passes validation
+
+### 4. Model Training Flow
+
+**Schedule**: Triggered by Prefect automation after dataset validation  
+**Purpose**: Train model, validate, compare with current, and deploy if better
+
+**Process**:
+1. Download dataset from MinIO
+2. Train model (local or Yandex Cloud - currently stub)
+3. Validate model on test set
+4. Compare accuracy with current production model
+5. If improvement threshold met: Upload to MinIO
+6. Emit event to trigger inference service reload
+
+**Model Storage Structure**:
+```
+ML_ARTIFACTS_BUCKET/
+└── models/
+    └── checkpoints/
+        ├── latest/                    # Current production model
+        │   ├── best_model.pth
+        │   ├── face_centroids.pkl
+        │   └── metadata.json
+        └── 2025-11-v1/               # Versioned backups
+            ├── best_model.pth
+            ├── face_centroids.pkl
+            └── metadata.json
+```
+
+**Training Configuration**:
+- Minimum improvement threshold: 2% (configurable)
+- Training modes: local (future: yandex_cloud)
+- Automatic rollback if model load fails
+
+**Events Emitted**:
+- `model.trained.ready` - When model is uploaded and ready for deployment
+
+## Event-Driven Automation
+
+The system uses Prefect events and automations for workflow orchestration:
+
+```
+Daily Collection (00:00)
+         ↓
+Monthly Creation (1st, 01:00)
+         ↓
+Dataset Validation
+         ↓
+[event: dataset.validated.verified]
+         ↓
+Model Training (automated)
+         ↓
+[event: model.trained.ready]
+         ↓
+Inference Reload (automated)
+```
+
+See [AUTOMATION_SETUP.md](./AUTOMATION_SETUP.md) for detailed configuration instructions.
 
 ## Deployment
 

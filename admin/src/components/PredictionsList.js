@@ -53,7 +53,7 @@ export const PredictionsList = props => (
       <FunctionField label="Photo" render={record => <PhotoField record={record} />} />
       <TextField source="userId" label="User ID" />
       <TextField source="initialPrediction" label="Initial Prediction" />
-      <TextField source="verifiedPrediction" label="Verified As" />
+      <TextField source="styleId" label="Verified As" sortable={false} />
       <BooleanField source="isVerified" label="Verified" />
       <DateField source="createdAt" label="Created" showTime />
       <EditButton />

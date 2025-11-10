@@ -18,6 +18,7 @@ const Header = () => {
     const user = useSelector(selectUser);
     const [canUpload, setCanUpload] = React.useState(false);
     const [selectedFiles, setSelectedFiles] = React.useState([]);
+    const [errorMessage, setErrorMessage] = React.useState("");
 
 
     const handleLogout = async () => {
@@ -127,6 +128,7 @@ const Header = () => {
 
         try {
             setStep(3);
+            setErrorMessage(""); // Clear previous errors
 
             const data = await styleBuild(formData);
 
@@ -142,6 +144,12 @@ const Header = () => {
             }
         } catch (err) {
             console.error('Ошибка при загрузке фото:', err);
+            
+            // Extract error message from response
+            const errorMsg = err.response?.data?.message || err.message || 'Произошла ошибка при загрузке фото';
+            setErrorMessage(errorMsg);
+            alert(errorMsg); // Show alert to user
+            
             setStep(0);
             setSelectedFiles([]);
         }

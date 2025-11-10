@@ -41,7 +41,7 @@ func GetStyle(photosData [][]byte) (string, float64, error) {
 	}
 
 	// Send request to ML service
-	resp, err := http.Post("http://ml:8000/predict/simple", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post("http://ml-inference:8000/predict/simple", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return "", 0, fmt.Errorf("failed to send request to ML service: %w", err)
 	}

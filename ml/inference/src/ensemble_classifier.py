@@ -237,6 +237,98 @@ class EnsembleClassifier:
         
         return top_k_predictions
     
+    def predict_multi_image(self, image_paths, weights={'hierarchical': 0.6, 'centroid': 0.4},
+                           distance_metric='euclidean', return_details=False):
+        """
+        Make ensemble prediction from multiple images (1-4) with confidence-based weighting.
+        Each image's probability distribution is weighted by its confidence (max probability),
+        then aggregated to produce final prediction.
+        
+        Args:
+            image_paths (list): List of paths to images (1-4 images)
+            weights (dict): Weights for ensemble combination
+            distance_metric (str): Distance metric for centroid classifier
+            return_details (bool): If True, return detailed prediction info
+            
+        Returns:
+            If return_details=False: predicted_class_name
+            If return_details=True: (predicted_class_name, confidence, details)
+        """
+        if not image_paths or len(image_paths) == 0:
+            if return_details:
+                return None, 0.0, None
+            return None
+        
+        # If only one image, use regular predict
+        if len(image_paths) == 1:
+            return self.predict(image_paths[0], weights, distance_metric, return_details)
+        
+        # Process each image and collect probability distributions
+        all_predictions = []
+        
+        for img_path in image_paths:
+            # Get detailed prediction with full probability distribution
+            pred_class, conf, details = self.predict(
+                img_path, weights, distance_metric, return_details=True
+            )
+            
+            if pred_class is not None and details is not None:
+                all_predictions.append({
+                    'probabilities': details['ensemble']['probabilities'],
+                    'confidence': conf,
+                    'class': pred_class
+                })
+        
+        # If no valid predictions, return None
+        if len(all_predictions) == 0:
+            if return_details:
+                return None, 0.0, None
+            return None
+        
+        # Aggregate probability distributions with confidence-based weighting
+        # Each image's probabilities are weighted by its confidence (max probability)
+        weighted_probs_sum = np.zeros_like(all_predictions[0]['probabilities'])
+        total_weight = 0.0
+        
+        for pred in all_predictions:
+            confidence_weight = pred['confidence']
+            weighted_probs_sum += pred['probabilities'] * confidence_weight
+            total_weight += confidence_weight
+        
+        # Normalize by total weight to get final probability distribution
+        if total_weight > 0:
+            final_probabilities = weighted_probs_sum / total_weight
+        else:
+            final_probabilities = weighted_probs_sum
+        
+        # Get final prediction
+        predicted_idx = np.argmax(final_probabilities)
+        predicted_class = self.idx_to_class[predicted_idx]
+        final_confidence = final_probabilities[predicted_idx]
+        
+        if not return_details:
+            return predicted_class
+        
+        # Build detailed response
+        detailed_info = {
+            'ensemble': {
+                'class': predicted_class,
+                'confidence': final_confidence,
+                'probabilities': final_probabilities
+            },
+            'num_images_processed': len(all_predictions),
+            'per_image_predictions': [
+                {
+                    'class': pred['class'],
+                    'confidence': pred['confidence'],
+                    'weight': pred['confidence'] / total_weight if total_weight > 0 else 0
+                }
+                for pred in all_predictions
+            ]
+        }
+        
+        return predicted_class, final_confidence, detailed_info
+    
     def get_class_names(self):
         """Get all available class names"""
         return list(self.idx_to_class.values())

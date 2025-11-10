@@ -9,7 +9,8 @@ import (
 )
 
 type VerifyRequest struct {
-	VerifiedPrediction string `json:"verifiedPrediction" validate:"required"`
+	StyleId            string `json:"styleId"`
+	VerifiedPrediction string `json:"verifiedPrediction"` // legacy support
 }
 
 func (ctr PredictionsController) Put(ctx echo.Context) error {
@@ -28,8 +29,14 @@ func (ctr PredictionsController) Put(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.BadRequestJson, ctx)
 	}
 
-	if err := ctx.Validate(&req); err != nil {
-		ctr.logger.Error(err)
+	// Use styleId if provided, otherwise fall back to verifiedPrediction for legacy support
+	verifiedStyle := req.StyleId
+	if verifiedStyle == "" {
+		verifiedStyle = req.VerifiedPrediction
+	}
+
+	if verifiedStyle == "" {
+		ctr.logger.Error("styleId or verifiedPrediction is required")
 		return myerrors.GetHttpErrorByCode(myerrors.ValidateJsonError, ctx)
 	}
 
@@ -47,7 +54,7 @@ func (ctr PredictionsController) Put(ctx echo.Context) error {
 	}
 
 	// Update style with verification
-	err = ctr.storage.UserStyle.Verify(parsedId, req.VerifiedPrediction, adminUser.ID)
+	err = ctr.storage.UserStyle.Verify(parsedId, verifiedStyle, adminUser.ID)
 	if err != nil {
 		ctr.logger.Error(err)
 		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)

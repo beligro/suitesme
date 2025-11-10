@@ -18,6 +18,7 @@ from tasks.data_collection import (
 )
 
 from tasks.dataset_creation import create_monthly_dataset
+from flows.dataset_validation import validate_dataset_structure_flow
 from config import settings
 
 
@@ -183,18 +184,37 @@ def monthly_dataset_creation_flow(
     
     logger.info(f"✓ Full dataset created: {full_stats}")
     
+    # Validate datasets
+    logger.info("=" * 80)
+    logger.info("VALIDATING datasets")
+    logger.info("=" * 80)
+    
+    # Validate verified dataset
+    logger.info("Validating VERIFIED dataset...")
+    verified_validation = validate_dataset_structure_flow('verified', year, month)
+    logger.info(f"Verified validation: {verified_validation.status}")
+    
+    # Validate full dataset
+    logger.info("Validating FULL dataset...")
+    full_validation = validate_dataset_structure_flow('full', year, month)
+    logger.info(f"Full validation: {full_validation.status}")
+    
     # Summary
     result = {
         'status': 'success',
         'year': year,
         'month': month,
         'verified_dataset': verified_stats,
-        'full_dataset': full_stats
+        'full_dataset': full_stats,
+        'verified_validation': verified_validation.to_dict(),
+        'full_validation': full_validation.to_dict()
     }
     
     logger.info("=" * 80)
     logger.info("FLOW COMPLETE")
     logger.info(f"Results: {result}")
+    logger.info(f"Verified validation: {verified_validation.status}")
+    logger.info(f"Full validation: {full_validation.status}")
     logger.info("=" * 80)
     
     return result

@@ -349,10 +349,25 @@ class TrainPipeline:
         return train_dataset, val_dataset
     
     def train(self, num_epochs=20, batch_size=16, learning_rate=0.001, validation_split=0.2, 
-              save_path="./assets/small_classifier.pth", patience=5):
-        """Train the hierarchical classifier"""
+              save_path="./assets/small_classifier.pth", patience=5, pretrained_model_path=None):
+        """
+        Train the hierarchical classifier.
+        
+        Args:
+            num_epochs: Number of training epochs
+            batch_size: Batch size for training
+            learning_rate: Learning rate
+            validation_split: Fraction of data to use for validation
+            save_path: Path to save the best model
+            patience: Early stopping patience
+            pretrained_model_path: Optional path to pretrained weights for fine-tuning
+        """
         print("="*60)
         print("TRAINING HIERARCHICAL CLASSIFIER")
+        if pretrained_model_path:
+            print("MODE: FINE-TUNING FROM EXISTING WEIGHTS")
+        else:
+            print("MODE: TRAINING FROM SCRATCH")
         print("="*60)
         
         # Create checkpoints directory
@@ -394,6 +409,32 @@ class TrainPipeline:
             class_to_idx=self.class_to_idx,
             idx_to_class=self.idx_to_class
         )
+        
+        # Load pretrained weights for fine-tuning if provided
+        if pretrained_model_path and os.path.exists(pretrained_model_path):
+            print(f"\n{'='*60}")
+            print(f"LOADING PRETRAINED WEIGHTS FOR FINE-TUNING")
+            print(f"{'='*60}")
+            try:
+                checkpoint = torch.load(pretrained_model_path, map_location='cpu')
+                
+                # Load model state dict
+                if 'model_state_dict' in checkpoint:
+                    model.load_state_dict(checkpoint['model_state_dict'])
+                    print(f"✓ Loaded pretrained weights from checkpoint")
+                    
+                    # Log previous best accuracy if available
+                    if 'best_val_accuracy' in checkpoint:
+                        prev_accuracy = checkpoint['best_val_accuracy']
+                        print(f"  Previous best validation accuracy: {prev_accuracy:.2f}%")
+                else:
+                    print("⚠️  No model_state_dict found in checkpoint, training from scratch")
+                
+                print(f"{'='*60}\n")
+            except Exception as e:
+                print(f"⚠️  Error loading pretrained weights: {e}")
+                print(f"   Continuing with fresh initialization")
+                print(f"{'='*60}\n")
         
         # Loss with class weights and focal loss
         criterion = FocalLoss(alpha=class_weights, gamma=2)

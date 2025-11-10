@@ -58,6 +58,16 @@ services:
       - "8000:8000"
     networks:
       - suitesme
+    environment:
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - ML_ARTIFACTS_BUCKET=ml-artifacts
+      - MODEL_CHECK_INTERVAL=300
+    depends_on:
+      - minio
+    volumes:
+      - model_cache:/tmp/model_cache
     restart: always
 
   ml-automl:
@@ -73,9 +83,10 @@ services:
     environment:
       - PREFECT_API_URL=http://prefect-server:4200/api
       - MINIO_ENDPOINT=minio:9000
-      - PYTHONPATH=/app/automl
+      - PYTHONPATH=/app/automl:/app/ml/inference/src
     volumes:
       - ./ml/automl:/app/automl
+      - ./ml/inference:/app/ml/inference
     working_dir: /app/automl
     command: >
       bash -c "
@@ -185,3 +196,4 @@ volumes:
   minio_data:
   logs_data:
   prefect_db_data:
+  model_cache:

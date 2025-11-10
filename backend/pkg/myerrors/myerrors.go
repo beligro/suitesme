@@ -117,7 +117,7 @@ func GetHttpErrorByCode(errorCode ErrorCode, ctx echo.Context) error {
 	case BadUserUpdateParams:
 		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "Bad user update params"})
 	case NoFaceDetected:
-		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "No face detected in the photo"})
+		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "Не можем найти ваше лицо на картинке"})
 
 	case UserUnauthorized:
 		return ctx.JSON(http.StatusUnauthorized, MyError{Code: string(errorCode), Message: "User is unauthorized"})

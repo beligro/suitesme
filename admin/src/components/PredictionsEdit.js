@@ -100,7 +100,7 @@ const AcceptButton = () => {
       'predictions',
       { 
         id: record.id, 
-        data: { verifiedPrediction: record.initialPrediction },
+        data: { styleId: record.initialPrediction },
         previousData: record 
       },
       {
@@ -182,7 +182,7 @@ export const PredictionsEdit = props => {
           <AcceptButton />
           
           <SelectInput 
-            source="verifiedPrediction" 
+            source="styleId" 
             label="Or Choose Different Style Class"
             choices={styleChoices}
             fullWidth
