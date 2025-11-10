@@ -60,17 +60,19 @@ func (ctr AuthController) VerifyEmail(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.IncorrectVerificationCode, ctx)
 	}
 
-	leadId, err := external.CreateLead(ctr.config, ctr.logger, user)
+	// Try to create lead in AmoCRM, but don't fail email verification if it fails
+	var leadId int = 0
+	amoLeadId, err := external.CreateLead(ctr.config, ctr.logger, user)
 	if err != nil {
-		ctr.logger.Error(err)
-		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
-	}
-	if leadId == nil {
-		ctr.logger.Error("Empty lead id")
-		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
+		ctr.logger.Warn("Failed to create AmoCRM lead (non-critical): ", err.Error())
+	} else if amoLeadId != nil {
+		leadId = *amoLeadId
+		ctr.logger.Info("Successfully created AmoCRM lead with ID: ", leadId)
+	} else {
+		ctr.logger.Warn("Empty lead id from AmoCRM (non-critical)")
 	}
 
-	ctr.storage.User.SetUserIsVerified(request.UserId, *leadId)
+	ctr.storage.User.SetUserIsVerified(request.UserId, leadId)
 
 	return ctx.JSON(http.StatusOK, models.EmptyResponse{})
 }
