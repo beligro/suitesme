@@ -50,6 +50,16 @@ services:
       - "8000:8000"
     networks:
       - suitesme
+    environment:
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - ML_ARTIFACTS_BUCKET=ml-artifacts
+      - MODEL_CHECK_INTERVAL=300
+    depends_on:
+      - minio
+    volumes:
+      - model_cache:/tmp/model_cache
     restart: always
 
   ml-automl:
@@ -65,13 +75,17 @@ services:
     environment:
       - PREFECT_API_URL=http://prefect-server:4200/api
       - MINIO_ENDPOINT=minio:9000
+      - PYTHONPATH=/app/automl:/app/ml/inference/src
     volumes:
       - ./ml/automl:/app/automl
+      - ./ml/inference:/app/ml/inference
     working_dir: /app/automl
     command: >
       bash -c "
       pip install -q -r requirements.txt &&
-      echo 'AutoML service ready' &&
+      echo '✓ AutoML service ready!' &&
+      echo 'Run daily flow: docker compose exec ml-automl python -m flows.dataset_management daily' &&
+      echo 'Run monthly flow: docker compose exec ml-automl python -m flows.dataset_management monthly' &&
       tail -f /dev/null
       "
     restart: always
@@ -94,6 +108,8 @@ services:
       - PREFECT_API_SERVICES_LATE_RUNS_ENABLED=true
       - PREFECT_API_SERVICES_FLOW_RUN_NOTIFICATIONS_ENABLED=false
       - PREFECT_API_SERVICES_PAUSE_EXPIRATIONS_ENABLED=false
+      - PREFECT_API_SERVICES_EVENT_PERSISTER_ENABLED=false
+      - PREFECT_SERVER_ANALYTICS_ENABLED=false
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4200/api/health"]
@@ -122,7 +138,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql
     networks:
       - suitesme
     restart: always
@@ -158,6 +174,7 @@ services:
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
       - STYLE_PHOTO_BUCKET=${STYLE_PHOTO_BUCKET}
       - STYLE_PDF_BUCKET=${STYLE_PDF_BUCKET}
+      - ML_ARTIFACTS_BUCKET=${ML_ARTIFACTS_BUCKET}
     volumes:
       - ./minio-init.sh:/minio-init.sh
     entrypoint: ["/bin/sh", "/minio-init.sh"]
@@ -169,3 +186,4 @@ volumes:
   minio_data:
   logs_data:
   prefect_db_data:
+  model_cache:
