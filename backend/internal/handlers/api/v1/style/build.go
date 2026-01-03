@@ -134,7 +134,8 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 			return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 		}
 
-		photoURLs[i] = fmt.Sprintf("%s/%s/%s/%s", ctr.config.MinioFilePathEndpoint, ctr.config.StylePhotoBucket, parsedUserId.String(), photo.Filename)
+		// Use relative URL path to avoid hardcoding server IP
+		photoURLs[i] = fmt.Sprintf("/files/%s/%s/%s", ctr.config.StylePhotoBucket, parsedUserId.String(), photo.Filename)
 	}
 
 	// Use first photo URL for user style record (main photo)
