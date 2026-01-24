@@ -67,7 +67,7 @@ func (ctr AuthController) ForgotPassword(ctx echo.Context) error {
 
 	ctr.storage.User.Save(user)
 
-	resetLink := "http://51.250.84.195/password_reset?token=" + url.QueryEscape(urlToken)
+	resetLink := "http://178.154.206.33/password_reset?token=" + url.QueryEscape(urlToken)
 	plainText := "You requested a password reset for your SuitesMe account.\n\n" +
 		"Please use the following link to reset your password: " + resetLink + "\n\n" +
 		"If you didn't request a password reset, please ignore this email."

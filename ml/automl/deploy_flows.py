@@ -11,6 +11,7 @@ from flows.dataset_management import (
     daily_data_collection_flow,
     monthly_dataset_creation_flow
 )
+from flows.model_update_orchestrator import update_model_flow
 from prefect.deployments import Deployment
 from prefect.server.schemas.schedules import CronSchedule
 from config import settings
@@ -125,6 +126,31 @@ def deploy_flows():
         print(f"   ✗ Failed to deploy monthly creation flow: {e}")
         return False
     
+    # Deploy model update orchestrator flow
+    print("\n3. Deploying model update orchestrator flow...")
+    print("   Schedule: 2nd day of month at 02:00 UTC (after dataset creation)")
+    
+    try:
+        model_update_deployment = Deployment.build_from_flow(
+            flow=update_model_flow,
+            name="monthly-model-update",
+            version="1.0.0",
+            schedule=CronSchedule(
+                cron="0 2 2 * *",  # 2nd day of month at 02:00 UTC
+                timezone="UTC"
+            ),
+            work_pool_name=settings.prefect.work_pool_name,
+            tags=["model-training", "monthly", "orchestrator"],
+            description="Monthly model training, comparison, and deployment orchestration"
+        )
+        
+        deployment_id = model_update_deployment.apply()
+        print(f"   ✓ Model update orchestrator deployed (ID: {deployment_id})")
+        
+    except Exception as e:
+        print(f"   ✗ Failed to deploy model update orchestrator: {e}")
+        return False
+    
     return True
 
 
@@ -158,6 +184,7 @@ def main():
         print("\nTo manually trigger a flow:")
         print("   prefect deployment run 'daily_data_collection/daily-collection'")
         print("   prefect deployment run 'monthly_dataset_creation/monthly-creation'")
+        print("   prefect deployment run 'update_model_orchestrator/monthly-model-update'")
         print("="*80)
         sys.exit(0)
     else:
