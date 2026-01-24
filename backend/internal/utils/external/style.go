@@ -10,55 +10,84 @@ import (
 )
 
 type MLRequest struct {
-	Image string `json:"image"`
+	Images []string `json:"images"`
 }
 
 type MLResponse struct {
-	PredictedClass string  `json:"predicted_class"`
-	Confidence     float64 `json:"confidence"`
+	PredictedClass  string  `json:"predicted_class"`
+	Confidence      float64 `json:"confidence"`
+	ImagesProcessed int     `json:"images_processed"`
+	ImagesTotal     int     `json:"images_total"`
 }
 
-func GetStyle(photoData []byte) (string, error) {
-	// Encode photo to base64
-	base64Image := base64.StdEncoding.EncodeToString(photoData)
+func GetStyle(photosData [][]byte) (string, float64, int, int, error) {
+	// Validate that we have 1-4 photos
+	if len(photosData) < 1 || len(photosData) > 4 {
+		return "", 0, 0, 0, fmt.Errorf("must provide 1-4 photos, got %d", len(photosData))
+	}
+
+	// Encode all photos to base64
+	base64Images := make([]string, len(photosData))
+	for i, photoData := range photosData {
+		base64Images[i] = base64.StdEncoding.EncodeToString(photoData)
+	}
 
 	// Prepare request
 	mlRequest := MLRequest{
-		Image: base64Image,
+		Images: base64Images,
 	}
 
 	requestBody, err := json.Marshal(mlRequest)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal request: %w", err)
+		return "", 0, 0, 0, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
 	// Send request to ML service
-	resp, err := http.Post("http://ml:8000/predict/simple", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post("http://ml-inference:8000/predict/simple", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
-		return "", fmt.Errorf("failed to send request to ML service: %w", err)
+		return "", 0, 0, 0, fmt.Errorf("failed to send request to ML service: %w", err)
 	}
 	defer resp.Body.Close()
 
-	// Process 400 from ML service - indicates no face detected in the photo
+	// Process 400 from ML service - indicates no face detected in any photo
 	if resp.StatusCode == http.StatusBadRequest {
-		return "", fmt.Errorf("no face detected in the photo")
+		return "", 0, 0, len(photosData), fmt.Errorf("no face detected in the photo")
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("ML service returned status %d", resp.StatusCode)
+		return "", 0, 0, 0, fmt.Errorf("ML service returned status %d", resp.StatusCode)
 	}
 
 	// Read response
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("failed to read response: %w", err)
+		return "", 0, 0, 0, fmt.Errorf("failed to read response: %w", err)
 	}
 
 	// Parse response
 	var mlResponse MLResponse
 	if err := json.Unmarshal(responseBody, &mlResponse); err != nil {
-		return "", fmt.Errorf("failed to unmarshal response: %w", err)
+		return "", 0, 0, 0, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
-	return mlResponse.PredictedClass, nil
+	// Debug: log the raw response
+	fmt.Printf("DEBUG: Raw ML response: %s\n", string(responseBody))
+	fmt.Printf("DEBUG: Parsed - ImagesProcessed: %d, ImagesTotal: %d\n", mlResponse.ImagesProcessed, mlResponse.ImagesTotal)
+
+	// Use response values if available, otherwise use defaults
+	imagesProcessed := mlResponse.ImagesProcessed
+	imagesTotal := mlResponse.ImagesTotal
+	
+	// Fallback to photosData length if not provided by ML service
+	if imagesTotal == 0 {
+		imagesTotal = len(photosData)
+		fmt.Printf("DEBUG: ImagesTotal was 0, set to %d\n", imagesTotal)
+	}
+	if imagesProcessed == 0 && mlResponse.PredictedClass != "" {
+		imagesProcessed = imagesTotal
+		fmt.Printf("DEBUG: ImagesProcessed was 0, set to %d\n", imagesProcessed)
+	}
+
+	fmt.Printf("DEBUG: Final values - ImagesProcessed: %d, ImagesTotal: %d\n", imagesProcessed, imagesTotal)
+	return mlResponse.PredictedClass, mlResponse.Confidence, imagesProcessed, imagesTotal, nil
 }

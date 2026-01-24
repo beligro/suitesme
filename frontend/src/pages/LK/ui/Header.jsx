@@ -17,6 +17,9 @@ const Header = () => {
     const [style, setStyle] = React.useState("");
     const user = useSelector(selectUser);
     const [canUpload, setCanUpload] = React.useState(false);
+    const [selectedFiles, setSelectedFiles] = React.useState([]);
+    const [errorMessage, setErrorMessage] = React.useState("");
+    const [warningMessage, setWarningMessage] = React.useState("");
 
 
     const handleLogout = async () => {
@@ -57,10 +60,12 @@ const Header = () => {
             const {data} = await $authHost.post("style/build", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
-            console.log(data);
+            console.log('styleBuild успешно:', data);
             return data;
         } catch (error) {
-            console.log(error);
+            console.error('styleBuild ошибка:', error);
+            // Re-throw the error to be handled by the caller
+            throw error;
         }
     }
 
@@ -97,28 +102,67 @@ const Header = () => {
 
     //ФОТО----------------
 
-    const handlePhotoUpload = async (file) => {
-        if (!file) return;
+    const handleFilesSelect = (files) => {
+        if (!files || files.length === 0) return;
+
+        // Calculate how many more photos can be added
+        const remainingSlots = 4 - selectedFiles.length;
+        const filesToAdd = Array.from(files).slice(0, remainingSlots);
+
+        if (files.length > remainingSlots) {
+            alert(`Вы можете добавить ещё только ${remainingSlots} ${remainingSlots === 1 ? 'фото' : 'фото'}`);
+        }
+
+        setSelectedFiles([...selectedFiles, ...filesToAdd]);
+    };
+
+    const removeFile = (indexToRemove) => {
+        setSelectedFiles(selectedFiles.filter((_, index) => index !== indexToRemove));
+    };
+
+    const handlePhotoUpload = async () => {
+        if (selectedFiles.length === 0) return;
 
         const formData = new FormData();
-        formData.append('photo', file);
+        // Append all files with the field name 'photos'
+        for (let i = 0; i < selectedFiles.length; i++) {
+            formData.append('photos', selectedFiles[i]);
+        }
 
         try {
             setStep(3);
+            setErrorMessage(""); // Clear previous errors
 
             const data = await styleBuild(formData);
 
             if (data?.style_id) {
                 console.log('style_id получен:', data.style_id);
                 setStyle(data.style_id)
+                setSelectedFiles([]);
+                setErrorMessage(""); // Clear errors on success
+                
+                // Display warning if some photos didn't have faces
+                if (data.warning) {
+                    setWarningMessage(data.warning);
+                } else {
+                    setWarningMessage("");
+                }
+                
                 setStep(2)
             } else {
                 console.warn('style_id отсутствует в ответе:', data);
                 setStep(0);
+                setSelectedFiles([]);
             }
         } catch (err) {
             console.error('Ошибка при загрузке фото:', err);
+            
+            // Extract error message from response
+            const errorMsg = err.response?.data?.message || err.message || 'Произошла ошибка при загрузке фото';
+            
+            setErrorMessage(errorMsg);
             setStep(0);
+            setSelectedFiles([]);
         }
     };
 
@@ -233,26 +277,94 @@ const Header = () => {
                     <div className="flex flex-col items-center lg:justify-around justify-start h-full gap-4">
                         <p className="lg:text-[30px] text-[23px] font-unbounded font-extralight text-center uppercase lg:mb-4 mb-4">Добро пожаловать в <br className="lg:block hidden" /> SUITSME.AI</p>
 
-                        <div className="relative w-[35%] min-w-[200px] lg:border-none border border-[#607E96] py-12 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl bg-[#FFFFFF6E] gap-6 cursor-pointer hover:scale-95 transition duration-200 easy-in-out">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={ (e) => {
-                                    if (e.target.files[0]) {
-                                        handlePhotoUpload(e.target.files[0]);
-                                    }
-                                }}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50"
-                            />
-                            <img className="w-[15%]" src="/photos/LK/Plus.svg" alt="" />
-                            <p className="uppercase text-[#1B3C4D] text-[14px] font-unbounded font-light text-center">Загрузите<br/> своё<br/> селфи</p>
-                        </div>
+                        {errorMessage && (
+                            <div className="w-full max-w-[600px] mb-4 p-4 bg-red-100 border-2 border-red-400 rounded-lg">
+                                <p className="text-red-700 text-center font-montserrat text-sm">
+                                    {errorMessage}
+                                </p>
+                            </div>
+                        )}
+
+                        {selectedFiles.length === 0 ? (
+                            <div className="relative w-[35%] min-w-[200px] lg:border-none border border-[#607E96] py-12 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl bg-[#FFFFFF6E] gap-6 cursor-pointer hover:scale-95 transition duration-200 easy-in-out">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={ (e) => {
+                                        if (e.target.files && e.target.files.length > 0) {
+                                            handleFilesSelect(e.target.files);
+                                            setErrorMessage(""); // Clear error when new files are selected
+                                        }
+                                    }}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50"
+                                />
+                                <img className="w-[15%]" src="/photos/LK/Plus.svg" alt="" />
+                                <p className="uppercase text-[#1B3C4D] text-[14px] font-unbounded font-light text-center">Загрузите<br/> 1-4 фото<br/> (селфи)</p>
+                            </div>
+                        ) : (
+                            <div className="w-full max-w-[600px] flex flex-col items-center gap-4">
+                                <div className="flex flex-wrap gap-3 justify-center items-center">
+                                    {selectedFiles.map((file, index) => (
+                                        <div key={index} className="relative w-32 h-32 border-2 border-[#1B3C4D] rounded-lg overflow-hidden group">
+                                            <img 
+                                                src={URL.createObjectURL(file)} 
+                                                alt={`Preview ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <button
+                                                onClick={() => removeFile(index)}
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                    
+                                    {selectedFiles.length < 4 && (
+                                        <div className="relative w-32 h-32 border-2 border-dashed border-[#1B3C4D] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#FFFFFF6E] transition">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                multiple
+                                                onChange={ (e) => {
+                                                    if (e.target.files && e.target.files.length > 0) {
+                                                        handleFilesSelect(e.target.files);
+                                                    }
+                                                    e.target.value = '';
+                                                }}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50"
+                                            />
+                                            <span className="text-3xl text-[#1B3C4D]">+</span>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <p className="text-sm font-montserrat text-[#1B3C4D]">
+                                    {selectedFiles.length} из 4 {selectedFiles.length === 1 ? 'фото' : 'фото'} выбрано
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={handlePhotoUpload}
+                                        className="px-8 py-3 bg-[#1B3C4D] text-white rounded-full font-unbounded text-sm uppercase hover:scale-95 transition"
+                                    >
+                                        Отправить
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedFiles([])}
+                                        className="px-8 py-3 border border-[#1B3C4D] text-[#1B3C4D] rounded-full font-unbounded text-sm uppercase hover:scale-95 transition"
+                                    >
+                                        Очистить
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         <p className="text-center font-montserrat font-light text-[12px] uppercase text-[#1B3C4D]">
                             наш <span className="">AI</span> проанализирует черты лица <br className="lg:block hidden" />
                             и определит типаж
                         </p>
-                        <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt="" />
+                        {selectedFiles.length === 0 && <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt="" />}
                     </div>
                     {/*<div className="uppercase font-light text-center text-[13px] lg:hidden block">*/}
                     {/*    Здесь может быть размещен*/}
@@ -294,7 +406,16 @@ const Header = () => {
                             </div>
                             <p className="text-center font-montserrat font-normal text-[14px] cursor-pointer">{user.first_name}</p>
                         </div>
-                        {canUpload && (<button className="w-32 h-10 border border-white rounded-xl hover:bg-white/50 transition duration-200" onClick={() => setStep(0)}>Повторить</button>)}
+                        
+                        {warningMessage && (
+                            <div className="w-full max-w-[600px] mb-4 p-4 bg-yellow-100 border-2 border-yellow-500 rounded-lg backdrop-blur-sm">
+                                <p className="text-yellow-800 text-center font-montserrat text-sm">
+                                    ⚠️ {warningMessage}
+                                </p>
+                            </div>
+                        )}
+                        
+                        {canUpload && (<button className="w-32 h-10 border border-white rounded-xl hover:bg-white/50 transition duration-200" onClick={() => { setStep(0); setWarningMessage(""); }}>Повторить</button>)}
                         <p className="text-center font-montserrat text-[25px]">Ваш типаж - <span className="font-semibold ">{style}</span></p>
                         <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>
                     </div>

@@ -21,3 +21,11 @@ func (repo *AdminUserRepository) Get(username string, password string) (*models.
 
 	return adminUser, result.Error
 }
+
+func (repo *AdminUserRepository) GetByUsername(username string) (*models.DbAdminUser, error) {
+	adminUser := &models.DbAdminUser{}
+
+	result := repo.db.Model(&models.DbAdminUser{}).Where("username = ?", username).First(adminUser)
+
+	return adminUser, result.Error
+}

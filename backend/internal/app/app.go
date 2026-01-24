@@ -8,6 +8,7 @@ import (
 	"suitesme/internal/config"
 	admin_auth "suitesme/internal/handlers/admin/auth"
 	"suitesme/internal/handlers/admin/v1/content"
+	"suitesme/internal/handlers/admin/v1/predictions"
 	"suitesme/internal/handlers/admin/v1/settings"
 	"suitesme/internal/handlers/admin/v1/styles"
 	"suitesme/internal/handlers/api/v1/auth"
@@ -25,7 +26,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/patrickmn/go-cache"
@@ -94,6 +94,7 @@ func Run() {
 	contentController := content.NewContentController(&logger, storage, cfg)
 	settingsController := settings.NewSettingsController(&logger, storage, cfg)
 	stylesController := styles.NewStylesController(&logger, storage, cfg, s3Client)
+	predictionsController := predictions.NewPredictionsController(&logger, storage, cfg)
 	adminAuthController := admin_auth.NewAdminAuthController(&logger, storage, cfg)
 	apiContentController := api_content.NewApiContentController(&logger, storage, cfg, webContentCache)
 
@@ -104,11 +105,14 @@ func Run() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(TraceIdMiddleware)
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://51.250.84.195:3000", "http://51.250.84.195", "http://51.250.84.195:80", "http://localhost:5173", "http://localhost", "localhost:5173"},
-		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-	}))
+	// CORS is handled by nginx proxy, not needed here to avoid duplicate headers
+	// e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	// 	AllowOrigins:     []string{"http://51.250.84.195:3000", "http://51.250.84.195", "http://51.250.84.195:80", "http://localhost:5173", "http://localhost:3000", "http://localhost", "localhost:5173"},
+	// 	AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.OPTIONS},
+	// 	AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+	// 	ExposeHeaders:    []string{"Content-Range", "X-Total-Count", "X-Trace-Id"},
+	// 	AllowCredentials: true,
+	// }))
 
 	e.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong")
@@ -154,7 +158,7 @@ func Run() {
 	adminRoutes := e.Group("/admin")
 	adminV1 := adminRoutes.Group("/v1")
 	adminV1.Use(LoggerMiddleware(&logger))
-	adminV1.Use(echojwt.JWT(cfg.AdminTokenSecret))
+	adminV1.Use(AdminJWTAuthMiddleware(cfg.AdminTokenSecret))
 
 	adminV1.GET("/content", contentController.List)
 	adminV1.GET("/content/:id", contentController.Get)
@@ -173,6 +177,12 @@ func Run() {
 	adminV1.PUT("/styles/:id", stylesController.Put)
 	adminV1.DELETE("/styles/:id", stylesController.Delete)
 	adminV1.POST("/styles", stylesController.Post)
+
+	adminV1.GET("/predictions", predictionsController.List)
+	adminV1.GET("/predictions/:id", predictionsController.Get)
+	adminV1.PUT("/predictions/:id", predictionsController.Put)
+	adminV1.DELETE("/predictions/:id", predictionsController.Delete)
+	adminV1.GET("/predictions-statistics", predictionsController.Statistics)
 
 	adminAuth := adminRoutes.Group("/auth")
 	adminAuth.POST("/login", adminAuthController.Login)

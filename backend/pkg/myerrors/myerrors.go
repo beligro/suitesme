@@ -28,11 +28,12 @@ const (
 	ValidateJsonError ErrorCode = "validate_json_error"
 	NoFaceDetected    ErrorCode = "no_face_detected"
 
-	ContentNotFound  ErrorCode = "content_not_found"
-	SettingsNotFound ErrorCode = "settings_not_found"
-	UserNotFound     ErrorCode = "user_not_found"
-	PaymentNotFound  ErrorCode = "payment_not_found"
-	StyleNotFound    ErrorCode = "style_not_found"
+	ContentNotFound    ErrorCode = "content_not_found"
+	SettingsNotFound   ErrorCode = "settings_not_found"
+	UserNotFound       ErrorCode = "user_not_found"
+	PaymentNotFound    ErrorCode = "payment_not_found"
+	StyleNotFound      ErrorCode = "style_not_found"
+	PredictionNotFound ErrorCode = "prediction_not_found"
 
 	UserUnauthorized          ErrorCode = "user_unauthorized"
 	UserNotExists             ErrorCode = "user_not_exists"
@@ -116,7 +117,7 @@ func GetHttpErrorByCode(errorCode ErrorCode, ctx echo.Context) error {
 	case BadUserUpdateParams:
 		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "Bad user update params"})
 	case NoFaceDetected:
-		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "No face detected in the photo"})
+		return ctx.JSON(http.StatusBadRequest, MyError{Code: string(errorCode), Message: "На фотографиях не обнаружено лиц. Пожалуйста, загрузите другие фото"})
 
 	case UserUnauthorized:
 		return ctx.JSON(http.StatusUnauthorized, MyError{Code: string(errorCode), Message: "User is unauthorized"})
@@ -136,6 +137,8 @@ func GetHttpErrorByCode(errorCode ErrorCode, ctx echo.Context) error {
 		return ctx.JSON(http.StatusNotFound, MyError{Code: string(errorCode), Message: "Style not found"})
 	case PaymentNotFound:
 		return ctx.JSON(http.StatusNotFound, MyError{Code: string(errorCode), Message: "Payment not found"})
+	case PredictionNotFound:
+		return ctx.JSON(http.StatusNotFound, MyError{Code: string(errorCode), Message: "Prediction not found"})
 
 	case UserAlreadyExists:
 		return ctx.JSON(http.StatusConflict, MyError{Code: string(errorCode), Message: "User already exists"})

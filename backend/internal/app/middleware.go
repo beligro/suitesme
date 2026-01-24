@@ -7,20 +7,15 @@ import (
 	"net/http"
 	"strings"
 	"suitesme/internal/utils/helper"
+	"suitesme/internal/utils/security"
 	"suitesme/pkg/logging"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
-	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
-
-type TokenClaims struct {
-	UserId uuid.UUID
-	jwt.RegisteredClaims
-}
 
 func JWTOptionalAuthMiddleware(secret []byte) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -31,43 +26,72 @@ func JWTOptionalAuthMiddleware(secret []byte) echo.MiddlewareFunc {
 			}
 
 			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-			token, err := jwt.ParseWithClaims(tokenStr, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-				return secret, nil
-			})
+			claims, err := security.ParseToken(tokenStr, secret)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
 			}
 
-			if claims, ok := token.Claims.(*TokenClaims); ok && token.Valid {
-				c.Set("userID", claims.UserId)
-			} else {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
-			}
+			c.Set("userID", claims.UserId)
 			return next(c)
 		}
 	}
 }
 
 func JWTAuthMiddleware(secret []byte) echo.MiddlewareFunc {
-	return echojwt.WithConfig(echojwt.Config{
-		SigningKey: secret,
-		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(TokenClaims)
-		},
-		ErrorHandler: func(c echo.Context, err error) error {
-			return echo.NewHTTPError(http.StatusUnauthorized, "Authentication failed")
-		},
-	})
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			authHeader := c.Request().Header.Get("Authorization")
+			if authHeader == "" {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization header")
+			}
+
+			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+			claims, err := security.ParseToken(tokenStr, secret)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+			}
+
+			c.Set("userID", claims.UserId)
+			return next(c)
+		}
+	}
 }
 
 func ParseUserID(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user := c.Get("user").(*jwt.Token)
-		claims := user.Claims.(*TokenClaims)
-		userID := claims.UserId
-
+		userID := c.Get("userID").(uuid.UUID)
 		c.Set("userID", userID)
 		return next(c)
+	}
+}
+
+func AdminJWTAuthMiddleware(secret []byte) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			authHeader := c.Request().Header.Get("Authorization")
+			if authHeader == "" {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization header")
+			}
+
+			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+			token, err := jwt.ParseWithClaims(tokenStr, &security.AdminTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+					return nil, echo.NewHTTPError(http.StatusUnauthorized, "Invalid signing method")
+				}
+				return secret, nil
+			})
+			if err != nil {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+			}
+
+			if claims, ok := token.Claims.(*security.AdminTokenClaims); ok && token.Valid {
+				c.Set("adminUsername", claims.Username)
+			} else {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token claims")
+			}
+
+			return next(c)
+		}
 	}
 }
 

@@ -1,0 +1,9 @@
+torch
+facenet_pytorch
+pillow
+numpy<2
+scikit-learn
+tqdm
+fastapi
+uvicorn[standard]
+minio>=7.2.0

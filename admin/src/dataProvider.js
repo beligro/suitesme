@@ -2,7 +2,7 @@ import { fetchUtils } from 'react-admin';
 import jsonServerProvider from 'ra-data-json-server';
 
 // Use relative URL instead of hardcoded IP
-const apiUrl = '/api/admin/v1';
+const apiUrl = '/admin/v1';
 
 const httpClient = (url, options = {}) => {
   if (!options.headers) {
@@ -17,6 +17,22 @@ const defaultDataProvider = jsonServerProvider(apiUrl, httpClient);
 
 const dataProvider = {
   ...defaultDataProvider,
+  
+  // Override getList to handle custom statistics endpoint
+  getList: (resource, params) => {
+    // Handle statistics endpoint
+    if (resource === 'predictions-statistics') {
+      return httpClient(`${apiUrl}/predictions-statistics`, {
+        method: 'GET',
+      }).then(({ json }) => ({
+        data: [json], // Wrap in array for react-admin
+        total: 1,
+      }));
+    }
+    
+    // Use default implementation for other resources
+    return defaultDataProvider.getList(resource, params);
+  },
   
   // Override getOne method to handle styles resource
   getOne: (resource, params) => {

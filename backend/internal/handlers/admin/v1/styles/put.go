@@ -83,7 +83,8 @@ func (ctr StylesController) Put(ctx echo.Context) error {
 			return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 		}
 
-		pdfURL := fmt.Sprintf("%s/%s/%s", ctr.config.MinioFilePathEndpoint, ctr.config.StylePhotoBucket, fileKey)
+		// Use relative URL path to avoid hardcoding server IP
+		pdfURL := fmt.Sprintf("/files/%s/%s", ctr.config.StylePdfBucket, fileKey)
 		existingStyle.PdfInfoUrl = pdfURL
 	}
 
