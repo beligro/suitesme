@@ -24,4 +24,8 @@ go.work.sum
 .env
 *.log
 
-backend/backups
+# SSL сертификаты
+/nginx/ssl/*
+!nginx/ssl/.gitkeep
+
+docs
