@@ -53,7 +53,16 @@ func Run() {
 	cfg := config.New(&logger)
 	logger.Info("config initialized")
 
-	dbParams := fmt.Sprintf("host=%s dbname=%s user=%s password=%s sslmode=disable", cfg.DbHost, cfg.DbName, cfg.DbUser, cfg.DbPassword)
+	// В Docker окружении используем имя сервиса "postgres" для подключения к БД
+	// Это обеспечивает подключение только внутри Docker сети
+	dbHost := cfg.DbHost
+	if dbHost == "" || dbHost == "localhost" {
+		// Если DB_HOST не указан или localhost, используем имя сервиса Docker
+		dbHost = "postgres"
+		logger.Info("Using Docker service name 'postgres' for database connection")
+	}
+
+	dbParams := fmt.Sprintf("host=%s port=5432 dbname=%s user=%s password=%s sslmode=disable", dbHost, cfg.DbName, cfg.DbUser, cfg.DbPassword)
 	storage, err := storage.NewDB(dbParams)
 	if err != nil {
 		logger.Panic(err)
