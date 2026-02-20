@@ -28,4 +28,4 @@ go.work.sum
 /nginx/ssl/*
 !nginx/ssl/.gitkeep
 
-docs
+/certbot

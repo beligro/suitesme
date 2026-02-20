@@ -1,13 +1,13 @@
 package auth
 
 import (
-	"net/http"
-	"suitesme/internal/models"
-	"suitesme/internal/utils/security"
+	//"net/http"
+	//"suitesme/internal/models"
+	//"suitesme/internal/utils/security"
 	"suitesme/pkg/myerrors"
-	"suitesme/pkg/sender"
+	//"suitesme/pkg/sender"
 
-	utils_request "suitesme/internal/utils/request"
+	//utils_request "suitesme/internal/utils/request"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -39,7 +39,10 @@ type RegisterResponse struct {
 // @Failure		500		{object}	models.ErrorResponse
 // @Router			/api/v1/auth/register [post]
 func (ctr AuthController) Register(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+	// TODO: remove this
+	return myerrors.GetHttpErrorByCode(myerrors.SendingEmailFailed, ctx)
+
+	/*ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 	request, err := utils_request.ParseRequest[RegisterRequest](&ctx)
 	if err != nil {
 		return err
@@ -109,4 +112,5 @@ func (ctr AuthController) Register(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, RegisterResponse{UserId: userId})
+	*/
 }

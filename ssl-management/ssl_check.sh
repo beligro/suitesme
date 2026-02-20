@@ -7,7 +7,7 @@
 set -e
 
 # Конфигурация
-DOMAIN="h2o-nsk.ru"
+DOMAIN="ai.mne-idet.ru"
 NGINX_SSL_DIR="/home/aagrom/suitesme/nginx/ssl"
 PROJECT_DIR="/home/aagrom/suitesme"
 
