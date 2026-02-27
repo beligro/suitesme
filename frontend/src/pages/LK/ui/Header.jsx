@@ -20,6 +20,7 @@ const Header = () => {
     const [selectedFiles, setSelectedFiles] = React.useState([]);
     const [errorMessage, setErrorMessage] = React.useState("");
     const [warningMessage, setWarningMessage] = React.useState("");
+    const [pdfInfoUrl, setPdfInfoUrl] = React.useState("");
 
 
     const handleLogout = async () => {
@@ -80,6 +81,7 @@ const Header = () => {
             if (response.status === 200) {
                 setStyle(response.data.style_id);
                 setCanUpload(response.data.can_upload_photos);
+                setPdfInfoUrl(response.data.pdf_info_url || "");
                 setStep(2);
             } else if (response.status === 404) {
                 setStep(0);
@@ -140,6 +142,7 @@ const Header = () => {
                 setStyle(data.style_id)
                 setSelectedFiles([]);
                 setErrorMessage(""); // Clear errors on success
+                setPdfInfoUrl(data.pdf_info_url || "");
                 
                 // Display warning if some photos didn't have faces
                 if (data.warning) {
@@ -171,11 +174,23 @@ const Header = () => {
             const {data} = await getInfo()
             setCanUpload(data.can_upload_photos)
             setStyle(data.style_id)
+            setPdfInfoUrl(data.pdf_info_url || "")
             setStep(2);
         } catch (error) {
             console.log(error);
             setStep(0);
         }
+    }
+
+    const handleDownloadPdf = () => {
+        if (!pdfInfoUrl) return;
+        const link = document.createElement('a');
+        link.href = pdfInfoUrl;
+        link.download = `${style || 'style'}.pdf`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     // useEffect(() => {
@@ -225,6 +240,7 @@ const Header = () => {
             if (styleRes.status === 200) {
                 setStyle(styleRes.data.style_id);
                 setCanUpload(styleRes.data.can_upload_photos);
+                setPdfInfoUrl(styleRes.data.pdf_info_url || "");
                 setStep(2);
             } else if (styleRes.status === 404) {
                 setStep( user.first_name ? 1 : 0 );
@@ -398,8 +414,8 @@ const Header = () => {
             {step === 2 && (
                 <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 lg:h-[80%] h-[70%] lg:block flex flex-col items-center justify-between text-[#1B3C4D]">
                     <div className="flex flex-col items-center lg:justify-around justify-start h-full gap-4">
-                        <p className="lg:text-[30px] text-[23px] font-unbounded font-extralight text-center uppercase" >Готово! <br className="lg:hidden" /> Ваш типаж <br className="lg:block hidden" /> SUITSME.AI</p>
-                        <div className="flex flex-col items-center justify-center gap-2 mb-8">
+                        <p className="lg:text-[30px] text-[23px] font-unbounded font-extralight text-center uppercase" >Добро пожаловать в <br className="lg:block hidden" /> SUITSME.AI</p>
+                        <div className="flex flex-col items-center justify-center gap-2">
                             <div
                                 className="w-10 h-10 border rounded-full border-white flex items-center justify-center cursor-pointer">
                                 <img src="/photos/main/Profile.svg" className="w-4" alt="" />
@@ -415,37 +431,28 @@ const Header = () => {
                             </div>
                         )}
                         
-                        {canUpload && (<button className="w-32 h-10 border border-white rounded-xl hover:bg-white/50 transition duration-200" onClick={() => { setStep(0); setWarningMessage(""); }}>Повторить</button>)}
-                        <p className="text-center font-montserrat text-[25px]">Ваш типаж - <span className="font-semibold ">{style}</span></p>
+                        <p className="text-center font-montserrat font-light lg:text-[12px] text-[10px] uppercase">ВАШ ТИПАЖ — {style}</p>
+                        <img 
+                            src="/photos/LK/Step2.png" 
+                            className={`lg:w-[17%] w-[70%] max-w-[150px] cursor-pointer hover:scale-95 transition ease-in-out duration-200 ${!pdfInfoUrl ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                            alt="" 
+                            onClick={handleDownloadPdf}
+                        />
+                        <p className="text-center font-montserrat font-light text-[12px] uppercase">
+                            нажмите на иконку, чтобы скачать <br className="lg:block hidden"/> результат
+                        </p>
+                        {canUpload && (
+                            <button 
+                                className="px-6 py-2 border border-[#1B3C4D] rounded-full hover:bg-[#1B3C4D]/10 transition duration-200 font-montserrat text-sm uppercase" 
+                                onClick={() => { setStep(0); setWarningMessage(""); }}
+                            >
+                                Повторить типирование
+                            </button>
+                        )}
                         <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>
                     </div>
                 </div>
             )}
-
-            {/*{step === 2 && (*/}
-            {/*    <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 lg:h-[80%] h-[70%] lg:block flex flex-col items-center justify-between text-[#1B3C4D]">*/}
-            {/*        <div className="flex flex-col items-center lg:justify-around justify-start h-full gap-4">*/}
-            {/*            <p className="lg:text-[30px] text-[23px] font-unbounded font-extralight text-center uppercase" >Добро пожаловать в <br className="lg:block hidden" /> SUITSME.AI</p>*/}
-            {/*            <div className="flex flex-col items-center justify-center gap-2">*/}
-            {/*                <div*/}
-            {/*                    className="w-10 h-10 border rounded-full border-white flex items-center justify-center cursor-pointer">*/}
-            {/*                    <img src="/photos/main/Profile.svg" className="w-4" alt="" />*/}
-            {/*                </div>*/}
-            {/*                <p className="text-center font-montserrat font-normal text-[14px] cursor-pointer">Имя</p>*/}
-            {/*            </div>*/}
-            {/*            <p className="text-center font-montserrat font-light lg:text-[12px] text-[10px]  uppercase">ВАШ ТИПАЖ</p>*/}
-            {/*            <img src="/photos/LK/Step2.png" className="lg:w-[17%] w-[70%] max-w-[150px] cursor-pointer hover:scale-95 transition ease-in-out duration-200" alt="" onClick={() => setStep(0)}/>*/}
-            {/*            <p className="text-center font-montserrat font-light text-[12px] uppercase">*/}
-            {/*                нажмите на иконку, чтобы посмотреть <br className="lg:block hidden"/> результат*/}
-            {/*            </p>*/}
-            {/*            <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt=""/>*/}
-            {/*        </div>*/}
-            {/*        <div className="uppercase font-light text-center text-[13px] lg:hidden block">*/}
-            {/*            Здесь может быть размещен*/}
-            {/*            какой-то текст*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*)}*/}
 
 
             {step === 3 && (

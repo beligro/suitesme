@@ -19,8 +19,9 @@ import (
 )
 
 type StyleBuildResult struct {
-	StyleId string `json:"style_id" validate:"required"`
-	Warning string `json:"warning,omitempty"`
+	StyleId    string `json:"style_id" validate:"required"`
+	PdfInfoUrl string `json:"pdf_info_url,omitempty"`
+	Warning    string `json:"warning,omitempty"`
 }
 
 // Build godoc
@@ -70,8 +71,14 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 
 	// Regular users can only upload once
 	if styleId != "" && !user.IsAdmin {
+		var pdfInfoUrl string
+		if dbStyle, err := ctr.storage.Styles.GetByName(styleId); err == nil && dbStyle != nil {
+			pdfInfoUrl = dbStyle.PdfInfoUrl
+		}
+
 		response := StyleBuildResult{
-			StyleId: styleId,
+			StyleId:    styleId,
+			PdfInfoUrl: pdfInfoUrl,
 		}
 
 		return ctx.JSON(http.StatusOK, response)
@@ -172,6 +179,12 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 
 	external.UpdateLeadStatus(ctr.config, ctr.logger, user.AmocrmLeadId, external.GotStyle, &styleId)
 
+	// Get PDF info URL for the style
+	var pdfInfoUrl string
+	if dbStyle, err := ctr.storage.Styles.GetByName(styleId); err == nil && dbStyle != nil {
+		pdfInfoUrl = dbStyle.PdfInfoUrl
+	}
+
 	// Construct warning message if some photos didn't have faces
 	var warningMessage string
 	if imagesProcessed < imagesTotal {
@@ -207,8 +220,9 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	}
 
 	response := StyleBuildResult{
-		StyleId: styleId,
-		Warning: warningMessage,
+		StyleId:    styleId,
+		PdfInfoUrl: pdfInfoUrl,
+		Warning:    warningMessage,
 	}
 
 	return ctx.JSON(http.StatusOK, response)

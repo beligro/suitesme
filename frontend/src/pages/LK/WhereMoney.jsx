@@ -1,15 +1,17 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 import {$authHost} from "../../app/indexAPI.js";
 import {LK} from "../../app/routes/constans.js";
+import { getPublicSettings } from "../../app/settingsAPI.js";
 
 const WhereMoney = () => {
-    const [step, setStep] = React.useState(0);
-    const [isActive, setIsActive] = React.useState(false);
+    const [step, setStep] = useState(0);
+    const [isActive, setIsActive] = useState(false);
     const nav = useNavigate();
-    const [isLoading, setIsLoading] = React.useState(false);
-    const [error, setError] = React.useState(false);
-    const [isReady,   setIsReady]   = React.useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(false);
+    const [isReady, setIsReady] = useState(false);
+    const [price, setPrice] = useState("5990");
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const status = queryParams.get("status");
@@ -164,6 +166,14 @@ const WhereMoney = () => {
         }
     }, []);
 
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const settings = await getPublicSettings();
+            if (settings.price) setPrice(settings.price);
+        };
+        fetchSettings();
+    }, []);
+
     if (!isReady) return null;
 
     return (
@@ -246,7 +256,7 @@ const WhereMoney = () => {
                         </div>
 
                         <p className="text-[#1B3C4D] font-medium text-[30px] font-unbounded">
-                            3990 ₽
+                            {price} ₽
                         </p>
                         <div className="flex items-start gap-3 w-full">
                             <img
@@ -261,10 +271,26 @@ const WhereMoney = () => {
                                 alt=""
                                 onClick={() => setIsActive(!isActive)}
                             />
-                            <a className="font-montserrat text-[10px] font-normal text-[#1B3C4D] uppercase leading-tight cursor-pointer" href="https://mneidet.com/privacy/">
-                                Я согласен с условиями <br className="lg:block hidden"/>
-                                лицензионного <br className="lg:hidden"/> соглашения
-                            </a>
+                            <p className="font-montserrat text-[10px] font-normal text-[#1B3C4D] uppercase leading-tight">
+                                Нажимая кнопку «ОПЛАТИТЬ», я даю{' '}
+                                <a
+                                    href="https://docs.yandex.ru/docs/view?url=ya-disk%3A%2F%2F%2Fdisk%2Fmneidet%2FSoglasie.pdf&name=Soglasie.pdf&uid=510495654&nosw=1"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline cursor-pointer"
+                                >
+                                    Согласие на обработку персональных данных
+                                </a>
+                                {' '}и принимаю{' '}
+                                <a
+                                    href="https://docs.yandex.ru/docs/view?url=ya-disk%3A%2F%2F%2Fdisk%2Fmneidet%2FPrivacyPolicy.pdf&name=PrivacyPolicy.pdf&uid=510495654&nosw=1"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline cursor-pointer"
+                                >
+                                    Политику конфиденциальности
+                                </a>
+                            </p>
                         </div>
                         <div className="w-full relative">
                             <button
@@ -273,7 +299,7 @@ const WhereMoney = () => {
                                 onClick={() => getPayment()}
                             >
                                 <p className="uppercase font-unbounded font-light text-[14px] text-white">
-                                    продолжить
+                                    оплатить
                                 </p>
                             </button>
                             {error && (

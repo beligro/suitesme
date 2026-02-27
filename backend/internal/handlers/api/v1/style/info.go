@@ -12,6 +12,7 @@ import (
 
 type StyleInfo struct {
 	StyleId         string `json:"style_id"`
+	PdfInfoUrl      string `json:"pdf_info_url,omitempty"`
 	CanUploadPhotos bool   `json:"can_upload_photos"`
 }
 
@@ -56,8 +57,14 @@ func (ctr StyleController) Info(ctx echo.Context) error {
 	canUploadPhotos := user.IsAdmin
 
 	if styleId != "" {
+		var pdfInfoUrl string
+		if dbStyle, err := ctr.storage.Styles.GetByName(styleId); err == nil && dbStyle != nil {
+			pdfInfoUrl = dbStyle.PdfInfoUrl
+		}
+
 		response := StyleInfo{
 			StyleId:         styleId,
+			PdfInfoUrl:      pdfInfoUrl,
 			CanUploadPhotos: canUploadPhotos,
 		}
 

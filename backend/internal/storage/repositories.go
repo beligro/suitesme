@@ -18,7 +18,10 @@ type UserRepository interface {
 	SetUserIsVerified(uuid.UUID, int)
 }
 
-type StylesRepository interface{}
+type StylesRepository interface {
+	Get(id string) (*models.DbStyle, error)
+	GetByName(name string) (*models.DbStyle, error)
+}
 
 type UserStyleRepository interface {
 	Get(uuid.UUID) (string, error)

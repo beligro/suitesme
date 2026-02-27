@@ -53,7 +53,7 @@ const Footer = () => {
             <div className="w-full lg:px-60 px-5 lg:pt-10 pb-20 flex lg:flex-row flex-col items-center justify-start lg:gap-16 gap-0 relative">
                 <a
                     className="font-montserrat text-[12px] font-light underline cursor-pointer"
-                    href="https://mneidet.com/privacy/"
+                    href="https://docs.yandex.ru/docs/view?url=ya-disk%3A%2F%2F%2Fdisk%2Fmneidet%2FOferta.pdf&name=Oferta.pdf&uid=510495654&nosw=1"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -61,7 +61,7 @@ const Footer = () => {
                 </a>
                 <a
                     className="font-montserrat text-[12px] font-light underline cursor-pointer"
-                    href="https://mneidet.com/privacy/"
+                    href="https://docs.yandex.ru/docs/view?url=ya-disk%3A%2F%2F%2Fdisk%2Fmneidet%2FPrivacyPolicy.pdf&name=PrivacyPolicy.pdf&uid=510495654&nosw=1"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
