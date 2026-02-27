@@ -2,11 +2,14 @@ package sender
 
 import (
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
+	"net"
 	"net/smtp"
 	"strings"
 	"suitesme/internal/config"
 	"time"
+	"unicode/utf8"
 )
 
 // EmailMessage represents an email message with all necessary fields
@@ -18,13 +21,31 @@ type EmailMessage struct {
 	HTMLContent string
 }
 
+// encodeRFC2047 encodes non-ASCII strings for email headers (RFC 2047)
+func encodeRFC2047(s string) string {
+	if s == "" {
+		return s
+	}
+	needsEnc := false
+	for _, r := range s {
+		if r > 127 {
+			needsEnc = true
+			break
+		}
+	}
+	if !needsEnc || !utf8.ValidString(s) {
+		return s
+	}
+	return "=?UTF-8?B?" + base64.StdEncoding.EncodeToString([]byte(s)) + "?="
+}
+
 // SendFormattedEmail sends a properly formatted email with headers to avoid spam filters
 func SendFormattedEmail(emailTo string, msg EmailMessage, cfg *config.Config) error {
 	// Set up headers
 	headers := make(map[string]string)
 	headers["From"] = msg.From
 	headers["To"] = msg.To
-	headers["Subject"] = msg.Subject
+	headers["Subject"] = encodeRFC2047(msg.Subject)
 	headers["MIME-Version"] = "1.0"
 	headers["Date"] = time.Now().Format(time.RFC1123Z)
 	headers["Message-ID"] = fmt.Sprintf("<%d.%s>", time.Now().Unix(), msg.From)
@@ -63,22 +84,24 @@ func SendFormattedEmail(emailTo string, msg EmailMessage, cfg *config.Config) er
 	// Close the boundary
 	messageBody.WriteString(fmt.Sprintf("--%s--", boundary))
 
-	// Connect to the SMTP server with TLS
+	// SSL/TLS config: implicit TLS (SMTPS, port 465) or STARTTLS (port 587)
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
 		ServerName:         cfg.SmtpHost,
+		MinVersion:         tls.VersionTLS12,
+		InsecureSkipVerify: true, // для SMTP с самоподписанными сертификатами
 	}
 
-	// Connect to the server
+	// Try implicit TLS/SSL first (port 465)
 	conn, err := tls.Dial("tcp", cfg.SmtpHost+":"+cfg.SmtpPort, tlsConfig)
 	if err != nil {
-		// Fallback to non-TLS if TLS connection fails
-		return sendWithoutTLS(emailTo, messageBody.String(), cfg)
+		// Fallback to STARTTLS (port 587)
+		return sendWithSTARTTLS(emailTo, messageBody.String(), cfg, tlsConfig)
 	}
 
 	client, err := smtp.NewClient(conn, cfg.SmtpHost)
 	if err != nil {
-		return sendWithoutTLS(emailTo, messageBody.String(), cfg)
+		conn.Close()
+		return sendWithSTARTTLS(emailTo, messageBody.String(), cfg, tlsConfig)
 	}
 
 	// Authenticate
@@ -114,14 +137,46 @@ func SendFormattedEmail(emailTo string, msg EmailMessage, cfg *config.Config) er
 	return client.Quit()
 }
 
-// sendWithoutTLS is a fallback method when TLS connection fails
-func sendWithoutTLS(emailTo string, messageBody string, cfg *config.Config) error {
+// sendWithSTARTTLS connects via plain TCP and upgrades to TLS with STARTTLS (port 587)
+func sendWithSTARTTLS(emailTo string, messageBody string, cfg *config.Config, tlsConfig *tls.Config) error {
+	conn, err := net.Dial("tcp", cfg.SmtpHost+":"+cfg.SmtpPort)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client, err := smtp.NewClient(conn, cfg.SmtpHost)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	if err = client.StartTLS(tlsConfig); err != nil {
+		return err
+	}
+
 	auth := smtp.PlainAuth("", cfg.EmailSendFrom, cfg.EmailPassword, cfg.SmtpHost)
-	return smtp.SendMail(
-		cfg.SmtpHost+":"+cfg.SmtpPort,
-		auth,
-		cfg.EmailSendFrom,
-		[]string{emailTo},
-		[]byte(messageBody),
-	)
+	if err = client.Auth(auth); err != nil {
+		return err
+	}
+	if err = client.Mail(cfg.EmailSendFrom); err != nil {
+		return err
+	}
+	if err = client.Rcpt(emailTo); err != nil {
+		return err
+	}
+
+	writer, err := client.Data()
+	if err != nil {
+		return err
+	}
+	_, err = writer.Write([]byte(messageBody))
+	if err != nil {
+		return err
+	}
+	if err = writer.Close(); err != nil {
+		return err
+	}
+
+	return client.Quit()
 }

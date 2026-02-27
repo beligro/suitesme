@@ -21,7 +21,7 @@ DB_USER="postgres"
 
 # Old patterns to fix
 OLD_SERVER_PATTERN_1="http://51.250.84.195:9000"
-OLD_SERVER_PATTERN_2="http://178.154.206.33:9000"
+OLD_SERVER_PATTERN_2="http://89.232.188.182:9000"
 OLD_SERVER_PATTERN_3="http://localhost:9000"
 OLD_BUCKET_NAME="style"
 NEW_BUCKET_NAME="style-photos"
@@ -98,12 +98,12 @@ docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -c \
    WHERE photo_url LIKE '%51.250.84.195%';"
 echo "  ✓ Fixed old server IP (51.250.84.195)"
 
-# Fix current server direct MinIO access (178.154.206.33:9000) -> relative path
+# Fix current server direct MinIO access (89.232.188.182:9000) -> relative path
 docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -c \
   "UPDATE db_user_styles 
-   SET photo_url = REPLACE(photo_url, 'http://178.154.206.33:9000/', '/files/')
-   WHERE photo_url LIKE '%178.154.206.33:9000%';"
-echo "  ✓ Fixed current server direct MinIO (178.154.206.33:9000)"
+   SET photo_url = REPLACE(photo_url, 'http://89.232.188.182:9000/', '/files/')
+   WHERE photo_url LIKE '%89.232.188.182:9000%';"
+echo "  ✓ Fixed current server direct MinIO (89.232.188.182:9000)"
 
 # Fix localhost URLs -> relative path
 docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -c \

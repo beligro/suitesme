@@ -9,12 +9,23 @@ import {useNavigate} from "react-router-dom";
 
 const clients = [
     "photos/main/womans/Woman1.jpg",
-    "photos/main/womans/Woman3.jpg",
-    "photos/main/womans/Woman4.JPG",
-    "photos/main/womans/Woman5.jpg",
-    "photos/main/womans/Woman6.jpeg",
-    "photos/main/womans/Woman7.JPG",
-    "photos/main/womans/Woman9.jpg",
+    "photos/main/womans/Woman2.jpg",
+    "photos/main/womans/Woman3.JPG",
+    "photos/main/womans/Woman4.jpg",
+    "photos/main/womans/Woman55.jpg",
+    "photos/main/womans/Woman6.JPG",
+    "photos/main/womans/Woman7.jpg",
+];
+
+// Конфиг кейсов: расширение (woman1 — png, остальные — jpg), кол-во фото "до" и "после"
+const clientCaseConfig = [
+    { ext: "png", beforeCount: 3, afterCount: 3 },   // woman1
+    { ext: "jpg", beforeCount: 2, afterCount: 3 },   // woman2
+    { ext: "jpg", beforeCount: 3, afterCount: 3 },   // woman3
+    { ext: "jpg", beforeCount: 3, afterCount: 3 },   // woman4
+    { ext: "jpg", beforeCount: 3, afterCount: 3 },   // woman5
+    { ext: "jpg", beforeCount: 3, afterCount: 2 },   // woman6
+    { ext: "jpg", beforeCount: 3, afterCount: 3 },   // woman7
 ];
 
 const Carusel = () => {
@@ -74,7 +85,8 @@ const Carusel = () => {
                                     alt={`client-${index}`}
                                     className="rounded-3xl w-full h-[400px] object-cover hover:scale-95 transition duration-200 cursor-pointer"
                                     onClick={() => {
-                                        if (index === 0) {
+                                        const config = clientCaseConfig[index];
+                                        if (config && (config.beforeCount + config.afterCount > 0)) {
                                             setModalOpen(true);
                                             setActiveClientIndex(index);
                                         }
@@ -101,7 +113,7 @@ const Carusel = () => {
                 </div>
             </div>
 
-            {modalOpen && activeClientIndex === 0 && ( // Заглушка! Как докините фоток в public меняй "=== 0" на "!== null"
+            {modalOpen && activeClientIndex !== null && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center">
                     <div className="relative w-full h-full flex items-center justify-center">
                         <Swiper
@@ -113,13 +125,28 @@ const Carusel = () => {
                             loop
                             className="w-[90%] max-w-[1000px]"
                         >
-                            {["before", "after"].map((type) =>
-                                [1, 2, 3].map((i) => (
-                                    <SwiperSlide key={`${type}-${i}`}>
+                            {(() => {
+                                const config = clientCaseConfig[activeClientIndex];
+                                if (!config) return null;
+                                const ext = config.ext;
+                                const slides = [];
+                                ["before", "after"].forEach((type) => {
+                                    const count = type === "before" ? config.beforeCount : config.afterCount;
+                                    const label = type === "before" ? "Before" : "After";
+                                    for (let i = 1; i <= count; i++) {
+                                        slides.push({
+                                            key: `${type}-${i}`,
+                                            src: `/photos/main/womans/woman${activeClientIndex + 1}/hero${label}${i}.${ext}`,
+                                            type,
+                                        });
+                                    }
+                                });
+                                return slides.map(({ key, src, type }) => (
+                                    <SwiperSlide key={key}>
                                         <div className="relative max-h-[90vh] flex justify-center">
                                             <div className="relative">
                                                 <img
-                                                    src={`/photos/main/womans/woman${activeClientIndex + 1}/hero${type === 'before' ? 'Before' : 'After'}${i}.png`}
+                                                    src={src}
                                                     className="object-contain w-full max-h-[90vh] mx-auto rounded-2xl"
                                                     alt=""
                                                 />
@@ -129,7 +156,7 @@ const Carusel = () => {
                                                 <div className="custom-next absolute right-2 top-1/2 -translate-y-1/2 z-50 cursor-pointer backdrop-blur-2xl rounded-full">
                                                     <img src="/photos/main/RightButtonOpenSlider.svg" alt="next" className="w-10 h-10" />
                                                 </div>
-                                                <p className="absolute font-montserrat top-2 left-2 text-white px-2 py-1 text-sm rounded ">
+                                                <p className="absolute font-montser top-2 left-2 text-white px-2 py-1 text-sm rounded ">
                                                     {type === "before" ? "ДО" : "ПОСЛЕ"}
                                                 </p>
                                                 <button
@@ -141,8 +168,8 @@ const Carusel = () => {
                                             </div>
                                         </div>
                                     </SwiperSlide>
-                                ))
-                            )}
+                                ));
+                            })()}
                         </Swiper>
                     </div>
                 </div>

@@ -179,8 +179,24 @@ const Register = () => {
                         <img className={`${isActive ? "hidden": "block"} w-5 cursor-pointer`} src="/photos/Auth/Register/Checkbox.svg" alt="" onClick={() => setIsActive(!isActive)} />
                         <img className={`${isActive ? "block": "hidden"} w-5 cursor-pointer`} src="/photos/Auth/Register/CheckboxActive.svg" alt="" onClick={() => setIsActive(!isActive)} />
                         <p className="font-montserrat text-[10px] font-normal text-[#1B3C4D] uppercase">
-                            Я принимаю условия и политику <br/>
-                            конфиденциальности
+                            Продолжая, вы соглашаетесь на{' '}
+                            <a
+                                href="https://docs.yandex.ru/docs/view?url=ya-disk%3A%2F%2F%2Fdisk%2Fmneidet%2FSoglasie.pdf&name=Soglasie.pdf&uid=510495654&nosw=1"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline cursor-pointer"
+                            >
+                                обработку персональных данных
+                            </a>
+                            , а также принимаете{' '}
+                            <a
+                                href="https://docs.yandex.ru/docs/view?url=ya-disk%3A%2F%2F%2Fdisk%2Fmneidet%2FPrivacyPolicy.pdf&name=PrivacyPolicy.pdf&uid=510495654&nosw=1"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline cursor-pointer"
+                            >
+                                политику конфиденциальности
+                            </a>
                         </p>
                     </div>
                     <button

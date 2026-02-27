@@ -21,6 +21,13 @@ func (repo *StylesRepository) Get(id string) (*models.DbStyle, error) {
 	return &style, result.Error
 }
 
+// GetByName retrieves a style by Name
+func (repo *StylesRepository) GetByName(name string) (*models.DbStyle, error) {
+	var style models.DbStyle
+	result := repo.db.Where("name = ?", name).First(&style)
+	return &style, result.Error
+}
+
 // List returns a list of styles with pagination, sorting and ordering
 func (repo *StylesRepository) List(sort string, order string, limit int, offset int) []models.DbStyle {
 	var styles []models.DbStyle

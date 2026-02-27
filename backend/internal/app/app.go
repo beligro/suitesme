@@ -15,6 +15,7 @@ import (
 	api_content "suitesme/internal/handlers/api/v1/content"
 	"suitesme/internal/handlers/api/v1/payment"
 	"suitesme/internal/handlers/api/v1/profile"
+	"suitesme/internal/handlers/api/v1/settings_public"
 	"suitesme/internal/handlers/api/v1/style"
 	"suitesme/internal/storage"
 	"suitesme/pkg/logging"
@@ -106,6 +107,7 @@ func Run() {
 	predictionsController := predictions.NewPredictionsController(&logger, storage, cfg)
 	adminAuthController := admin_auth.NewAdminAuthController(&logger, storage, cfg)
 	apiContentController := api_content.NewApiContentController(&logger, storage, cfg, webContentCache)
+	settingsPublicController := settings_public.NewSettingsPublicController(&logger, storage, settingsCache)
 
 	e := echo.New()
 	e.Validator = validator.NewValidator()
@@ -163,6 +165,10 @@ func Run() {
 	apiV1Content := apiV1.Group("/content")
 
 	apiV1Content.GET("/list", apiContentController.List)
+
+	apiV1Settings := apiV1.Group("/settings")
+
+	apiV1Settings.GET("/public", settingsPublicController.GetPublic)
 
 	adminRoutes := e.Group("/admin")
 	adminV1 := adminRoutes.Group("/v1")

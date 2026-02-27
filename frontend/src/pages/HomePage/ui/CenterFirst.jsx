@@ -1,18 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SectionWrapper from "../../../hoc/SectionWrapper.jsx";
 import {useNavigate} from "react-router-dom";
+import { getPublicSettings } from "../../../app/settingsAPI.js";
 
 const CenterFirst = () => {
+    const [isBouncing, setIsBouncing] = useState(false);
+    const [price, setPrice] = useState("5990");
+    const nav = useNavigate();
 
-    const [isBouncing, setIsBouncing] = React.useState(false);
-    const nav = useNavigate()
-
-    React.useEffect(() => {
+    useEffect(() => {
         const interval = setInterval(() => {
             setIsBouncing(prev => !prev);
         }, 2000);
 
         return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const settings = await getPublicSettings();
+            if (settings.price) setPrice(settings.price);
+        };
+        fetchSettings();
     }, []);
 
 
@@ -78,7 +87,7 @@ const CenterFirst = () => {
                             <span className="uppercase text-[10px] font-normal -ml-1 font-montserrat">стоимость</span>
                             <br />
                             <div className="lg:font-medium font-normal">
-                                3990 Р
+                                {price} Р
                             </div>
                         </p>
                     </div>

@@ -56,8 +56,7 @@ const TopMain = () => {
             />
 
             <img 
-                className="w-full h-[500px] object-cover z-0 top-0 lg:hidden" 
-                style={{ marginLeft: '20px' }}
+                className="w-full h-[500px] object-cover z-0 top-0 lg:hidden"
                 src="/photos/main/top-main-mobile.png" 
                 alt="" 
             />

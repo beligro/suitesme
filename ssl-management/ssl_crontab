@@ -1,14 +1,15 @@
 # SSL Auto-renewal crontab for SuitesMe
 # Автоматическое обновление SSL сертификатов Let's Encrypt
+# Запуск через sg docker — чтобы cron имел доступ к Docker
 
-# Проверка SSL сертификата каждый день в 2:00 утра
-0 2 * * * /home/aagrom/suitesme/ssl-management/ssl_renew_simple.sh >> /home/aagrom/suitesme/logs/ssl_auto_renew.log 2>&1
+# Проверка и обновление SSL каждый день в 2:00
+0 2 * * * sg docker -c "/home/aagrom/suitesme/ssl-management/ssl_renew_simple.sh" >> /home/aagrom/suitesme/logs/ssl_auto_renew.log 2>&1
 
-# Дополнительная проверка каждые 6 часов (на случай проблем)
-0 */6 * * * /home/aagrom/suitesme/ssl-management/ssl_check.sh >> /home/aagrom/suitesme/logs/ssl_check.log 2>&1
+# Дополнительная проверка каждые 6 часов
+0 */6 * * * sg docker -c "/home/aagrom/suitesme/ssl-management/ssl_check.sh" >> /home/aagrom/suitesme/logs/ssl_check.log 2>&1
 
-# Еженедельная проверка статуса (воскресенье в 3:00 утра)
-0 3 * * 0 /home/aagrom/suitesme/ssl-management/ssl_check.sh
+# Еженедельная проверка (воскресенье в 3:00)
+0 3 * * 0 sg docker -c "/home/aagrom/suitesme/ssl-management/ssl_check.sh"
 
 # Очистка старых логов (каждый месяц)
 0 4 1 * * find /home/aagrom/suitesme/logs -name "ssl_*.log" -mtime +30 -delete
