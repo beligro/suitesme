@@ -30,3 +30,9 @@ func (repository *PaymentsRepository) Create(payment *models.DbPayments) {
 func (repo *PaymentsRepository) Save(payment *models.DbPayments) {
 	repo.db.Save(payment)
 }
+
+func (repo *PaymentsRepository) GetByStripeSessionID(sessionID string) (*models.DbPayments, error) {
+	payment := &models.DbPayments{}
+	err := repo.db.Model(&models.DbPayments{}).Where("stripe_session_id = ?", sessionID).First(payment).Error
+	return payment, err
+}

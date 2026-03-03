@@ -59,8 +59,6 @@ func parseProductField(key string) (index int, productKey string) {
 // @Failure		500		{object}	models.ErrorResponse
 // @Router			/api/v1/payment/callback [post]
 func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
-	ctr.logger.Info("Content-Type is: ", ctx.Request().Header.Get("Content-Type"))
 	if err := ctx.Request().ParseForm(); err != nil {
 		return err
 	}
@@ -90,10 +88,7 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 		data["products"] = products
 	}
 
-	ctr.logger.Infoln(data)
-
 	sign := ctx.Request().Header.Get("Sign")
-	ctr.logger.Infoln("header sign is: ", sign)
 	h := security.Hmac{}
 	isEqual, err := h.Verify(data, ctr.config.ProdamusToken, sign, "sha256")
 	if err != nil {
@@ -103,6 +98,18 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 	if !isEqual {
 		ctr.logger.Error("Different signatures")
 		return myerrors.GetHttpErrorByCode(myerrors.IncorrectSign, ctx)
+	}
+
+	orderNumStr, exists := data["order_num"].(string)
+	if !exists {
+		return ctx.JSON(http.StatusOK, models.EmptyResponse{})
+	}
+
+	orderNum, err := uuid.Parse(orderNumStr)
+	if err != nil {
+		ctr.logger.Info(err)
+		ctr.logger.Info("Order num is not UUID, probably it is another flow")
+		return ctx.JSON(http.StatusOK, models.EmptyResponse{})
 	}
 
 	paymentStatus, exists := data["payment_status"].(string)
@@ -115,18 +122,6 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 	if !exists {
 		ctr.logger.Info("Not found order_id")
 		return myerrors.GetHttpErrorByCode(myerrors.BadRequestJson, ctx)
-	}
-
-	orderNumStr, exists := data["order_num"].(string)
-	if !exists {
-		return myerrors.GetHttpErrorByCode(myerrors.BadRequestJson, ctx)
-	}
-
-	orderNum, err := uuid.Parse(orderNumStr)
-	if err != nil {
-		ctr.logger.Info(err)
-		ctr.logger.Info("Order num is not UUID, probably it is another flow")
-		return ctx.JSON(http.StatusOK, models.EmptyResponse{})
 	}
 
 	user, err := ctr.storage.User.Get(orderNum)

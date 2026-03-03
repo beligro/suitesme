@@ -13,7 +13,6 @@ type PostResponse struct {
 }
 
 func (ctr SettingsController) Post(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	setting, err := utils_request.ParseRequest[models.UpsertSettingRequest](&ctx)
 	if err != nil {

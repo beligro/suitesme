@@ -40,7 +40,7 @@ type StyleBuildResult struct {
 // @Failure 500 {object} models.ErrorResponse
 // @Router /api/v1/style/build [post]
 func (ctr StyleController) Build(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+
 	userID := ctx.Get("userID")
 	if userID == nil {
 		return myerrors.GetHttpErrorByCode(myerrors.UserUnauthorized, ctx)
@@ -158,14 +158,14 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		}
 		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 	}
-	
+
 	// Debug logging
-	ctr.logger.Info(fmt.Sprintf("ML Response - StyleId: %s, Confidence: %.2f, ImagesProcessed: %d, ImagesTotal: %d", 
+	ctr.logger.Info(fmt.Sprintf("ML Response - StyleId: %s, Confidence: %.2f, ImagesProcessed: %d, ImagesTotal: %d",
 		styleId, confidence, imagesProcessed, imagesTotal))
 
 	// Store all photo URLs
 	photoURLsJSON, _ := json.Marshal(photoURLs)
-	
+
 	userStyle := &models.DbUserStyle{
 		UserId:            parsedUserId,
 		PhotoUrl:          photoURL,
@@ -203,18 +203,18 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 			} else if imagesProcessed >= 2 && imagesProcessed <= 4 {
 				processedWord = "фотографий"
 			}
-			
+
 			failedWord := "не содержит"
 			if failedCount > 1 {
 				failedWord = "не содержат"
 			}
-			
+
 			failedPhrase := fmt.Sprintf("%d", failedCount)
 			if failedCount == 1 {
 				failedPhrase = "1"
 			}
-			
-			warningMessage = fmt.Sprintf("Предсказание сделано на основе %d %s, %s %s лица", 
+
+			warningMessage = fmt.Sprintf("Предсказание сделано на основе %d %s, %s %s лица",
 				imagesProcessed, processedWord, failedPhrase, failedWord)
 		}
 	}

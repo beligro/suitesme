@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import {$host} from "../../../app/indexAPI.js";
-import {MAIN, VERIFY} from "../../../app/routes/constans.js";
+import {MAIN, VERIFY, LOGIN} from "../../../app/routes/constans.js";
 
 
 
@@ -14,6 +14,7 @@ const Verify = () => {
     const userId = localStorage.getItem("userId");
     const [resetToken, setResetToken] = React.useState("");
     const userInfo = JSON.parse(localStorage.getItem("infoToResent"))
+    const [isSendingCode, setIsSendingCode] = useState(false);
 
 
     const startTimer = (sec = 40) => {
@@ -112,6 +113,7 @@ const Verify = () => {
         const token = code.join("");
         if (token.length !== 6) return alert("Введите 6-значный код");
 
+        setIsSendingCode(true);
         try {
             await $host.post("/auth/verify_email", {
                 user_id: userId,
@@ -121,6 +123,8 @@ const Verify = () => {
             setStep(3);
         } catch (e) {
             alert(e.response?.data?.message ?? "Ошибка верфикации");
+        } finally {
+            setIsSendingCode(false);
         }
     };
 
@@ -178,10 +182,14 @@ const Verify = () => {
                                 </p>
 
                                 <button
-                                    className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32"
+                                    className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32 disabled:opacity-50 relative overflow-hidden"
+                                    disabled={isSendingCode}
                                     onClick={sendCode}
                                 >
-                                    <p className="uppercase font-unbounded font-light text-white">отправить</p>
+                                    {isSendingCode && (
+                                        <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-button-shimmer" />
+                                    )}
+                                    <p className="uppercase font-unbounded font-light text-white relative z-10">отправить</p>
                                 </button>
                                 <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">ЕЩЕ НЕТ аккаунтА? <span className="cursor-pointer text-black" onClick={() => {nav("/register")}}> ЗАРЕГИСТРИРОВАТЬСЯ</span> </div>
                                 <div className="w-full hidden justify-center sm:flex">
@@ -202,7 +210,7 @@ const Verify = () => {
                                 <p className="text-[#607E96] text-[10px] uppercase">Аккаунт успешно верфицирован</p>
                             </div>
                             <div className="w-full flex flex-col gap-10">
-                                <button className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32" onClick={() => {nav(MAIN)}}>
+                                <button className="w-full bg-[#1B3C4D] py-5 rounded-2xl mb-32" onClick={() => {nav(LOGIN)}}>
                                     <p className="uppercase font-unbounded font-light text-white">Вернуться ко входу</p>
                                 </button>
                                 <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">ЕЩЕ НЕТ аккаунтА? <span className="cursor-pointer text-black" onClick={() => {nav("/register")}}> ЗАРЕГИСТРИРОВАТЬСЯ</span> </div>

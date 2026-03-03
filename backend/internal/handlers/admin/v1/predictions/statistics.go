@@ -8,7 +8,6 @@ import (
 )
 
 func (ctr PredictionsController) Statistics(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	stats, err := ctr.storage.UserStyle.GetStatistics()
 	if err != nil {
@@ -18,4 +17,3 @@ func (ctr PredictionsController) Statistics(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, stats)
 }
-

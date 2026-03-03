@@ -8,12 +8,12 @@ import (
 )
 
 type PublicSettingsResponse struct {
-	Price    string  `json:"price"`
-	OldPrice *string `json:"old_price,omitempty"`
+	Price     string  `json:"price"`
+	OldPrice  *string `json:"old_price,omitempty"`
+	EuroPrice *string `json:"euro_price,omitempty"`
 }
 
 func (ctr SettingsPublicController) GetPublic(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	settingsCache := caches.GetSettingsCache(ctr.storage, ctr.settingsCache)
 
@@ -23,6 +23,9 @@ func (ctr SettingsPublicController) GetPublic(ctx echo.Context) error {
 
 	if oldPrice, exists := settingsCache["old_price"]; exists && oldPrice != "" {
 		response.OldPrice = &oldPrice
+	}
+	if euroPrice, exists := settingsCache["euro_price"]; exists && euroPrice != "" {
+		response.EuroPrice = &euroPrice
 	}
 
 	return ctx.JSON(http.StatusOK, response)

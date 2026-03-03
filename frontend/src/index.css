@@ -71,3 +71,12 @@ html,body { height:100%; background:#F7F7F7; }
   overscroll-behavior: none;
   -webkit-overflow-scrolling: auto;
 }
+
+@keyframes button-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-button-shimmer {
+  animation: button-shimmer 1.5s ease-in-out infinite;
+}

@@ -2,9 +2,9 @@ package predictions
 
 import (
 	"net/http"
+	"strconv"
 	"suitesme/internal/storage/repository"
 	"suitesme/pkg/myerrors"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,7 +15,6 @@ type ListResponse struct {
 }
 
 func (ctr PredictionsController) List(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	// Parse query parameters
 	limitStr := ctx.QueryParam("_end")
@@ -92,4 +91,3 @@ func (ctr PredictionsController) List(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, predictions)
 }
-

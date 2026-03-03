@@ -23,7 +23,6 @@ type StyleRequest struct {
 }
 
 func (ctr StylesController) Post(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	// Parse the multipart form data
 	if err := ctx.Request().ParseMultipartForm(10 << 20); err != nil { // 10 MB max

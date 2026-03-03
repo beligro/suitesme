@@ -181,7 +181,7 @@ const Register = () => {
                         <p className="font-montserrat text-[10px] font-normal text-[#1B3C4D] uppercase">
                             Продолжая, вы соглашаетесь на{' '}
                             <a
-                                href="https://docs.yandex.ru/docs/view?url=ya-disk%3A%2F%2F%2Fdisk%2Fmneidet%2FSoglasie.pdf&name=Soglasie.pdf&uid=510495654&nosw=1"
+                                href="https://disk.yandex.ru/i/sm5-QrrMwvgcCg"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="underline cursor-pointer"
@@ -190,7 +190,7 @@ const Register = () => {
                             </a>
                             , а также принимаете{' '}
                             <a
-                                href="https://docs.yandex.ru/docs/view?url=ya-disk%3A%2F%2F%2Fdisk%2Fmneidet%2FPrivacyPolicy.pdf&name=PrivacyPolicy.pdf&uid=510495654&nosw=1"
+                                href="https://disk.yandex.ru/i/i5Z9cm8HvkNHYA"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="underline cursor-pointer"
@@ -201,10 +201,13 @@ const Register = () => {
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-[#1B3C4D] py-5 rounded-2xl disabled:opacity-50"
+                        className="w-full bg-[#1B3C4D] py-5 rounded-2xl disabled:opacity-50 relative overflow-hidden"
                         disabled={isSubmitting || !isActive}
                     >
-                        <p className="uppercase font-unbounded font-light text-white">зарегистрироваться</p>
+                        {isSubmitting && (
+                            <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-button-shimmer" />
+                        )}
+                        <p className="uppercase font-unbounded font-light text-white relative z-10">зарегистрироваться</p>
                     </button>
                     <div className="text-center uppercase font-montserrat text-[#8296A6] text-[12px]">уже есть аккаунт? <span className="cursor-pointer text-black" onClick={() => {nav("/login")}}>Войти</span> </div>
                     <div className="w-full hidden justify-center sm:flex">

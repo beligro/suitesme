@@ -14,7 +14,6 @@ type VerifyRequest struct {
 }
 
 func (ctr PredictionsController) Put(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	id := ctx.Param("id")
 	parsedId, err := uuid.Parse(id)
@@ -69,4 +68,3 @@ func (ctr PredictionsController) Put(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, style)
 }
-

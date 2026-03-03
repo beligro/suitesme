@@ -392,7 +392,7 @@ const Header = () => {
             {step === 1 && (
                 <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 lg:h-[80%] h-[70%] lg:block flex flex-col items-center justify-between text-[#1B3C4D]">
                     <div className="flex flex-col items-center lg:justify-around justify-start h-full gap-4">
-                        <p className="lg:text-[30px] text-[23px] font-unbounded font-extralight text-center uppercase" >Готово! <br className="lg:hidden" /> Ваш типаж <br className="lg:block hidden" /> SUITSME.AI</p>
+                    <p className="lg:text-[30px] text-[23px] font-unbounded font-extralight text-center uppercase" >Добро пожаловать в <br className="lg:block hidden" /> SUITSME.AI</p>
                         <div className="flex flex-col items-center justify-center gap-2 mb-8">
                             <div
                                 className="w-10 h-10 border rounded-full border-white flex items-center justify-center cursor-pointer">
@@ -478,7 +478,7 @@ const Header = () => {
             <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[750px] lg:block hidden w-auto z-20 transform ease-in-out lg:left-0 md:-left-[50%] -left-[40%] ${isBouncing ? "lg:top-[10%] -top-[20%]" : "lg:top-[5%] -top-[25%]"}`} src="/photos/main/Soplya.webp" alt="" />
             <img style={{ transitionDuration: '2000ms' }} className={`absolute h-[580px] lg:block hidden z-20 lg:right-0 md:-right-[20%] -right-[50%] transform ease-in-out ${isBouncing ? "top-[0%]" : "-top-[5%]"}`} src="/photos/main/Soplya3.webp" alt="" />
             <div className={`${isOpen ? "flex" : "hidden"} w-full z-50 absolute top-0 left-0 flex-col bg-[rgb(130,148,155)] h-full`}>
-                <div className="w-full flex mt-5">
+                <div className="w-full flex justify-center items-center mt-5">
                     <p className="font-headingnowtrial text-[#FFFFFF] cursor-pointer" onClick={() => nav(MAIN)}>MNEIDET</p>
                     <img src="/photos/main/cross-svgrepo-com.svg" alt="" className="absolute right-5 top-3 w-[36px] cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
                 </div>

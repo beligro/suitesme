@@ -12,6 +12,8 @@ const WhereMoney = () => {
     const [error, setError] = useState(false);
     const [isReady, setIsReady] = useState(false);
     const [price, setPrice] = useState("5990");
+    const [euroPrice, setEuroPrice] = useState("");
+    const [loadingProvider, setLoadingProvider] = useState(null);
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const status = queryParams.get("status");
@@ -32,9 +34,10 @@ const WhereMoney = () => {
         }
     };
 
-    const getLink = async () => {
+    const getLink = async (provider) => {
         try {
-            const response = await $authHost.get("payment/link");
+            const params = provider === "stripe" ? { params: { provider: "stripe" } } : {};
+            const response = await $authHost.get("payment/link", params);
             return response.data;
         } catch (error) {
             console.log(error);
@@ -83,12 +86,15 @@ const WhereMoney = () => {
         setIsLoading(false);
     };
 
-    const getPayment = async () => {
-        const response = await getLink();
+    const getPayment = async (provider) => {
+        const key = provider === "stripe" ? "stripe" : "prodamus";
+        setLoadingProvider(key);
+        const response = await getLink(provider);
         if (response && response.link) {
             window.location.href = response.link;
         } else {
             setError(true);
+            setLoadingProvider(null);
         }
     };
 
@@ -113,7 +119,7 @@ const WhereMoney = () => {
             console.warn("payNotify упал, продолжаем polling:", error?.response?.status || error);
         }
 
-        const maxAttempts = 20;
+        const maxAttempts = 60;
         let attempts = 0;
 
         const poll = async () => {
@@ -170,6 +176,7 @@ const WhereMoney = () => {
         const fetchSettings = async () => {
             const settings = await getPublicSettings();
             if (settings.price) setPrice(settings.price);
+            if (settings.euro_price) setEuroPrice(settings.euro_price);
         };
         fetchSettings();
     }, []);
@@ -258,6 +265,11 @@ const WhereMoney = () => {
                         <p className="text-[#1B3C4D] font-medium text-[30px] font-unbounded">
                             {price} ₽
                         </p>
+                        {euroPrice && (
+                            <p className="text-[#1B3C4D] font-medium text-[30px] font-unbounded -mt-2">
+                                ({euroPrice} €)
+                            </p>
+                        )}
                         <div className="flex items-start gap-3 w-full">
                             <img
                                 className={`w-5 cursor-pointer ${isActive ? "hidden" : "block"}`}
@@ -274,7 +286,7 @@ const WhereMoney = () => {
                             <p className="font-montserrat text-[10px] font-normal text-[#1B3C4D] uppercase leading-tight">
                                 Нажимая кнопку «ОПЛАТИТЬ», я даю{' '}
                                 <a
-                                    href="https://docs.yandex.ru/docs/view?url=ya-disk%3A%2F%2F%2Fdisk%2Fmneidet%2FSoglasie.pdf&name=Soglasie.pdf&uid=510495654&nosw=1"
+                                    href="https://disk.yandex.ru/i/sm5-QrrMwvgcCg"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="underline cursor-pointer"
@@ -283,7 +295,7 @@ const WhereMoney = () => {
                                 </a>
                                 {' '}и принимаю{' '}
                                 <a
-                                    href="https://docs.yandex.ru/docs/view?url=ya-disk%3A%2F%2F%2Fdisk%2Fmneidet%2FPrivacyPolicy.pdf&name=PrivacyPolicy.pdf&uid=510495654&nosw=1"
+                                    href="https://disk.yandex.ru/i/i5Z9cm8HvkNHYA"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="underline cursor-pointer"
@@ -292,18 +304,35 @@ const WhereMoney = () => {
                                 </a>
                             </p>
                         </div>
-                        <div className="w-full relative">
+                        <div className="w-full relative flex flex-col gap-3">
                             <button
-                                className="w-full bg-[#1B3C4D] py-5 rounded-2xl disabled:opacity-50"
-                                disabled={!isActive}
+                                className="w-full bg-[#1B3C4D] py-5 rounded-2xl disabled:opacity-50 relative overflow-hidden"
+                                disabled={!isActive || loadingProvider !== null}
                                 onClick={() => getPayment()}
                             >
-                                <p className="uppercase font-unbounded font-light text-[14px] text-white">
-                                    оплатить
+                                {loadingProvider === "prodamus" && (
+                                    <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-button-shimmer" />
+                                )}
+                                <p className="uppercase font-unbounded font-light text-[14px] text-white relative z-10">
+                                    Оплатить российской картой
                                 </p>
                             </button>
+                            {euroPrice && (
+                                <button
+                                    className="w-full py-5 rounded-2xl border border-[#1B3C4D] disabled:opacity-50 relative overflow-hidden"
+                                    disabled={!isActive || loadingProvider !== null}
+                                    onClick={() => getPayment("stripe")}
+                                >
+                                    {loadingProvider === "stripe" && (
+                                        <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-[#1B3C4D]/20 to-transparent animate-button-shimmer" />
+                                    )}
+                                    <p className="uppercase font-unbounded font-light text-[14px] text-[#1B3C4D] relative z-10">
+                                        Оплатить иностранной картой
+                                    </p>
+                                </button>
+                            )}
                             {error && (
-                                <p className={`absolute text-center w-full mt-5 text-red-500 uppercase text-[14px] font-medium`}>ошибка оплаты</p>
+                                <p className="text-center w-full text-red-500 uppercase text-[14px] font-medium">ошибка оплаты</p>
                             )}
                         </div>
                         <div className="text-center"></div>

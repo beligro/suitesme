@@ -26,7 +26,7 @@ import (
 // @Failure		500		{object}	models.ErrorResponse
 // @Router			/api/v1/payment/notify [post]
 func (ctr PaymentController) PaymentNotify(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+
 	userID := ctx.Get("userID")
 	if userID == nil {
 		return myerrors.GetHttpErrorByCode(myerrors.UserUnauthorized, ctx)

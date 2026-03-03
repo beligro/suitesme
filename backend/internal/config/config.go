@@ -32,6 +32,9 @@ type Config struct {
 	StylePdfBucket         string
 	AmocrmAccessToken      string
 	ProdamusToken          string
+	StripeSecretKey        string
+	StripeWebhookSecret    string
+	StripeWebhookSource    string
 }
 
 func New(logger *logging.Logger) *Config {
@@ -61,6 +64,9 @@ func New(logger *logging.Logger) *Config {
 		StylePdfBucket:         getEnv("STYLE_PDF_BUCKET", "", logger),
 		AmocrmAccessToken:      getEnv("AMOCRM_ACCESS_TOKEN", "", logger),
 		ProdamusToken:          getEnv("PRODAMUS_TOKEN", "", logger),
+		StripeSecretKey:        getEnv("STRIPE_SECRET_KEY", "", logger),
+		StripeWebhookSecret:    getEnv("STRIPE_WEBHOOK_SECRET", "", logger),
+		StripeWebhookSource:    getEnv("STRIPE_WEBHOOK_SOURCE", "ai_mne_idet", logger),
 	}
 }
 

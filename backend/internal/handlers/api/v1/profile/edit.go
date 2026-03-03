@@ -23,7 +23,7 @@ import (
 // @Failure		500				{object}	models.ErrorResponse
 // @Router		/api/v1/profile/edit [post]
 func (ctr ProfileController) Edit(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+
 	userID := ctx.Get("userID")
 	if userID == nil {
 		return myerrors.GetHttpErrorByCode(myerrors.UserUnauthorized, ctx)

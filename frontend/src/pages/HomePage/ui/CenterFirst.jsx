@@ -87,7 +87,7 @@ const CenterFirst = () => {
                             <span className="uppercase text-[10px] font-normal -ml-1 font-montserrat">стоимость</span>
                             <br />
                             <div className="lg:font-medium font-normal">
-                                {price} Р
+                                {price} ₽
                             </div>
                         </p>
                     </div>

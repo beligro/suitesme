@@ -29,7 +29,7 @@ type RefreshRequest struct {
 // @Failure	500		{object}		models.ErrorResponse
 // @Router		/api/v1/auth/refresh [post]
 func (ctr AuthController) Refresh(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+
 	request, err := utils_request.ParseRequest[RefreshRequest](&ctx)
 	if err != nil {
 		return err

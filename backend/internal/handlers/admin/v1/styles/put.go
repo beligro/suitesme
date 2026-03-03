@@ -13,7 +13,6 @@ import (
 )
 
 func (ctr StylesController) Put(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	id := ctx.Param("id")
 	if id == "" {

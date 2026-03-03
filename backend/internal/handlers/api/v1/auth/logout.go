@@ -25,7 +25,7 @@ type LogoutRequest struct {
 // @Failure	500		{object}		models.ErrorResponse
 // @Router		/api/v1/auth/logout [post]
 func (ctr AuthController) Logout(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+
 	request, err := utils_request.ParseRequest[LogoutRequest](&ctx)
 	if err != nil {
 		return err

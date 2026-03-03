@@ -8,7 +8,6 @@ import (
 )
 
 func (ctr ApiContentController) List(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	return ctx.JSON(http.StatusOK, caches.GetWebContentCache(ctr.storage, ctr.contentCache))
 }
