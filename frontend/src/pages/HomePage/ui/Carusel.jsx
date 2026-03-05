@@ -9,23 +9,20 @@ import {useNavigate} from "react-router-dom";
 
 const clients = [
     "photos/main/womans/Woman1.jpg",
-    "photos/main/womans/Woman2.jpg",
-    "photos/main/womans/Woman3.JPG",
+    "photos/main/womans/Woman2.JPG",
+    "photos/main/womans/Woman3.jpg",
     "photos/main/womans/Woman4.jpg",
-    "photos/main/womans/Woman55.jpg",
-    "photos/main/womans/Woman6.JPG",
-    "photos/main/womans/Woman7.jpg",
+    "photos/main/womans/Woman5.JPG",
+    "photos/main/womans/Woman6.jpg",
 ];
 
-// Конфиг кейсов: расширение (woman1 — png, остальные — jpg), кол-во фото "до" и "после"
 const clientCaseConfig = [
-    { ext: "png", beforeCount: 3, afterCount: 3 },   // woman1
-    { ext: "jpg", beforeCount: 2, afterCount: 3 },   // woman2
+    { ext: "jpg", beforeCount: 2, afterCount: 3 },   // woman1
+    { ext: "jpg", beforeCount: 3, afterCount: 3 },   // woman2
     { ext: "jpg", beforeCount: 3, afterCount: 3 },   // woman3
     { ext: "jpg", beforeCount: 3, afterCount: 3 },   // woman4
-    { ext: "jpg", beforeCount: 3, afterCount: 3 },   // woman5
-    { ext: "jpg", beforeCount: 3, afterCount: 2 },   // woman6
-    { ext: "jpg", beforeCount: 3, afterCount: 3 },   // woman7
+    { ext: "jpg", beforeCount: 3, afterCount: 2 },   // woman5
+    { ext: "jpg", beforeCount: 3, afterCount: 3 },   // woman6
 ];
 
 const Carusel = () => {

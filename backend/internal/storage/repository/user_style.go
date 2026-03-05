@@ -41,6 +41,7 @@ type PredictionListParams struct {
 	Limit      int
 	Offset     int
 	IsVerified *bool
+	UserIDs    []uuid.UUID // filter by user IDs (e.g. from email lookup)
 	SortBy     string
 	SortOrder  string
 }
@@ -54,6 +55,9 @@ func (repo *UserStyleRepository) List(params PredictionListParams) ([]models.DbU
 	// Apply filters
 	if params.IsVerified != nil {
 		query = query.Where("is_verified = ?", *params.IsVerified)
+	}
+	if len(params.UserIDs) > 0 {
+		query = query.Where("user_id IN ?", params.UserIDs)
 	}
 
 	// Get total count

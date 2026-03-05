@@ -145,7 +145,7 @@ const Header = () => {
                 setPdfInfoUrl(data.pdf_info_url || "");
                 
                 // Display warning if some photos didn't have faces
-                if (data.warning) {
+                if (data.warning && data.warning !== "") {
                     setWarningMessage(data.warning);
                 } else {
                     setWarningMessage("");
@@ -376,9 +376,16 @@ const Header = () => {
                             </div>
                         )}
 
-                        <p className="text-center font-montserrat font-light text-[12px] uppercase text-[#1B3C4D]">
-                            наш <span className="">AI</span> проанализирует черты лица <br className="lg:block hidden" />
-                            и определит типаж
+                        <p className="uppercase text-[#1B3C4D] text-[14px] font-unbounded font-light text-center">
+                            Внимательно прочитайте{' '}
+                            <a
+                                href="/instruction.pdf"
+                                download="instruction.pdf"
+                                className="underline"
+                            >
+                                инструкцию
+                            </a>
+                            {' '}перед загрузкой фотографий
                         </p>
                         {selectedFiles.length === 0 && <img src="/photos/main/MiddleWoman.png" className="lg:block hidden w-[65%]" alt="" />}
                     </div>

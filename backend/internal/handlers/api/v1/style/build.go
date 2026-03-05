@@ -46,6 +46,8 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.UserUnauthorized, ctx)
 	}
 
+	ctr.logger.Info(fmt.Sprintf("UserID: %s tries to build style", userID))
+
 	parsedUserId := userID.(uuid.UUID)
 
 	user, err := ctr.storage.User.Get(parsedUserId)
@@ -160,8 +162,8 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	}
 
 	// Debug logging
-	ctr.logger.Info(fmt.Sprintf("ML Response - StyleId: %s, Confidence: %.2f, ImagesProcessed: %d, ImagesTotal: %d",
-		styleId, confidence, imagesProcessed, imagesTotal))
+	ctr.logger.Info(fmt.Sprintf("ML Response - UserID: %s, StyleId: %s, Confidence: %.2f, ImagesProcessed: %d, ImagesTotal: %d",
+		userID, styleId, confidence, imagesProcessed, imagesTotal))
 
 	// Store all photo URLs
 	photoURLsJSON, _ := json.Marshal(photoURLs)
@@ -219,10 +221,12 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		}
 	}
 
+	ctr.logger.Info(fmt.Sprintf("StyleBuildResult - UserID: %s, StyleId: %s, Warning: %s", userID, styleId, warningMessage))
+
 	response := StyleBuildResult{
 		StyleId:    styleId,
 		PdfInfoUrl: pdfInfoUrl,
-		Warning:    warningMessage,
+		Warning:    "",
 	}
 
 	return ctx.JSON(http.StatusOK, response)

@@ -13,7 +13,7 @@ import (
 )
 
 type RefreshRequest struct {
-	RefreshToken *string `json:"refresh_token" validate:"required"`
+	RefreshToken string `json:"refresh_token" validate:"required"`
 }
 
 // @Summary			Refresh tokens
@@ -35,13 +35,13 @@ func (ctr AuthController) Refresh(ctx echo.Context) error {
 		return err
 	}
 
-	claims, err := security.ParseToken(*request.RefreshToken, ctr.config.RefreshTokenSecret)
+	claims, err := security.ParseToken(request.RefreshToken, ctr.config.RefreshTokenSecret)
 	if err != nil {
 		ctr.logger.Error(err)
 		return myerrors.GetHttpErrorByCode(myerrors.IncorrectToken, ctx)
 	}
 
-	_, err = ctr.storage.Tokens.GetByPK((*claims).UserId, *request.RefreshToken)
+	_, err = ctr.storage.Tokens.GetByPK((*claims).UserId, request.RefreshToken)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			ctr.logger.Error(err)
