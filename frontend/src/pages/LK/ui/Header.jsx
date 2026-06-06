@@ -15,6 +15,7 @@ const Header = () => {
     const nav = useNavigate();
     const [step, setStep] = React.useState(4); // 0 1 2 - функциональные, 3 - загрузка
     const [style, setStyle] = React.useState("");
+    const [isStyleVerified, setIsStyleVerified] = React.useState(false);
     const user = useSelector(selectUser);
     const [canUpload, setCanUpload] = React.useState(false);
     const [selectedFiles, setSelectedFiles] = React.useState([]);
@@ -80,6 +81,7 @@ const Header = () => {
             const response = await getInfo();
             if (response.status === 200) {
                 setStyle(response.data.style_id);
+                setIsStyleVerified(!!response.data.is_verified);
                 setCanUpload(response.data.can_upload_photos);
                 setPdfInfoUrl(response.data.pdf_info_url || "");
                 setStep(2);
@@ -140,6 +142,7 @@ const Header = () => {
             if (data?.style_id) {
                 console.log('style_id получен:', data.style_id);
                 setStyle(data.style_id)
+                setIsStyleVerified(!!data.is_verified);
                 setSelectedFiles([]);
                 setErrorMessage(""); // Clear errors on success
                 setPdfInfoUrl(data.pdf_info_url || "");
@@ -174,6 +177,7 @@ const Header = () => {
             const {data} = await getInfo()
             setCanUpload(data.can_upload_photos)
             setStyle(data.style_id)
+            setIsStyleVerified(!!data?.is_verified);
             setPdfInfoUrl(data.pdf_info_url || "")
             setStep(2);
         } catch (error) {
@@ -239,6 +243,7 @@ const Header = () => {
 
             if (styleRes.status === 200) {
                 setStyle(styleRes.data.style_id);
+                setIsStyleVerified(!!styleRes.data.is_verified);
                 setCanUpload(styleRes.data.can_upload_photos);
                 setPdfInfoUrl(styleRes.data.pdf_info_url || "");
                 setStep(2);
@@ -439,6 +444,9 @@ const Header = () => {
                         )}
                         
                         <p className="text-center font-montserrat font-light lg:text-[12px] text-[10px] uppercase">ВАШ ТИПАЖ — {style}</p>
+                        {isStyleVerified && (
+                            <p className="text-center font-montserrat font-light lg:text-[12px] text-[10px] text-[#209e5f]">Типаж верифицирован</p>
+                        )}
                         <img 
                             src="/photos/LK/Step2.png" 
                             className={`lg:w-[17%] w-[70%] max-w-[150px] cursor-pointer hover:scale-95 transition ease-in-out duration-200 ${!pdfInfoUrl ? 'opacity-50 cursor-not-allowed' : ''}`} 

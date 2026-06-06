@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { $host } from "../../../app/indexAPI.js";
-import { PAYMENT, VERIFY} from "../../../app/routes/constans.js";
+import { PAYMENT, VERIFY } from "../../../app/routes/constans.js";
 import {useSelector} from "react-redux";
 import {selectIsAuthenticated} from "../../../features/Auth/model/selector.js";
 
@@ -63,8 +63,8 @@ const Register = () => {
         try {
             const data = await fetchRegister(values);
 
-            localStorage.setItem('userId' , String(data.user_id))
-            localStorage.setItem('infoToResent', JSON.stringify(values))
+            localStorage.setItem('userId', String(data.user_id));
+            localStorage.setItem('infoToResent', JSON.stringify(values));
             nav(VERIFY);
         } catch (error) {
             console.error("Ошибка регистрации:", error);

@@ -314,7 +314,7 @@ const WhereMoney = () => {
                                     <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-button-shimmer" />
                                 )}
                                 <p className="uppercase font-unbounded font-light text-[14px] text-white relative z-10">
-                                    Оплатить российской картой
+                                    {euroPrice ? "Оплатить российской картой" : "Оплатить"}
                                 </p>
                             </button>
                             {euroPrice && (

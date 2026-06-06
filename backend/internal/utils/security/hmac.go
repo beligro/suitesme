@@ -1,6 +1,7 @@
 package security
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/json"
@@ -23,10 +24,16 @@ func (h *Hmac) create(data interface{}, key string, algo string) (string, error)
 
 	h.sort(dataMap)
 
-	dataJSON, err := json.Marshal(dataMap)
-	if err != nil {
+	// Prodamus (PHP json_encode) не экранирует &, <, > — иначе не сойдётся при customer_extra с "&#128525;" и т.п.
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
+	if err := enc.Encode(dataMap); err != nil {
 		return "", err
 	}
+	dataJSON := bytes.TrimSpace(buf.Bytes())
+	// Prodamus: "В json строке экранируйте /" — иначе подпись не сойдётся при значениях вроде "Visa/Mastercard"
+	dataJSON = bytes.ReplaceAll(dataJSON, []byte("/"), []byte("\\/"))
 
 	hmac := hmac.New(sha256.New, []byte(key))
 	hmac.Write(dataJSON)
@@ -39,6 +46,12 @@ func (h *Hmac) Verify(data interface{}, key, sign, algo string) (bool, error) {
 		return false, err
 	}
 	return strings.EqualFold(expectedSign, sign), nil
+}
+
+// Create returns HMAC-SHA256 signature for data (Prodamus-style: sorted keys, / escaped in JSON).
+// Exported for tests and for generating Sign when needed.
+func (h *Hmac) Create(data interface{}, key string, algo string) (string, error) {
+	return h.create(data, key, algo)
 }
 
 func (h *Hmac) sort(data map[string]interface{}) {

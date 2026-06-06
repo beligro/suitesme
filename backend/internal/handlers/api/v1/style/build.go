@@ -22,6 +22,7 @@ type StyleBuildResult struct {
 	StyleId    string `json:"style_id" validate:"required"`
 	PdfInfoUrl string `json:"pdf_info_url,omitempty"`
 	Warning    string `json:"warning,omitempty"`
+	IsVerified bool   `json:"is_verified"`
 }
 
 // Build godoc
@@ -64,7 +65,7 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
 	}
 
-	styleId, err := ctr.storage.UserStyle.Get(parsedUserId)
+	style, err := ctr.storage.UserStyle.GetByUserId(parsedUserId)
 
 	if err != nil && err != gorm.ErrRecordNotFound {
 		ctr.logger.Error(err)
@@ -72,15 +73,16 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	}
 
 	// Regular users can only upload once
-	if styleId != "" && !user.IsAdmin {
+	if style != nil && style.StyleId != "" && !user.IsAdmin {
 		var pdfInfoUrl string
-		if dbStyle, err := ctr.storage.Styles.GetByName(styleId); err == nil && dbStyle != nil {
+		if dbStyle, err := ctr.storage.Styles.GetByName(style.StyleId); err == nil && dbStyle != nil {
 			pdfInfoUrl = dbStyle.PdfInfoUrl
 		}
 
 		response := StyleBuildResult{
-			StyleId:    styleId,
+			StyleId:    style.StyleId,
 			PdfInfoUrl: pdfInfoUrl,
+			IsVerified: style.IsVerified,
 		}
 
 		return ctx.JSON(http.StatusOK, response)
@@ -227,6 +229,7 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		StyleId:    styleId,
 		PdfInfoUrl: pdfInfoUrl,
 		Warning:    "",
+		IsVerified: false,
 	}
 
 	return ctx.JSON(http.StatusOK, response)

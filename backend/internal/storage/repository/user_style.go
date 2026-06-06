@@ -24,6 +24,15 @@ func (repo *UserStyleRepository) Get(userId uuid.UUID) (string, error) {
 	return userStyle.StyleId, result.Error
 }
 
+func (repo *UserStyleRepository) GetByUserId(userId uuid.UUID) (*models.DbUserStyle, error) {
+	var userStyle models.DbUserStyle
+	err := repo.db.Where("user_id = ?", userId).Order("created_at desc").First(&userStyle).Error
+	if err != nil {
+		return nil, err
+	}
+	return &userStyle, nil
+}
+
 func (repo *UserStyleRepository) GetById(id uuid.UUID) (*models.DbUserStyle, error) {
 	var userStyle models.DbUserStyle
 	err := repo.db.Where("id = ?", id).First(&userStyle).Error

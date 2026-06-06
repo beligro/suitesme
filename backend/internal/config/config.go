@@ -20,21 +20,24 @@ type Config struct {
 	RefreshTokenSecret     []byte
 	AdminTokenSecret       []byte
 	EmailSendFrom          string
-	EmailPassword          string
-	SmtpHost               string
-	SmtpPort               string
-	MinioRootUser          string
-	MinioRootPassword      string
-	MinioEndpoint          string
-	MinioFilePathEndpoint  string
-	MinioRegion            string
-	StylePhotoBucket       string
-	StylePdfBucket         string
-	AmocrmAccessToken      string
-	ProdamusToken          string
-	StripeSecretKey        string
-	StripeWebhookSecret    string
-	StripeWebhookSource    string
+	// RuSender API (https://rusender.ru/developer/api/email/)
+	RuSenderApiKey string
+	// Устаревшие SMTP-поля (не используются при RuSender)
+	EmailPassword         string
+	SmtpHost              string
+	SmtpPort              string
+	MinioRootUser         string
+	MinioRootPassword     string
+	MinioEndpoint         string
+	MinioFilePathEndpoint string
+	MinioRegion           string
+	StylePhotoBucket      string
+	StylePdfBucket        string
+	AmocrmAccessToken     string
+	ProdamusToken         string
+	StripeSecretKey       string
+	StripeWebhookSecret   string
+	StripeWebhookSource   string
 }
 
 func New(logger *logging.Logger) *Config {
@@ -52,6 +55,7 @@ func New(logger *logging.Logger) *Config {
 		RefreshTokenSecret:     getEnvBytes("REFRESH_TOKEN_SECRET", "", logger),
 		AdminTokenSecret:       getEnvBytes("ADMIN_TOKEN_SECRET", "", logger),
 		EmailSendFrom:          getEnv("EMAIL_SEND_FROM", "", logger),
+		RuSenderApiKey:         getEnv("RUSENDER_API_KEY", "", logger),
 		EmailPassword:          getEnv("EMAIL_PASSWORD", "", logger),
 		SmtpHost:               getEnv("SMTP_HOST", "", logger),
 		SmtpPort:               getEnv("SMTP_PORT", "", logger),

@@ -1,6 +1,7 @@
 package security
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/json"
@@ -25,8 +26,9 @@ func TestHmac_Verify_Success(t *testing.T) {
 	dataMap, _ := toMap(data)
 	h.sort(dataMap)
 
-	// Then marshal and create HMAC
+	// Then marshal, escape / (Prodamus-style), and create HMAC
 	dataJSON, _ := json.Marshal(dataMap)
+	dataJSON = bytes.ReplaceAll(dataJSON, []byte("/"), []byte("\\/"))
 	hmacObj := hmac.New(sha256.New, []byte(key))
 	hmacObj.Write(dataJSON)
 	expectedSign := fmt.Sprintf("%x", hmacObj.Sum(nil))
@@ -35,6 +37,24 @@ func TestHmac_Verify_Success(t *testing.T) {
 	result, err := h.Verify(data, key, expectedSign, "sha256")
 
 	// Assert
+	assert.NoError(t, err)
+	assert.True(t, result)
+}
+
+func TestHmac_Verify_ProdamusStyleSlashInValue(t *testing.T) {
+	// Prodamus требует экранировать / в JSON при проверке подписи (payment_type и т.д.)
+	h := &Hmac{}
+	key := "secret"
+	data := map[string]interface{}{
+		"payment_type": "Visa/Mastercard, EUR",
+		"order_id":     "123",
+	}
+	result, err := h.Verify(data, key, "", "sha256")
+	assert.NoError(t, err)
+	expectedSign, _ := h.create(data, key, "sha256")
+	// Проверяем, что подпись воспроизводима и не пустая
+	assert.NotEmpty(t, expectedSign)
+	result, err = h.Verify(data, key, expectedSign, "sha256")
 	assert.NoError(t, err)
 	assert.True(t, result)
 }

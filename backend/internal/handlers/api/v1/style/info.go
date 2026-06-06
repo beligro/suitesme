@@ -14,6 +14,7 @@ type StyleInfo struct {
 	StyleId         string `json:"style_id"`
 	PdfInfoUrl      string `json:"pdf_info_url,omitempty"`
 	CanUploadPhotos bool   `json:"can_upload_photos"`
+	IsVerified      bool   `json:"is_verified"`
 }
 
 // Info godoc
@@ -39,7 +40,7 @@ func (ctr StyleController) Info(ctx echo.Context) error {
 
 	parsedUserId := userID.(uuid.UUID)
 
-	styleId, err := ctr.storage.UserStyle.Get(parsedUserId)
+	userStyle, err := ctr.storage.UserStyle.GetByUserId(parsedUserId)
 
 	if err != nil && err != gorm.ErrRecordNotFound {
 		ctr.logger.Error(err)
@@ -56,16 +57,17 @@ func (ctr StyleController) Info(ctx echo.Context) error {
 	// Admin users can always upload photos
 	canUploadPhotos := user.IsAdmin
 
-	if styleId != "" {
+	if userStyle != nil && userStyle.StyleId != "" {
 		var pdfInfoUrl string
-		if dbStyle, err := ctr.storage.Styles.GetByName(styleId); err == nil && dbStyle != nil {
+		if dbStyle, err := ctr.storage.Styles.GetByName(userStyle.StyleId); err == nil && dbStyle != nil {
 			pdfInfoUrl = dbStyle.PdfInfoUrl
 		}
 
 		response := StyleInfo{
-			StyleId:         styleId,
+			StyleId:         userStyle.StyleId,
 			PdfInfoUrl:      pdfInfoUrl,
 			CanUploadPhotos: canUploadPhotos,
+			IsVerified:      userStyle.IsVerified,
 		}
 
 		return ctx.JSON(http.StatusOK, response)

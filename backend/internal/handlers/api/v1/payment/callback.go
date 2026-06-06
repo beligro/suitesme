@@ -45,6 +45,32 @@ func parseProductField(key string) (index int, productKey string) {
 	return index, productKey
 }
 
+// buildProdamusDataFromForm builds the same map that PaymentCallback uses for Sign verification.
+// Exported for tests (real Prodamus callback bodies).
+func buildProdamusDataFromForm(postForm url.Values) map[string]interface{} {
+	data := make(map[string]interface{})
+	products := make([]interface{}, 0)
+	for key, values := range postForm {
+		decodedKey, _ := url.QueryUnescape(key)
+		if len(values) > 0 {
+			if isProductField(decodedKey) {
+				productIndex, productKey := parseProductField(decodedKey)
+				for len(products) <= productIndex {
+					products = append(products, map[string]interface{}{})
+				}
+				productMap := products[productIndex].(map[string]interface{})
+				productMap[productKey] = values[0]
+			} else {
+				data[decodedKey] = values[0]
+			}
+		}
+	}
+	if len(products) > 0 {
+		data["products"] = products
+	}
+	return data
+}
+
 // @Summary		Get payment callback
 // @Description	Get payment-callback
 // @ID			get-payment-callback
@@ -63,30 +89,7 @@ func (ctr PaymentController) PaymentCallback(ctx echo.Context) error {
 		return err
 	}
 
-	data := make(map[string]interface{})
-	products := make([]interface{}, 0)
-
-	for key, values := range ctx.Request().PostForm {
-		decodedKey, _ := url.QueryUnescape(key)
-		if len(values) > 0 {
-			if isProductField(decodedKey) {
-				// Handle product fields
-				productIndex, productKey := parseProductField(decodedKey)
-				for len(products) <= productIndex {
-					products = append(products, map[string]interface{}{})
-				}
-				productMap := products[productIndex].(map[string]interface{})
-				productMap[productKey] = values[0]
-			} else {
-				// Add regular fields to data
-				data[decodedKey] = values[0]
-			}
-		}
-	}
-
-	if len(products) > 0 {
-		data["products"] = products
-	}
+	data := buildProdamusDataFromForm(ctx.Request().PostForm)
 
 	sign := ctx.Request().Header.Get("Sign")
 	h := security.Hmac{}

@@ -25,6 +25,7 @@ type StylesRepository interface {
 
 type UserStyleRepository interface {
 	Get(uuid.UUID) (string, error)
+	GetByUserId(uuid.UUID) (*models.DbUserStyle, error)
 	GetById(uuid.UUID) (*models.DbUserStyle, error)
 	Create(*models.DbUserStyle)
 	List(params repository.PredictionListParams) ([]models.DbUserStyle, int64, error)

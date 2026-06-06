@@ -158,6 +158,12 @@ definitions:
     properties:
       style_id:
         type: string
+      pdf_info_url:
+        type: string
+      warning:
+        type: string
+      is_verified:
+        type: boolean
     required:
     - style_id
     type: object
@@ -167,6 +173,10 @@ definitions:
         type: boolean
       style_id:
         type: string
+      pdf_info_url:
+        type: string
+      is_verified:
+        type: boolean
     type: object
 host: localhost:8080
 info:

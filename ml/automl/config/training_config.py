@@ -17,9 +17,9 @@ class TrainingConfig:
     
     # Training settings
     batch_size: int = 32
-    learning_rate: float = 0.001
-    num_epochs: int = 50
-    early_stopping_patience: int = 5
+    learning_rate: float = 0.0001
+    num_epochs: int = 15
+    early_stopping_patience: int = 3
     
     # Comparison settings
     min_accuracy_improvement: float = 0.02  # 2% minimum improvement

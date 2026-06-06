@@ -16,6 +16,75 @@ import {
   useUpdate
 } from "react-admin";
 import { useFormContext } from "react-hook-form";
+import { Box, Typography, IconButton } from "@mui/material";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+
+// Copyable email block at the top of the card
+const CopyableUserEmail = () => {
+  const record = useRecordContext();
+  const [theme] = useTheme();
+  const isDark = theme === 'dark';
+  const notify = useNotify();
+  const [copied, setCopied] = React.useState(false);
+
+  const email = record?.userEmail || '';
+  const handleCopy = React.useCallback(() => {
+    if (!email) return;
+    navigator.clipboard.writeText(email).then(() => {
+      setCopied(true);
+      notify('Email скопирован', { type: 'success' });
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      notify('Не удалось скопировать', { type: 'error' });
+    });
+  }, [email, notify]);
+
+  if (!email) return null;
+
+  return (
+    <Box
+      sx={{
+        p: 2,
+        mb: 2,
+        borderRadius: 1,
+        border: '1px solid',
+        borderColor: isDark ? 'grey.700' : 'grey.300',
+        bgcolor: isDark ? 'grey.900' : 'grey.50',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 1
+      }}
+    >
+      <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600 }}>
+        Email пользователя
+      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1, minWidth: 0 }}>
+        <Typography
+          component="span"
+          variant="body1"
+          sx={{
+            fontFamily: 'monospace',
+            fontSize: '1rem',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+        >
+          {email}
+        </Typography>
+        <IconButton
+          size="small"
+          onClick={handleCopy}
+          title="Копировать"
+          sx={{ flexShrink: 0 }}
+        >
+          <ContentCopyIcon fontSize="small" />
+        </IconButton>
+      </Box>
+    </Box>
+  );
+};
 
 // ML Service classes - from the face classifier API
 const ML_CLASSES = [
@@ -144,6 +213,7 @@ export const PredictionsEdit = props => {
   return (
     <Edit {...props}>
       <SimpleForm>
+        <FunctionField label={false} render={() => <CopyableUserEmail />} />
         <FunctionField render={record => <PhotoGallery record={record} />} />
         
         <div style={{ 
