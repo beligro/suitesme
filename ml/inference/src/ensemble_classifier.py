@@ -64,7 +64,9 @@ class EnsembleClassifier:
         self.hierarchical_model.eval()
         
         print(f"✓ Loaded hierarchical classifier with {self.num_classes} classes")
-        print(f"✓ Best validation accuracy: {checkpoint.get('val_accuracy', 'unknown'):.2f}%")
+        val_acc = checkpoint.get('val_accuracy', None)
+        val_acc_str = f"{val_acc:.2f}%" if isinstance(val_acc, (int, float)) else "unknown"
+        print(f"✓ Best validation accuracy: {val_acc_str}")
         
         # Initialize and load the centroid distance calculator
         print(f"Loading centroids from {centroids_path}")

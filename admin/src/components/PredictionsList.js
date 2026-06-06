@@ -8,13 +8,16 @@ import {
   EditButton,
   Filter,
   BooleanInput,
-  FunctionField
+  TextInput,
+  FunctionField,
+  Button
 } from "react-admin";
 
 // Filter component for predictions
 const PredictionFilter = (props) => (
-  <Filter {...props}>
-    <BooleanInput label="Verified Only" source="isVerified" alwaysOn />
+  <Filter {...props} filterButton={<Button variant="contained">Найти</Button>}>
+    <TextInput label="Email" source="email" alwaysOn resettable placeholder="user@example.com" />
+    <BooleanInput label="Только верифицированные" source="isVerified" alwaysOn />
   </Filter>
 );
 

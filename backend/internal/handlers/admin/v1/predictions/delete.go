@@ -10,7 +10,6 @@ import (
 )
 
 func (ctr PredictionsController) Delete(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	id := ctx.Param("id")
 	parsedId, err := uuid.Parse(id)
@@ -39,4 +38,3 @@ func (ctr PredictionsController) Delete(ctx echo.Context) error {
 
 	return ctx.NoContent(http.StatusNoContent)
 }
-

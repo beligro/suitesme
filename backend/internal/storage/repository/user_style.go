@@ -24,6 +24,15 @@ func (repo *UserStyleRepository) Get(userId uuid.UUID) (string, error) {
 	return userStyle.StyleId, result.Error
 }
 
+func (repo *UserStyleRepository) GetByUserId(userId uuid.UUID) (*models.DbUserStyle, error) {
+	var userStyle models.DbUserStyle
+	err := repo.db.Where("user_id = ?", userId).Order("created_at desc").First(&userStyle).Error
+	if err != nil {
+		return nil, err
+	}
+	return &userStyle, nil
+}
+
 func (repo *UserStyleRepository) GetById(id uuid.UUID) (*models.DbUserStyle, error) {
 	var userStyle models.DbUserStyle
 	err := repo.db.Where("id = ?", id).First(&userStyle).Error
@@ -41,6 +50,7 @@ type PredictionListParams struct {
 	Limit      int
 	Offset     int
 	IsVerified *bool
+	UserIDs    []uuid.UUID // filter by user IDs (e.g. from email lookup)
 	SortBy     string
 	SortOrder  string
 }
@@ -54,6 +64,9 @@ func (repo *UserStyleRepository) List(params PredictionListParams) ([]models.DbU
 	// Apply filters
 	if params.IsVerified != nil {
 		query = query.Where("is_verified = ?", *params.IsVerified)
+	}
+	if len(params.UserIDs) > 0 {
+		query = query.Where("user_id IN ?", params.UserIDs)
 	}
 
 	// Get total count

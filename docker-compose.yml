@@ -7,6 +7,11 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "80:80"
       - "443:443"
@@ -35,6 +40,11 @@ services:
     env_file:
       - .env
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     build:
@@ -45,6 +55,11 @@ services:
       - "3000:3000"
     networks:
       - suitesme
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   admin:
     build:
@@ -53,6 +68,11 @@ services:
       - "3001:3000"
     networks:
       - suitesme
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   ml-inference:
     build:
@@ -72,6 +92,11 @@ services:
     volumes:
       - model_cache:/tmp/model_cache
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   ml-automl:
     image: prefecthq/prefect:2-python3.9
@@ -100,6 +125,11 @@ services:
       tail -f /dev/null
       "
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   prefect-server:
     image: prefecthq/prefect:2-python3.9
@@ -124,10 +154,15 @@ services:
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4200/api/health"]
-      interval: 5s
-      timeout: 3s
-      retries: 12
-      start_period: 40s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   prefect-postgres:
     image: postgres:15-alpine
@@ -140,6 +175,11 @@ services:
     networks:
       - suitesme
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   postgres:
     image: postgres:15-alpine
@@ -154,6 +194,11 @@ services:
     networks:
       - suitesme
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   minio:
     image: minio/minio
@@ -172,9 +217,14 @@ services:
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   minio-init:
     image: minio/mc
@@ -192,6 +242,11 @@ services:
     entrypoint: ["/bin/sh", "/minio-init.sh"]
     networks:
       - suitesme
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
 
 volumes:
   db_data:

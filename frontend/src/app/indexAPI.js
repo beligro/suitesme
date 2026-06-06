@@ -28,6 +28,12 @@ $authHost.interceptors.response.use(
 
             const refreshToken = localStorage.getItem("refresh_token");
 
+            if (!refreshToken) {
+                localStorage.removeItem("access_token");
+                localStorage.removeItem("refresh_token");
+                return Promise.reject(error);
+            }
+
             try {
                 const response = await axios.post(
                     `${import.meta.env.VITE_API_URL}/auth/refresh`,

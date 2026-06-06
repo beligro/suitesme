@@ -11,7 +11,7 @@ import (
 )
 
 type LogoutRequest struct {
-	RefreshToken *string `json:"refresh_token" validate:"required"`
+	RefreshToken string `json:"refresh_token" validate:"required"`
 }
 
 // @Summary			Logout user
@@ -25,13 +25,13 @@ type LogoutRequest struct {
 // @Failure	500		{object}		models.ErrorResponse
 // @Router		/api/v1/auth/logout [post]
 func (ctr AuthController) Logout(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+
 	request, err := utils_request.ParseRequest[LogoutRequest](&ctx)
 	if err != nil {
 		return err
 	}
 
-	claims, err := security.ParseToken(*request.RefreshToken, ctr.config.RefreshTokenSecret)
+	claims, err := security.ParseToken(request.RefreshToken, ctr.config.RefreshTokenSecret)
 	if err != nil {
 		ctr.logger.Error(err)
 		return myerrors.GetHttpErrorByCode(myerrors.IncorrectToken, ctx)

@@ -50,8 +50,21 @@ const ForgotPassword = () => {
     }, [step]);
 
     useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search);
-        const token = searchParams.get("token");
+        const search = window.location.search;
+        const searchParams = new URLSearchParams(search);
+        let token = searchParams.get("token");
+        // Ссылка в письме использует token%3D вместо token=, чтобы = не обрезали;
+        // в этом случае URLSearchParams даёт ключ "token%3Dxxx" без значения
+        if (!token && search.includes("token%3D")) {
+            const rest = search.replace(/^\?/, "").split("&")[0];
+            if (rest.startsWith("token%3D")) {
+                try {
+                    token = decodeURIComponent(rest.slice("token%3D".length));
+                } catch (_) {
+                    token = rest.slice("token%3D".length);
+                }
+            }
+        }
         if (token) {
             setResetToken(token);
             setStep(2)

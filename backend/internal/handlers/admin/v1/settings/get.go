@@ -9,7 +9,6 @@ import (
 )
 
 func (ctr SettingsController) Get(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {

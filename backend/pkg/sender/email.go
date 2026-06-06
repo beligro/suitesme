@@ -1,16 +1,17 @@
 package sender
 
 import (
-	"crypto/tls"
-	"encoding/base64"
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"net"
-	"net/smtp"
-	"strings"
+	"net/http"
 	"suitesme/internal/config"
 	"time"
-	"unicode/utf8"
+
+	"github.com/google/uuid"
 )
+
+const rusenderSendURL = "https://api.rusender.ru/api/v1/external-mails/send"
 
 // EmailMessage represents an email message with all necessary fields
 type EmailMessage struct {
@@ -21,162 +22,92 @@ type EmailMessage struct {
 	HTMLContent string
 }
 
-// encodeRFC2047 encodes non-ASCII strings for email headers (RFC 2047)
-func encodeRFC2047(s string) string {
-	if s == "" {
-		return s
-	}
-	needsEnc := false
-	for _, r := range s {
-		if r > 127 {
-			needsEnc = true
-			break
-		}
-	}
-	if !needsEnc || !utf8.ValidString(s) {
-		return s
-	}
-	return "=?UTF-8?B?" + base64.StdEncoding.EncodeToString([]byte(s)) + "?="
+// rusenderRequest — тело запроса к RuSender API (см. https://rusender.ru/developer/api/email/)
+type rusenderRequest struct {
+	IdempotencyKey string       `json:"idempotencyKey"`
+	Mail           rusenderMail `json:"mail"`
 }
 
-// SendFormattedEmail sends a properly formatted email with headers to avoid spam filters
+type rusenderMail struct {
+	To      rusenderAddr `json:"to"`
+	From    rusenderAddr `json:"from"`
+	Subject string       `json:"subject"`
+	HTML    string       `json:"html,omitempty"`
+	Text    string       `json:"text,omitempty"`
+}
+
+type rusenderAddr struct {
+	Email string `json:"email"`
+	Name  string `json:"name,omitempty"`
+}
+
+// SendFormattedEmail sends email via RuSender API.
+// Требуется RUSENDER_API_KEY и EMAIL_SEND_FROM в конфиге.
 func SendFormattedEmail(emailTo string, msg EmailMessage, cfg *config.Config) error {
-	// Set up headers
-	headers := make(map[string]string)
-	headers["From"] = msg.From
-	headers["To"] = msg.To
-	headers["Subject"] = encodeRFC2047(msg.Subject)
-	headers["MIME-Version"] = "1.0"
-	headers["Date"] = time.Now().Format(time.RFC1123Z)
-	headers["Message-ID"] = fmt.Sprintf("<%d.%s>", time.Now().Unix(), msg.From)
-
-	// Generate a boundary for multipart messages
-	boundary := "SuitesMeEmailBoundary"
-
-	// Set Content-Type header for multipart messages
-	headers["Content-Type"] = "multipart/alternative; boundary=" + boundary
-
-	// Build the message
-	var messageBody strings.Builder
-
-	// Add headers
-	for key, value := range headers {
-		messageBody.WriteString(fmt.Sprintf("%s: %s\r\n", key, value))
+	if cfg.RuSenderApiKey == "" {
+		return fmt.Errorf("RUSENDER_API_KEY is not set")
 	}
-	messageBody.WriteString("\r\n")
-
-	// Add plain text part
-	messageBody.WriteString(fmt.Sprintf("--%s\r\n", boundary))
-	messageBody.WriteString("Content-Type: text/plain; charset=UTF-8\r\n")
-	messageBody.WriteString("Content-Transfer-Encoding: quoted-printable\r\n\r\n")
-	messageBody.WriteString(msg.PlainText)
-	messageBody.WriteString("\r\n\r\n")
-
-	// Add HTML part if provided
-	if msg.HTMLContent != "" {
-		messageBody.WriteString(fmt.Sprintf("--%s\r\n", boundary))
-		messageBody.WriteString("Content-Type: text/html; charset=UTF-8\r\n")
-		messageBody.WriteString("Content-Transfer-Encoding: quoted-printable\r\n\r\n")
-		messageBody.WriteString(msg.HTMLContent)
-		messageBody.WriteString("\r\n\r\n")
+	if cfg.EmailSendFrom == "" {
+		return fmt.Errorf("EMAIL_SEND_FROM is not set")
 	}
 
-	// Close the boundary
-	messageBody.WriteString(fmt.Sprintf("--%s--", boundary))
-
-	// SSL/TLS config: implicit TLS (SMTPS, port 465) or STARTTLS (port 587)
-	tlsConfig := &tls.Config{
-		ServerName:         cfg.SmtpHost,
-		MinVersion:         tls.VersionTLS12,
-		InsecureSkipVerify: true, // для SMTP с самоподписанными сертификатами
+	text := msg.PlainText
+	html := msg.HTMLContent
+	if text == "" && html == "" {
+		return fmt.Errorf("email must have at least plain text or HTML content")
+	}
+	if text == "" {
+		text = html
+	}
+	if html == "" {
+		html = text
 	}
 
-	// Try implicit TLS/SSL first (port 465)
-	conn, err := tls.Dial("tcp", cfg.SmtpHost+":"+cfg.SmtpPort, tlsConfig)
+	body := rusenderRequest{
+		IdempotencyKey: uuid.New().String(),
+		Mail: rusenderMail{
+			To: rusenderAddr{
+				Email: emailTo,
+			},
+			From: rusenderAddr{
+				Email: cfg.EmailSendFrom,
+			},
+			Subject: msg.Subject,
+			HTML:    html,
+			Text:    text,
+		},
+	}
+
+	raw, err := json.Marshal(body)
 	if err != nil {
-		// Fallback to STARTTLS (port 587)
-		return sendWithSTARTTLS(emailTo, messageBody.String(), cfg, tlsConfig)
+		return fmt.Errorf("rusender request marshal: %w", err)
 	}
 
-	client, err := smtp.NewClient(conn, cfg.SmtpHost)
+	req, err := http.NewRequest(http.MethodPost, rusenderSendURL, bytes.NewReader(raw))
 	if err != nil {
-		conn.Close()
-		return sendWithSTARTTLS(emailTo, messageBody.String(), cfg, tlsConfig)
+		return fmt.Errorf("rusender request: %w", err)
 	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Api-Key", cfg.RuSenderApiKey)
 
-	// Authenticate
-	auth := smtp.PlainAuth("", cfg.EmailSendFrom, cfg.EmailPassword, cfg.SmtpHost)
-	if err = client.Auth(auth); err != nil {
-		return err
-	}
-
-	// Set the sender and recipient
-	if err = client.Mail(cfg.EmailSendFrom); err != nil {
-		return err
-	}
-	if err = client.Rcpt(emailTo); err != nil {
-		return err
-	}
-
-	// Send the email body
-	writer, err := client.Data()
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("rusender send: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		return nil
 	}
 
-	_, err = writer.Write([]byte(messageBody.String()))
-	if err != nil {
-		return err
+	var errBody struct {
+		Message    string `json:"message"`
+		StatusCode int    `json:"statusCode"`
 	}
-
-	err = writer.Close()
-	if err != nil {
-		return err
+	_ = json.NewDecoder(resp.Body).Decode(&errBody)
+	if errBody.Message != "" {
+		return fmt.Errorf("rusender API %d: %s", resp.StatusCode, errBody.Message)
 	}
-
-	return client.Quit()
-}
-
-// sendWithSTARTTLS connects via plain TCP and upgrades to TLS with STARTTLS (port 587)
-func sendWithSTARTTLS(emailTo string, messageBody string, cfg *config.Config, tlsConfig *tls.Config) error {
-	conn, err := net.Dial("tcp", cfg.SmtpHost+":"+cfg.SmtpPort)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	client, err := smtp.NewClient(conn, cfg.SmtpHost)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	if err = client.StartTLS(tlsConfig); err != nil {
-		return err
-	}
-
-	auth := smtp.PlainAuth("", cfg.EmailSendFrom, cfg.EmailPassword, cfg.SmtpHost)
-	if err = client.Auth(auth); err != nil {
-		return err
-	}
-	if err = client.Mail(cfg.EmailSendFrom); err != nil {
-		return err
-	}
-	if err = client.Rcpt(emailTo); err != nil {
-		return err
-	}
-
-	writer, err := client.Data()
-	if err != nil {
-		return err
-	}
-	_, err = writer.Write([]byte(messageBody))
-	if err != nil {
-		return err
-	}
-	if err = writer.Close(); err != nil {
-		return err
-	}
-
-	return client.Quit()
+	return fmt.Errorf("rusender API error: HTTP %d", resp.StatusCode)
 }

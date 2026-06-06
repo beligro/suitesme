@@ -32,11 +32,9 @@ func CreatePaymentLink(user *models.DbUser, settings map[string]string) (string,
 	query.Add("customer_email", user.Email)
 	query.Add("urlReturn", settings["frontend_domain"]+"/payment?status=fail")
 	query.Add("urlSuccess", settings["frontend_domain"]+"/payment?status=ok")
-	query.Add("urlNotification", settings["backend_domain"]+"/api/v1/payment/callback")
+	query.Add("urlNotification", settings["backend_domain"]+"/v1/payment/callback")
 	query.Add("currency", "rub")
 	query.Add("payments_limit", "1")
-	// TODO: remove it
-	query.Add("demo_mode", "1")
 	req.URL.RawQuery = query.Encode()
 
 	resp, err := prodamusClient.Do(req)

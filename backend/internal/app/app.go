@@ -151,6 +151,7 @@ func Run() {
 	apiV1Payment.GET("/info", paymentController.Info, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
 	apiV1Payment.POST("/notify", paymentController.PaymentNotify, JWTAuthMiddleware(cfg.AccessTokenSecret), ParseUserID)
 	apiV1Payment.POST("/callback", paymentController.PaymentCallback)
+	apiV1Payment.POST("/stripe/webhook", paymentController.StripeWebhook)
 
 	apiV1Profile := apiV1.Group("/profile")
 

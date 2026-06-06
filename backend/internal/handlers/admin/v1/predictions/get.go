@@ -10,7 +10,6 @@ import (
 )
 
 func (ctr PredictionsController) Get(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	id := ctx.Param("id")
 	parsedId, err := uuid.Parse(id)
@@ -29,6 +28,10 @@ func (ctr PredictionsController) Get(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.InternalServerError, ctx)
 	}
 
+	// Populate user email for admin
+	if user, uErr := ctr.storage.User.Get(prediction.UserId); uErr == nil && user != nil {
+		prediction.UserEmail = user.Email
+	}
+
 	return ctx.JSON(http.StatusOK, prediction)
 }
-

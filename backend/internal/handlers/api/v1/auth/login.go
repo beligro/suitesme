@@ -31,7 +31,7 @@ type LoginRequest struct {
 // @Failure		500		{object}	models.ErrorResponse
 // @Router			/api/v1/auth/login [post]
 func (ctr AuthController) Login(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+
 	request, err := utils_request.ParseRequest[LoginRequest](&ctx)
 	if err != nil {
 		return err

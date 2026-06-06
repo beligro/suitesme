@@ -10,7 +10,6 @@ import (
 )
 
 func (ctr ContentController) Delete(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {

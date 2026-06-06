@@ -33,7 +33,7 @@ type ForgotPasswordRequest struct {
 // @Failure		500		{object}	models.ErrorResponse
 // @Router			/api/v1/auth/forgot_password [post]
 func (ctr AuthController) ForgotPassword(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+
 	request, err := utils_request.ParseRequest[ForgotPasswordRequest](&ctx)
 	if err != nil {
 		return err
@@ -67,7 +67,7 @@ func (ctr AuthController) ForgotPassword(ctx echo.Context) error {
 
 	ctr.storage.User.Save(user)
 
-	resetLink := "https://ai.mne-idet.ru/password_reset?token=" + url.QueryEscape(urlToken)
+	resetLink := "https://ai.mne-idet.ru/password_reset?token%3D" + url.QueryEscape(urlToken)
 	plainText := "You requested a password reset for your SuitesMe account.\n\n" +
 		"Please use the following link to reset your password: " + resetLink + "\n\n" +
 		"If you didn't request a password reset, please ignore this email."
@@ -80,7 +80,7 @@ func (ctr AuthController) ForgotPassword(ctx echo.Context) error {
 		"</div>" +
 		"<p style='color: #6c757d; font-size: 14px;'>Если кнопка выше не работает, скопируйте и вставьте следующую ссылку в ваш браузер:</p>" +
 		"<p style='background-color: #f5f5f5; padding: 10px; word-break: break-all; font-size: 14px;'>" + resetLink + "</p>" +
-		"<p>Если вы не запрашивали смену пароля, пожалуйста, проигнорируйте данное письмо.</p>" +
+		"<p>Если вы не запрашивали смену пароля, пожалуйста, проигнорируйте это письмо.</p>" +
 		"<p>Время действия ссылки - 15 минут</p>" +
 		"<p></p>" +
 		"<p></p>" +

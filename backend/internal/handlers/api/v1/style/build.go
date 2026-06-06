@@ -22,6 +22,7 @@ type StyleBuildResult struct {
 	StyleId    string `json:"style_id" validate:"required"`
 	PdfInfoUrl string `json:"pdf_info_url,omitempty"`
 	Warning    string `json:"warning,omitempty"`
+	IsVerified bool   `json:"is_verified"`
 }
 
 // Build godoc
@@ -40,11 +41,13 @@ type StyleBuildResult struct {
 // @Failure 500 {object} models.ErrorResponse
 // @Router /api/v1/style/build [post]
 func (ctr StyleController) Build(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+
 	userID := ctx.Get("userID")
 	if userID == nil {
 		return myerrors.GetHttpErrorByCode(myerrors.UserUnauthorized, ctx)
 	}
+
+	ctr.logger.Info(fmt.Sprintf("UserID: %s tries to build style", userID))
 
 	parsedUserId := userID.(uuid.UUID)
 
@@ -62,7 +65,7 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		return myerrors.GetHttpErrorByCode(myerrors.UserNotFound, ctx)
 	}
 
-	styleId, err := ctr.storage.UserStyle.Get(parsedUserId)
+	style, err := ctr.storage.UserStyle.GetByUserId(parsedUserId)
 
 	if err != nil && err != gorm.ErrRecordNotFound {
 		ctr.logger.Error(err)
@@ -70,15 +73,16 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 	}
 
 	// Regular users can only upload once
-	if styleId != "" && !user.IsAdmin {
+	if style != nil && style.StyleId != "" && !user.IsAdmin {
 		var pdfInfoUrl string
-		if dbStyle, err := ctr.storage.Styles.GetByName(styleId); err == nil && dbStyle != nil {
+		if dbStyle, err := ctr.storage.Styles.GetByName(style.StyleId); err == nil && dbStyle != nil {
 			pdfInfoUrl = dbStyle.PdfInfoUrl
 		}
 
 		response := StyleBuildResult{
-			StyleId:    styleId,
+			StyleId:    style.StyleId,
 			PdfInfoUrl: pdfInfoUrl,
+			IsVerified: style.IsVerified,
 		}
 
 		return ctx.JSON(http.StatusOK, response)
@@ -158,14 +162,14 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 		}
 		return myerrors.GetHttpErrorByCode(myerrors.ExternalError, ctx)
 	}
-	
+
 	// Debug logging
-	ctr.logger.Info(fmt.Sprintf("ML Response - StyleId: %s, Confidence: %.2f, ImagesProcessed: %d, ImagesTotal: %d", 
-		styleId, confidence, imagesProcessed, imagesTotal))
+	ctr.logger.Info(fmt.Sprintf("ML Response - UserID: %s, StyleId: %s, Confidence: %.2f, ImagesProcessed: %d, ImagesTotal: %d",
+		userID, styleId, confidence, imagesProcessed, imagesTotal))
 
 	// Store all photo URLs
 	photoURLsJSON, _ := json.Marshal(photoURLs)
-	
+
 	userStyle := &models.DbUserStyle{
 		UserId:            parsedUserId,
 		PhotoUrl:          photoURL,
@@ -203,26 +207,29 @@ func (ctr StyleController) Build(ctx echo.Context) error {
 			} else if imagesProcessed >= 2 && imagesProcessed <= 4 {
 				processedWord = "фотографий"
 			}
-			
+
 			failedWord := "не содержит"
 			if failedCount > 1 {
 				failedWord = "не содержат"
 			}
-			
+
 			failedPhrase := fmt.Sprintf("%d", failedCount)
 			if failedCount == 1 {
 				failedPhrase = "1"
 			}
-			
-			warningMessage = fmt.Sprintf("Предсказание сделано на основе %d %s, %s %s лица", 
+
+			warningMessage = fmt.Sprintf("Предсказание сделано на основе %d %s, %s %s лица",
 				imagesProcessed, processedWord, failedPhrase, failedWord)
 		}
 	}
 
+	ctr.logger.Info(fmt.Sprintf("StyleBuildResult - UserID: %s, StyleId: %s, Warning: %s", userID, styleId, warningMessage))
+
 	response := StyleBuildResult{
 		StyleId:    styleId,
 		PdfInfoUrl: pdfInfoUrl,
-		Warning:    warningMessage,
+		Warning:    "",
+		IsVerified: false,
 	}
 
 	return ctx.JSON(http.StatusOK, response)

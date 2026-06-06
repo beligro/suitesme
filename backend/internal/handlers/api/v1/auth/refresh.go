@@ -13,7 +13,7 @@ import (
 )
 
 type RefreshRequest struct {
-	RefreshToken *string `json:"refresh_token" validate:"required"`
+	RefreshToken string `json:"refresh_token" validate:"required"`
 }
 
 // @Summary			Refresh tokens
@@ -29,19 +29,19 @@ type RefreshRequest struct {
 // @Failure	500		{object}		models.ErrorResponse
 // @Router		/api/v1/auth/refresh [post]
 func (ctr AuthController) Refresh(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
+
 	request, err := utils_request.ParseRequest[RefreshRequest](&ctx)
 	if err != nil {
 		return err
 	}
 
-	claims, err := security.ParseToken(*request.RefreshToken, ctr.config.RefreshTokenSecret)
+	claims, err := security.ParseToken(request.RefreshToken, ctr.config.RefreshTokenSecret)
 	if err != nil {
 		ctr.logger.Error(err)
 		return myerrors.GetHttpErrorByCode(myerrors.IncorrectToken, ctx)
 	}
 
-	_, err = ctr.storage.Tokens.GetByPK((*claims).UserId, *request.RefreshToken)
+	_, err = ctr.storage.Tokens.GetByPK((*claims).UserId, request.RefreshToken)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			ctr.logger.Error(err)

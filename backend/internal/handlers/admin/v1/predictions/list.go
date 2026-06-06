@@ -2,10 +2,11 @@ package predictions
 
 import (
 	"net/http"
+	"strconv"
 	"suitesme/internal/storage/repository"
 	"suitesme/pkg/myerrors"
-	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,7 +16,6 @@ type ListResponse struct {
 }
 
 func (ctr PredictionsController) List(ctx echo.Context) error {
-	ctr.logger.Data["trace_id"] = ctx.Get("trace_id")
 
 	// Parse query parameters
 	limitStr := ctx.QueryParam("_end")
@@ -23,6 +23,7 @@ func (ctr PredictionsController) List(ctx echo.Context) error {
 	sortBy := ctx.QueryParam("_sort")
 	sortOrder := ctx.QueryParam("_order")
 	isVerifiedStr := ctx.QueryParam("isVerified")
+	emailFilter := ctx.QueryParam("email")
 
 	limit := 10
 	if limitStr != "" {
@@ -80,6 +81,18 @@ func (ctr PredictionsController) List(ctx echo.Context) error {
 		params.IsVerified = &isVerified
 	}
 
+	// Handle email filter: find user by email, then filter predictions by user_id
+	if emailFilter != "" {
+		user, err := ctr.storage.User.GetByEmail(emailFilter)
+		if err != nil || user == nil {
+			// No user with this email — return empty list
+			ctx.Response().Header().Set("X-Total-Count", "0")
+			ctx.Response().Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
+			return ctx.JSON(http.StatusOK, []interface{}{})
+		}
+		params.UserIDs = []uuid.UUID{user.ID}
+	}
+
 	predictions, total, err := ctr.storage.UserStyle.List(params)
 	if err != nil {
 		ctr.logger.Error(err)
@@ -92,4 +105,3 @@ func (ctr PredictionsController) List(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, predictions)
 }
-
